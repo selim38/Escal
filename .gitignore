@@ -1,0 +1,19 @@
+# Dépendances
+node_modules/
+
+# Builds Next
+.next/
+out/
+
+# Secrets backend PHP (présent uniquement sur le serveur)
+api/config.php
+api/uploads/
+
+# Logs locaux & état de déploiement FTP
+logs/
+*.log
+.ftp-deploy-sync-state.json
+
+# Divers
+.DS_Store
+admin-escal/tsconfig.tsbuildinfo

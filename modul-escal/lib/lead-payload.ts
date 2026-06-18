@@ -1,0 +1,62 @@
+import { calculatePrice } from "@/lib/calculatePrice";
+import { validateStepConfigs, type QuoteFormValues } from "@/lib/quote-schema";
+
+import {
+  DECOR_LABELS,
+  DEPTH_LABELS,
+  LANDING_FINISH_LABELS,
+  END_SIDE_LABELS,
+  RISER_OPTION_LABELS,
+  STAIR_LAYOUT_LABELS,
+  STEP_END_CAP_LABELS,
+  WIDTH_LABELS,
+} from "@/lib/quote-labels";
+export function buildLeadPayload(values: QuoteFormValues) {
+  const price = calculatePrice(values);
+  return {
+    type: "escal-concept-devis-request",
+    submittedAt: new Date().toISOString(),
+    estimatedMaterialsEuro: price.materialsSubtotal,
+    priceBreakdown: price.breakdown,
+    configuration: {
+      decor: DECOR_LABELS[values.decor],
+      riserOption: RISER_OPTION_LABELS[values.riserOption],
+      stepCount: values.stepCount,
+      uniformStepDimensions: values.uniformStepDimensions ? "Oui" : "Non",
+      ...(values.stepConfigs &&
+      validateStepConfigs(values.stepConfigs, values.stepCount)
+        ? {
+            steps: values.stepConfigs.map((step, index) => ({
+              index: index + 1,
+              layout: STAIR_LAYOUT_LABELS[step.layout],
+              width: WIDTH_LABELS[step.widthBand],
+              depth: DEPTH_LABELS[step.depthBand],
+            })),
+          }
+        : {}),
+      ...(values.widthBand
+        ? { widthBand: WIDTH_LABELS[values.widthBand] }
+        : {}),
+      ...(values.depthBand
+        ? { depthBand: DEPTH_LABELS[values.depthBand] }
+        : {}),
+      openSides: values.openSides,
+      intermediateLanding: values.intermediateLanding,
+      landingFinish: LANDING_FINISH_LABELS[values.landingFinish],
+      stepEndCap: STEP_END_CAP_LABELS[values.stepEndCap],
+      ...(values.stepEndCap === "OPEN_STEP" && values.openStepEndSide
+        ? { openStepEndSide: END_SIDE_LABELS[values.openStepEndSide] }
+        : {}),
+      ...(values.stepEndCap === "OPEN_STEP" && values.lateralEndSide
+        ? { lateralEndSide: END_SIDE_LABELS[values.lateralEndSide] }
+        : {}),
+    },
+    contact: {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      phone: values.phone,
+      country: values.country,
+    },
+  };
+}

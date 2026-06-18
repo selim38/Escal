@@ -1,0 +1,23 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: escal_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: escal_root
+      MYSQL_DATABASE: escal_concept
+      MYSQL_USER: escal
+      MYSQL_PASSWORD: escal_dev
+    ports:
+      - "3306:3306"
+    volumes:
+      - escal_mysql_data:/var/lib/mysql
+      - ./admin-escal/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uescal", "-pescal_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  escal_mysql_data:
