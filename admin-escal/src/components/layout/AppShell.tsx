@@ -50,6 +50,35 @@ export default function AppShell() {
       .catch(console.error);
   }, [selectedId, convs]);
 
+  // ── Polling : rafraîchit la liste des leads (nouveaux leads, unread, snippets)
+  useEffect(() => {
+    const t = setInterval(() => {
+      api.listLeads()
+        // Le lead ouvert est considéré comme lu côté affichage
+        .then(data => setLeads(data.map(l => l.id === selectedId ? { ...l, unread: 0 } : l)))
+        .catch(() => {});
+    }, 8000);
+    return () => clearInterval(t);
+  }, [selectedId]);
+
+  // ── Polling : rafraîchit la conversation ouverte (messages entrants WhatsApp)
+  useEffect(() => {
+    if (!selectedId) return;
+    const t = setInterval(() => {
+      api.getConversation(selectedId)
+        .then(msgs => setConvs(prev => {
+          const old = prev[selectedId];
+          // Si un message est arrivé pendant que le chat est ouvert → marquer lu en DB
+          if (old && msgs.length > old.length) {
+            api.patchLead(selectedId, { unread_count: 0 }).catch(() => {});
+          }
+          return { ...prev, [selectedId]: msgs };
+        }))
+        .catch(() => {});
+    }, 4000);
+    return () => clearInterval(t);
+  }, [selectedId]);
+
   const selected = leads.find(l => l.id === selectedId);
 
   // ── Actions ──────────────────────────────────────────────────────────────
