@@ -44,7 +44,7 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./admin-escal/out/
-          server-dir: /admin/
+          server-dir: ./admin/
 
   # ────────────────────────────────────────────────────────────────
   calcul:
@@ -74,7 +74,7 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./modul-escal/out/
-          server-dir: /calcul/
+          server-dir: ./calcul/
 
   # ────────────────────────────────────────────────────────────────
   api:
@@ -92,7 +92,7 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./api/
-          server-dir: /api/
+          server-dir: ./api/
           # IMPORTANT : ne jamais écraser/supprimer les secrets ni les uploads
           exclude: |
             **/config.php
