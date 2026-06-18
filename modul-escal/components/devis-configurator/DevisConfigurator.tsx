@@ -15,7 +15,11 @@ import {
   type QuoteFormDraft,
 } from "@/lib/quote-schema";
 
+import { calculatePrice } from "@/lib/calculatePrice";
 import { pendingPhotos } from "@/lib/pending-photos";
+
+// Backend PHP. En prod : même domaine → "/api". En dev : NEXT_PUBLIC_API_BASE.
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api";
 import { ProgressBar } from "./ProgressBar";
 import { StepNavigation } from "./StepNavigation";
 import { StepDecor } from "./steps/StepDecor";
@@ -151,10 +155,17 @@ function WizardBody() {
     }
 
     try {
-      const response = await fetch("/api/leads", {
+      // Le prix est calculé côté client (export statique = pas de serveur Node),
+      // puis transmis au backend PHP qui enregistre le lead.
+      const price = calculatePrice(res.data);
+      const response = await fetch(`${API_BASE}/leads.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(res.data),
+        body: JSON.stringify({
+          ...res.data,
+          estimatedMaterialsEuro: price.materialsSubtotal,
+          priceBreakdown: price.breakdown,
+        }),
       });
       const json = await response.json();
       if (!response.ok) throw new Error(json.error ?? "Erreur serveur");
@@ -164,7 +175,7 @@ function WizardBody() {
         const fd = new FormData();
         fd.append("leadId", json.leadId);
         for (const file of pendingPhotos.files) fd.append("photos", file);
-        await fetch("/api/photos", { method: "POST", body: fd }).catch(() => null);
+        await fetch(`${API_BASE}/photos.php`, { method: "POST", body: fd }).catch(() => null);
         pendingPhotos.files = [];
       }
 
