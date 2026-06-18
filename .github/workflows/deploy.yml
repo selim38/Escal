@@ -1,18 +1,20 @@
-name: Deploy Escal (FTP IONOS)
+name: Deploy Escal (SFTP IONOS)
 
-# Déploiement automatique à chaque push sur main.
-# - admin-escal  → build statique  → FTP vers /admin
-# - modul-escal  → build statique  → FTP vers /calcul
-# - api (PHP)    → copie directe   → FTP vers /api  (config.php préservé)
+# Déploiement automatique à chaque push sur main (IONOS = SFTP uniquement).
+# - admin-escal  → build statique  → SFTP vers ~/admin
+# - modul-escal  → build statique  → SFTP vers ~/calcul
+# - api (PHP)    → copie directe   → SFTP vers ~/api
+#
+# Upload-only : les fichiers présents sur le serveur mais absents du repo
+# (config.php, uploads/) ne sont JAMAIS supprimés.
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:        # bouton "Run workflow" manuel
+  workflow_dispatch:
 
-# Évite deux déploiements concurrents
 concurrency:
-  group: deploy-ftp
+  group: deploy-sftp
   cancel-in-progress: false
 
 jobs:
@@ -22,29 +24,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
           cache-dependency-path: admin-escal/package-lock.json
-
       - name: Build admin
         working-directory: admin-escal
         run: |
           npm ci
           npm run build
-
-      - name: Deploy admin via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy admin via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          local-dir: ./admin-escal/out/
-          server-dir: ./admin/
+          server:    ${{ secrets.FTP_SERVER }}
+          username:  ${{ secrets.FTP_USERNAME }}
+          password:  ${{ secrets.FTP_PASSWORD }}
+          port:      22
+          local_path: './admin-escal/out/*'
+          remote_path: 'admin'
+          sftp_only: true
 
   # ────────────────────────────────────────────────────────────────
   calcul:
@@ -52,29 +51,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
           cache-dependency-path: modul-escal/package-lock.json
-
       - name: Build calcul
         working-directory: modul-escal
         run: |
           npm ci
           npm run build
-
-      - name: Deploy calcul via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy calcul via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          local-dir: ./modul-escal/out/
-          server-dir: ./calcul/
+          server:    ${{ secrets.FTP_SERVER }}
+          username:  ${{ secrets.FTP_USERNAME }}
+          password:  ${{ secrets.FTP_PASSWORD }}
+          port:      22
+          local_path: './modul-escal/out/*'
+          remote_path: 'calcul'
+          sftp_only: true
 
   # ────────────────────────────────────────────────────────────────
   api:
@@ -82,20 +78,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Deploy api via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy api via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          local-dir: ./api/
-          server-dir: ./api/
-          # IMPORTANT : ne jamais écraser/supprimer les secrets ni les uploads
-          exclude: |
-            **/config.php
-            **/uploads/**
-            **/.git*
-            **/.ftp-deploy-sync-state.json
+          server:    ${{ secrets.FTP_SERVER }}
+          username:  ${{ secrets.FTP_USERNAME }}
+          password:  ${{ secrets.FTP_PASSWORD }}
+          port:      22
+          local_path: './api/*'
+          remote_path: 'api'
+          sftp_only: true
