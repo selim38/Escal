@@ -76,6 +76,85 @@ function twilio_send_whatsapp(string $toPhone, string $body, ?string $mediaUrl =
     return ['ok' => false, 'error' => $json['message'] ?? "HTTP $http"];
 }
 
+/** Normalise un numéro en E.164 (+33…) pour l'API Verify. */
+function twilio_e164(string $phone): string
+{
+    $phone = preg_replace('/^whatsapp:/', '', trim($phone));
+    $clean = preg_replace('/[^\d+]/', '', (string) $phone) ?? '';
+    if ($clean !== '' && $clean[0] !== '+') {
+        $clean = str_starts_with($clean, '0') ? '+33' . substr($clean, 1) : '+' . $clean;
+    }
+    return $clean;
+}
+
+/**
+ * Twilio Verify — envoie un code OTP par WhatsApp.
+ * @return array{ok:bool, status?:string, error?:string}
+ */
+function twilio_verify_start(string $phone): array
+{
+    global $CONFIG;
+    $t = $CONFIG['twilio'] ?? [];
+    $sid = $t['account_sid'] ?? '';
+    $tok = $t['auth_token'] ?? '';
+    $va  = $t['verify_service_sid'] ?? '';
+    if ($sid === '' || $tok === '' || $va === '') {
+        return ['ok' => false, 'error' => 'Service Verify non configuré'];
+    }
+
+    $url  = "https://verify.twilio.com/v2/Services/{$va}/Verifications";
+    $resp = twilio_post($url, $sid, $tok, [
+        'To'      => twilio_e164($phone),
+        'Channel' => 'whatsapp',
+    ]);
+    if ($resp['http'] >= 200 && $resp['http'] < 300) {
+        return ['ok' => true, 'status' => $resp['json']['status'] ?? ''];
+    }
+    return ['ok' => false, 'error' => $resp['json']['message'] ?? "HTTP {$resp['http']}"];
+}
+
+/**
+ * Twilio Verify — vérifie un code OTP.
+ * @return bool true si le code est approuvé.
+ */
+function twilio_verify_check(string $phone, string $code): bool
+{
+    global $CONFIG;
+    $t = $CONFIG['twilio'] ?? [];
+    $sid = $t['account_sid'] ?? '';
+    $tok = $t['auth_token'] ?? '';
+    $va  = $t['verify_service_sid'] ?? '';
+    if ($sid === '' || $tok === '' || $va === '') {
+        return false;
+    }
+
+    $url  = "https://verify.twilio.com/v2/Services/{$va}/VerificationCheck";
+    $resp = twilio_post($url, $sid, $tok, [
+        'To'   => twilio_e164($phone),
+        'Code' => $code,
+    ]);
+    return ($resp['http'] >= 200 && $resp['http'] < 300)
+        && (($resp['json']['status'] ?? '') === 'approved');
+}
+
+/** POST form-urlencoded vers l'API Twilio (Basic Auth). */
+function twilio_post(string $url, string $sid, string $tok, array $fields): array
+{
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => http_build_query($fields),
+        CURLOPT_USERPWD        => "{$sid}:{$tok}",
+        CURLOPT_TIMEOUT        => 15,
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/x-www-form-urlencoded'],
+    ]);
+    $body = curl_exec($ch);
+    $http = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    return ['http' => $http, 'json' => json_decode((string) $body, true) ?: []];
+}
+
 /**
  * Valide la signature X-Twilio-Signature d'une requête entrante (webhook).
  * Algorithme officiel : HMAC-SHA1(authToken, URL + concat(clé+valeur triés)).

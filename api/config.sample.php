@@ -21,9 +21,10 @@ return [
 
     // ─── Twilio WhatsApp ─────────────────────────────────────────────────
     'twilio' => [
-        'account_sid'   => 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',  // SID Twilio
-        'auth_token'    => 'METTRE_LE_TOKEN_ICI',                  // ⚠️ secret
-        'whatsapp_from' => 'whatsapp:+33XXXXXXXXX',               // numéro WhatsApp
+        'account_sid'        => 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',  // SID Twilio
+        'auth_token'         => 'METTRE_LE_TOKEN_ICI',                  // ⚠️ secret
+        'whatsapp_from'      => 'whatsapp:+33XXXXXXXXX',               // numéro WhatsApp
+        'verify_service_sid' => 'VAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',  // Twilio Verify (codes OTP/reset)
     ],
 
     // ─── Origines autorisées (CORS) — pour le dev local ──────────────────

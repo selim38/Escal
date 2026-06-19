@@ -182,17 +182,9 @@ function request_reset(): never
     $u = $stmt->fetch();
     if (!$u || empty($u['phone'])) json_out($okResponse);
 
-    $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-    $pdo->prepare(
-        'INSERT INTO password_resets (user_id, code_hash, expires_at)
-         VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))'
-    )->execute([$u['id'], password_hash($code, PASSWORD_DEFAULT)]);
-
+    // Twilio Verify gère la génération, l'envoi WhatsApp, l'expiration et l'anti-fraude.
     require_once __DIR__ . '/twilio.php';
-    twilio_send_whatsapp(
-        (string) $u['phone'],
-        "Kit Rénovation Escalier — votre code de réinitialisation est : {$code}\n(valide 15 minutes)"
-    );
+    twilio_verify_start((string) $u['phone']);
 
     json_out($okResponse);
 }
@@ -212,26 +204,19 @@ function reset_password(): never
     if ($err = password_problem($pwd))  json_error($err, 400);
 
     $pdo = db();
-    $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ?');
+    $stmt = $pdo->prepare('SELECT id, phone FROM users WHERE email = ?');
     $stmt->execute([$email]);
-    $uid = $stmt->fetchColumn();
-    if ($uid === false) json_error('Code invalide ou expiré.', 400);
+    $u = $stmt->fetch();
+    if (!$u || empty($u['phone'])) json_error('Code invalide ou expiré.', 400);
 
-    // Dernier code non utilisé et non expiré pour cet utilisateur
-    $r = $pdo->prepare(
-        'SELECT id, code_hash FROM password_resets
-         WHERE user_id = ? AND used = 0 AND expires_at > NOW()
-         ORDER BY id DESC LIMIT 1'
-    );
-    $r->execute([$uid]);
-    $row = $r->fetch();
-    if (!$row || !password_verify($code, $row['code_hash'])) {
+    // Vérification du code via Twilio Verify
+    require_once __DIR__ . '/twilio.php';
+    if (!twilio_verify_check((string) $u['phone'], $code)) {
         json_error('Code invalide ou expiré.', 400);
     }
 
     $pdo->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
-        ->execute([password_hash($pwd, PASSWORD_DEFAULT), $uid]);
-    $pdo->prepare('UPDATE password_resets SET used = 1 WHERE id = ?')->execute([$row['id']]);
+        ->execute([password_hash($pwd, PASSWORD_DEFAULT), $u['id']]);
 
     json_out(['ok' => true]);
 }
