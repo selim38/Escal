@@ -2,6 +2,60 @@
 
 import { useState } from "react";
 import { WhatsApp, Euro, Settings, ChevronRight, Edit } from "@/components/icons/Icons";
+import { inviteUser } from "@/lib/auth";
+
+function InviteUsers({ accent }: { accent: string }) {
+  const [email, setEmail] = useState("");
+  const [link, setLink] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(""); setLink(""); setCopied(false); setLoading(true);
+    try {
+      const code = await inviteUser(email.trim());
+      setLink(`${window.location.origin}/admin/?invite=${code}`);
+      setEmail("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div className="ec-set__hint">
+        Génère un lien d'invitation à envoyer à la personne. Elle pourra créer son compte
+        avec cette adresse e-mail uniquement (lien valable 7 jours).
+      </div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <input
+          className="ec-input"
+          type="email" required value={email} onChange={e => setEmail(e.target.value)}
+          placeholder="collegue@exemple.fr"
+          style={{ flex: 1, padding: "10px 12px", borderRadius: 9, border: "1px solid #e2ddd6", fontSize: 14 }}
+        />
+        <button className="ec-btn" type="submit" disabled={loading}
+          style={{ background: accent, color: "#fff", border: "none" }}>
+          {loading ? "…" : "Inviter"}
+        </button>
+      </div>
+      {error && <div style={{ color: "#B85850", fontSize: 13 }}>{error}</div>}
+      {link && (
+        <div style={{ display: "flex", gap: 8, alignItems: "center", background: "#f6f4f1", border: "1px solid #e7e2dc", borderRadius: 9, padding: "9px 12px" }}>
+          <span style={{ flex: 1, fontSize: 12.5, wordBreak: "break-all", color: "#6b6560" }}>{link}</span>
+          <button type="button" className="ec-btn ec-btn--ghost"
+            onClick={() => { navigator.clipboard?.writeText(link); setCopied(true); }}>
+            {copied ? "Copié ✓" : "Copier"}
+          </button>
+        </div>
+      )}
+    </form>
+  );
+}
 
 function Switch({ on, onChange, accent }: { on: boolean; onChange: (v: boolean) => void; accent: string }) {
   return (
@@ -138,6 +192,10 @@ export default function PageSettings({ accent }: { accent: string }) {
             <SettingsCard title="Organisation" eyebrow="Espace Kit Rénovation Escalier">
               <SettingRow label="Raison sociale"><span>Kit Rénovation Escalier</span></SettingRow>
               <SettingRow label="Renouvellement"><span className="ec-mono">15 juin 2026</span></SettingRow>
+            </SettingsCard>
+
+            <SettingsCard title="Inviter un utilisateur" eyebrow="Accès sur invitation">
+              <InviteUsers accent={accent} />
             </SettingsCard>
           </>
         )}

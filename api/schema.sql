@@ -151,3 +151,31 @@ CREATE TABLE IF NOT EXISTS users (
   created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   last_login_at DATETIME NULL
 ) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------
+-- 8. INVITATIONS (création de compte sur invitation)
+-- ---------------------------------------------------------
+CREATE TABLE IF NOT EXISTS invitations (
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  email       VARCHAR(255) NOT NULL,
+  code        VARCHAR(80)  NOT NULL UNIQUE,
+  invited_by  INT UNSIGNED NULL,
+  used        TINYINT(1) NOT NULL DEFAULT 0,
+  created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at  DATETIME NOT NULL,
+  KEY idx_inv_email (email)
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------
+-- 9. RÉINITIALISATIONS DE MOT DE PASSE (code WhatsApp)
+-- ---------------------------------------------------------
+CREATE TABLE IF NOT EXISTS password_resets (
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id     INT UNSIGNED NOT NULL,
+  code_hash   VARCHAR(255) NOT NULL,
+  used        TINYINT(1) NOT NULL DEFAULT 0,
+  created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at  DATETIME NOT NULL,
+  KEY idx_reset_user (user_id),
+  CONSTRAINT fk_reset_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

@@ -40,7 +40,7 @@ async function parse(res: Response) {
 }
 
 export async function signup(data: {
-  name: string; email: string; phone: string; password: string;
+  name: string; email: string; phone: string; password: string; code?: string;
 }): Promise<AuthUser> {
   const json = await parse(await fetch(`${BASE}/auth.php?action=signup`, {
     method: "POST",
@@ -49,6 +49,34 @@ export async function signup(data: {
   }));
   setToken(json.token);
   return json.user;
+}
+
+/** Crée une invitation (admin connecté). Renvoie le code à partager. */
+export async function inviteUser(email: string): Promise<string> {
+  const json = await parse(await fetch(`${BASE}/auth.php?action=invite`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ email }),
+  }));
+  return json.code as string;
+}
+
+/** Demande un code de réinitialisation (envoyé par WhatsApp). */
+export async function requestReset(email: string): Promise<void> {
+  await parse(await fetch(`${BASE}/auth.php?action=request-reset`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  }));
+}
+
+/** Réinitialise le mot de passe avec le code reçu. */
+export async function resetPassword(email: string, code: string, password: string): Promise<void> {
+  await parse(await fetch(`${BASE}/auth.php?action=reset`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, code, password }),
+  }));
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {
