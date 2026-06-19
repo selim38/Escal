@@ -8,7 +8,7 @@ import {
   Search, WhatsApp as WhatsAppIcon, Paperclip, Smile, Send,
   Check2, CheckDouble, External, More, Euro, Edit, Download,
 } from "@/components/icons/Icons";
-import { photoUrl } from "@/lib/api";
+import { photoUrl, devisUrl } from "@/lib/api";
 
 // ✓ envoyé · ✓✓ livré · ✓✓ bleu lu · ! échec
 function DeliveryTicks({ status }: { status?: string | null }) {
@@ -292,7 +292,7 @@ export default function PageWhatsApp({
             <div className="ec-wactx__section">
               <div className="ec-card__eyebrow">Actions</div>
               <div className="ec-wactx__actions">
-                <button className="ec-btn">
+                <button className="ec-btn" onClick={() => lead && window.open(devisUrl(lead.id), "_blank")}>
                   <Download size={13} /> Générer le devis PDF
                 </button>
                 <button className="ec-btn" onClick={() => onSetStatus(lead.id, "pending")}>

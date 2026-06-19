@@ -12,13 +12,18 @@
  */
 
 import type { Lead, Message } from "./types";
-import { authHeaders, clearToken } from "./auth";
+import { authHeaders, clearToken, getToken } from "./auth";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api";
 
 /** URL absolue d'une photo client (chemin stocké : "uploads/leads/L-x/…"). */
 export function photoUrl(path: string): string {
   return `${BASE}/${path.replace(/^\/+/, "")}`;
+}
+
+/** URL du devis imprimable (token en query car ouvert dans un onglet). */
+export function devisUrl(leadId: string): string {
+  return `${BASE}/devis.php?id=${encodeURIComponent(leadId)}&t=${encodeURIComponent(getToken() ?? "")}`;
 }
 
 async function asJson<T>(res: Response): Promise<T> {
