@@ -20,7 +20,7 @@ const TITLES: Record<Page, string> = {
 };
 
 const SUBTITLES: Record<Page, string> = {
-  dashboard: "Tableau de bord temps réel · configurateur Escal",
+  dashboard: "Tableau de bord temps réel · configurateur",
   leads:     "Tous les prospects actifs du configurateur",
   whatsapp:  "Conversations clients",
   settings:  "Configuration de l'espace",

@@ -183,7 +183,7 @@ export default function PageWhatsApp({
                 </button>
               </div>
               <div className="ec-wa__footnote">
-                Messages envoyés via le bot Escal sur WhatsApp Business.
+                Messages envoyés via WhatsApp Business.
               </div>
             </div>
           </>
