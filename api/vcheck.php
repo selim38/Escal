@@ -27,12 +27,15 @@ if (empty($t['verify_service_sid'])) { echo "\nImpossible de tester : verify_ser
 
 $va = $t['verify_service_sid'];
 $channel = $_GET['channel'] ?? 'whatsapp';   // &channel=sms pour tester en SMS
-echo "canal      : {$channel}\n";
+$locale  = $_GET['locale'] ?? '';            // &locale=en ou &locale=fr
+echo "canal      : {$channel}" . ($locale ? " (locale={$locale})" : "") . "\n";
+$post = ['To' => $phone, 'Channel' => $channel];
+if ($locale !== '') $post['Locale'] = $locale;
 $ch = curl_init("https://verify.twilio.com/v2/Services/{$va}/Verifications");
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_POST           => true,
-    CURLOPT_POSTFIELDS     => http_build_query(['To' => $phone, 'Channel' => $channel]),
+    CURLOPT_POSTFIELDS     => http_build_query($post),
     CURLOPT_USERPWD        => $t['account_sid'] . ':' . $t['auth_token'],
     CURLOPT_TIMEOUT        => 15,
 ]);

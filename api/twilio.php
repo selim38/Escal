@@ -102,13 +102,18 @@ function twilio_verify_start(string $phone): array
         return ['ok' => false, 'error' => 'Service Verify non configuré'];
     }
 
-    // Canal configurable : 'whatsapp' (défaut) ou 'sms' (repli si WhatsApp Verify non configuré)
+    // Canal configurable : 'whatsapp' (défaut) ou 'sms' (repli)
     $channel = $t['verify_channel'] ?? 'whatsapp';
-    $url  = "https://verify.twilio.com/v2/Services/{$va}/Verifications";
-    $resp = twilio_post($url, $sid, $tok, [
+    $fields = [
         'To'      => twilio_e164($phone),
         'Channel' => $channel,
-    ]);
+    ];
+    // Locale : doit correspondre à la langue du template WhatsApp approuvé (ex. 'en' ou 'fr')
+    if (!empty($t['verify_locale'])) {
+        $fields['Locale'] = $t['verify_locale'];
+    }
+    $url  = "https://verify.twilio.com/v2/Services/{$va}/Verifications";
+    $resp = twilio_post($url, $sid, $tok, $fields);
     if ($resp['http'] >= 200 && $resp['http'] < 300) {
         return ['ok' => true, 'status' => $resp['json']['status'] ?? ''];
     }
