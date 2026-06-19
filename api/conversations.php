@@ -8,7 +8,7 @@
 
 require __DIR__ . '/bootstrap.php';
 
-require_auth();   // conversations réservées au dashboard admin
+$AUTH_UID = require_auth();   // conversations réservées au dashboard admin
 
 $leadId = $_GET['leadId'] ?? '';
 if ($leadId === '') {
@@ -17,8 +17,8 @@ if ($leadId === '') {
 $dbId = db_id((string) $leadId);
 
 switch (method()) {
-    case 'GET':  get_history($dbId);    break;
-    case 'POST': post_message($dbId);   break;
+    case 'GET':  get_history($dbId);              break;
+    case 'POST': post_message($dbId, $AUTH_UID);  break;
     default:     json_error('Méthode non autorisée', 405);
 }
 
@@ -26,10 +26,11 @@ switch (method()) {
 function get_history(int $dbId): never
 {
     $stmt = db()->prepare(
-        'SELECT author, message, sent_at
-         FROM conversations
-         WHERE lead_id = ?
-         ORDER BY sent_at ASC'
+        'SELECT c.author, c.message, c.media_json, c.status, c.sent_at, u.name AS agent_name
+         FROM conversations c
+         LEFT JOIN users u ON u.id = c.author_user_id
+         WHERE c.lead_id = ?
+         ORDER BY c.sent_at ASC'
     );
     $stmt->execute([$dbId]);
 
@@ -39,6 +40,9 @@ function get_history(int $dbId): never
             'author' => $r['author'],
             'text'   => $r['message'],
             'time'   => $ts ? date('H:i', $ts) : '',
+            'media'  => $r['media_json'] ? (json_decode((string) $r['media_json'], true) ?: []) : [],
+            'status' => $r['status'],          // null|queued|sent|delivered|read|failed
+            'agent'  => $r['agent_name'],      // nom du commercial (messages vendor)
         ];
     }, $stmt->fetchAll());
 
@@ -46,7 +50,7 @@ function get_history(int $dbId): never
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-function post_message(int $dbId): never
+function post_message(int $dbId, int $uid): never
 {
     $b = read_json_body();
     $author  = $b['author'] ?? '';
@@ -71,15 +75,30 @@ function post_message(int $dbId): never
 
     // ─── Envoi WhatsApp réel quand un vendeur répond ─────────────────────
     $whatsapp = null;
+    $twilioSid = null;
+    $status = null;
     if ($author === 'vendor') {
         require_once __DIR__ . '/twilio.php';
-        $whatsapp = twilio_send_whatsapp((string) $leadPhone, $message);
-        // L'échec d'envoi n'empêche pas l'enregistrement local (on le remonte).
+        // URL publique du callback de statut (même domaine que cette requête)
+        $scheme = (($_SERVER['HTTPS'] ?? '') === 'on' || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') ? 'https' : 'http';
+        $statusCb = "{$scheme}://" . ($_SERVER['HTTP_HOST'] ?? '') . dirname($_SERVER['SCRIPT_NAME'] ?? '/api/x') . '/whatsapp-status.php';
+        $whatsapp = twilio_send_whatsapp((string) $leadPhone, $message, null, $statusCb);
+        if (!empty($whatsapp['ok'])) {
+            $twilioSid = $whatsapp['sid'] ?? null;
+            $status    = $whatsapp['status'] ?? 'queued';
+        } else {
+            $status = 'failed';
+        }
     }
 
     try {
-        $pdo->prepare('INSERT INTO conversations (lead_id, author, message) VALUES (?, ?, ?)')
-            ->execute([$dbId, $author, $message]);
+        $pdo->prepare(
+            'INSERT INTO conversations (lead_id, author, message, twilio_sid, status, author_user_id)
+             VALUES (?, ?, ?, ?, ?, ?)'
+        )->execute([
+            $dbId, $author, $message, $twilioSid, $status,
+            $author === 'vendor' ? $uid : null,
+        ]);
 
         $snippet = mb_substr($message, 0, 120);
         if ($author === 'client') {
@@ -97,7 +116,7 @@ function post_message(int $dbId): never
 
     $out = ['ok' => true];
     if ($whatsapp !== null) {
-        $out['whatsapp'] = $whatsapp;   // {ok, sid, status} ou {ok:false, error}
+        $out['whatsapp'] = $whatsapp;
     }
     json_out($out);
 }

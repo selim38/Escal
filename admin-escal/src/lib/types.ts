@@ -40,6 +40,9 @@ export interface Lead {
 export interface Message {
   author: "client" | "vendor";
   text: string;
+  media?: string[];
+  status?: string | null;   // queued | sent | delivered | read | failed
+  agent?: string | null;    // nom du commercial (messages vendor)
   time: string;
 }
 

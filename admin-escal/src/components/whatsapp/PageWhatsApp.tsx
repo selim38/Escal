@@ -6,8 +6,24 @@ import { LEAD_STATUS } from "@/lib/data";
 import { fmtEUR, avatarBg } from "@/lib/utils";
 import {
   Search, WhatsApp as WhatsAppIcon, Paperclip, Smile, Send,
-  CheckDouble, External, More, Euro, Edit, Download,
+  Check2, CheckDouble, External, More, Euro, Edit, Download,
 } from "@/components/icons/Icons";
+import { photoUrl } from "@/lib/api";
+
+// ✓ envoyé · ✓✓ livré · ✓✓ bleu lu · ! échec
+function DeliveryTicks({ status }: { status?: string | null }) {
+  if (status === "failed" || status === "undelivered") {
+    return <span style={{ marginLeft: 4, fontWeight: 700 }} title="Échec d'envoi">!</span>;
+  }
+  if (status === "read") {
+    return <CheckDouble size={12} style={{ marginLeft: 4, color: "#7CDBFF" }} />;
+  }
+  if (status === "delivered") {
+    return <CheckDouble size={12} style={{ marginLeft: 4 }} />;
+  }
+  // queued | sent | null
+  return <Check2 size={12} style={{ marginLeft: 4 }} />;
+}
 
 function StatusPill({ status }: { status: Lead["status"] }) {
   const s = LEAD_STATUS[status] ?? { label: status, dot: "#888" };
@@ -153,10 +169,24 @@ export default function PageWhatsApp({
                     className="ec-bubble__body"
                     style={m.author === "vendor" ? { background: accent, color: "#fff" } : undefined}
                   >
-                    {m.text}
+                    {m.media && m.media.length > 0 && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: m.text && m.text !== "📷 Photo" ? 6 : 0 }}>
+                        {m.media.map((src, j) => (
+                          <a key={j} href={photoUrl(src)} target="_blank" rel="noopener noreferrer">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={photoUrl(src)} alt="photo"
+                              style={{ maxWidth: 180, maxHeight: 180, borderRadius: 8, display: "block", objectFit: "cover" }} />
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                    {m.text && m.text !== "📷 Photo" && m.text}
                     <div className="ec-bubble__meta">
+                      {m.author === "vendor" && m.agent && (
+                        <span style={{ marginRight: 6, opacity: .85 }}>{m.agent}</span>
+                      )}
                       {m.time}
-                      {m.author === "vendor" && <CheckDouble size={12} style={{ marginLeft: 4 }} />}
+                      {m.author === "vendor" && <DeliveryTicks status={m.status} />}
                     </div>
                   </div>
                 </div>

@@ -51,15 +51,6 @@ if ($phone === '') {
     twiml_ok();   // rien d'exploitable, on acquitte quand même
 }
 
-// Si le client a envoyé des médias (photos), on l'indique dans le texte
-if ($numMedia > 0) {
-    $mediaNote = $numMedia . ' photo(s) reçue(s)';
-    $body = $body !== '' ? "$body\n[$mediaNote]" : "[$mediaNote]";
-}
-if ($body === '') {
-    $body = '[message vide]';
-}
-
 $pdo = db();
 
 // ─── Retrouver le lead par numéro ───────────────────────────────────────────
@@ -84,17 +75,37 @@ if ($leadId === false) {
             decor, riser_option, step_count, status, last_snippet, unread_count)
          VALUES ('Prospect', 'WhatsApp', '', ?, '', '', 'NONE', 0, 'new', ?, 0)"
     );
-    $insert->execute(['+' . $digits, mb_substr($body, 0, 120)]);
+    $insert->execute(['+' . $digits, mb_substr($body !== '' ? $body : 'Photo reçue', 0, 120)]);
     $leadId = (int) $pdo->lastInsertId();
 }
 
-// ─── Enregistrer le message + incrémenter unread ────────────────────────────
+// ─── Télécharger les photos entrantes ───────────────────────────────────────
+$media = [];
+if ($numMedia > 0) {
+    require_once __DIR__ . '/twilio.php';
+    for ($i = 0; $i < $numMedia; $i++) {
+        $url  = (string) ($_POST["MediaUrl{$i}"] ?? '');
+        $type = (string) ($_POST["MediaContentType{$i}"] ?? 'image/jpeg');
+        if ($url === '') continue;
+        $path = twilio_download_media($url, $type, 'L-' . $leadId);
+        if ($path) $media[] = $path;
+    }
+}
+
+// message NOT NULL → libellé par défaut si seulement une photo
+if ($body === '') {
+    $body = $media ? '📷 Photo' : '[message vide]';
+}
+
+// ─── Enregistrer le message (+ médias) + incrémenter unread ─────────────────
 try {
-    $pdo->prepare('INSERT INTO conversations (lead_id, author, message) VALUES (?, ?, ?)')
-        ->execute([$leadId, 'client', $body]);
+    $pdo->prepare('INSERT INTO conversations (lead_id, author, message, media_json) VALUES (?, ?, ?, ?)')
+        ->execute([$leadId, 'client', $body, $media ? json_encode($media, JSON_UNESCAPED_SLASHES) : null]);
+
+    $snippet = $media && $body === '📷 Photo' ? '📷 Photo' : mb_substr($body, 0, 120);
     $pdo->prepare(
         'UPDATE leads SET last_snippet = ?, unread_count = unread_count + 1, updated_at = NOW() WHERE id = ?'
-    )->execute([mb_substr($body, 0, 120), $leadId]);
+    )->execute([$snippet, $leadId]);
 } catch (Throwable $e) {
     error_log('[webhook] DB error: ' . $e->getMessage());
     // On acquitte quand même pour éviter que Twilio ne réessaie en boucle.

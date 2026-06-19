@@ -30,7 +30,7 @@ function twilio_wa_address(string $phone): string
  * Envoie un message WhatsApp via l'API REST Twilio.
  * @return array{ok:bool, sid?:string, status?:string, error?:string}
  */
-function twilio_send_whatsapp(string $toPhone, string $body, ?string $mediaUrl = null): array
+function twilio_send_whatsapp(string $toPhone, string $body, ?string $mediaUrl = null, ?string $statusCallback = null): array
 {
     global $CONFIG;
     $t = $CONFIG['twilio'] ?? [];
@@ -50,6 +50,9 @@ function twilio_send_whatsapp(string $toPhone, string $body, ?string $mediaUrl =
     ];
     if ($mediaUrl !== null && $mediaUrl !== '') {
         $fields['MediaUrl'] = $mediaUrl;
+    }
+    if ($statusCallback !== null && $statusCallback !== '') {
+        $fields['StatusCallback'] = $statusCallback;
     }
 
     $ch = curl_init($url);
@@ -74,6 +77,49 @@ function twilio_send_whatsapp(string $toPhone, string $body, ?string $mediaUrl =
         return ['ok' => true, 'sid' => $json['sid'], 'status' => $json['status'] ?? ''];
     }
     return ['ok' => false, 'error' => $json['message'] ?? "HTTP $http"];
+}
+
+/**
+ * Télécharge un média Twilio (authentifié) vers uploads/leads/{leadId}/.
+ * @return string|null chemin relatif "uploads/leads/L-x/…" ou null si échec.
+ */
+function twilio_download_media(string $mediaUrl, string $contentType, string $leadId): ?string
+{
+    global $CONFIG;
+    $t = $CONFIG['twilio'] ?? [];
+    $sid = $t['account_sid'] ?? '';
+    $tok = $t['auth_token'] ?? '';
+
+    $extMap = [
+        'image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp',
+        'image/gif' => 'gif', 'application/pdf' => 'pdf',
+    ];
+    $ext = $extMap[strtolower(trim(explode(';', $contentType)[0]))] ?? 'jpg';
+
+    $ch = curl_init($mediaUrl);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_USERPWD        => "{$sid}:{$tok}",
+        CURLOPT_TIMEOUT        => 25,
+    ]);
+    $data = curl_exec($ch);
+    $http = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($data === false || $http < 200 || $http >= 300) {
+        return null;
+    }
+
+    $baseDir = rtrim($CONFIG['uploads_dir'] ?? (__DIR__ . '/uploads'), '/');
+    $dir = "{$baseDir}/leads/{$leadId}";
+    if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
+        return null;
+    }
+    $filename = sprintf('wa-%d-%s.%s', time(), bin2hex(random_bytes(5)), $ext);
+    if (file_put_contents("{$dir}/{$filename}", $data) === false) {
+        return null;
+    }
+    return "uploads/leads/{$leadId}/{$filename}";
 }
 
 /** Normalise un numéro en E.164 (+33…) pour l'API Verify. */

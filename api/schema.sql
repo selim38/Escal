@@ -130,14 +130,27 @@ CREATE TABLE IF NOT EXISTS leads (
 -- 6. CONVERSATIONS WhatsApp
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS conversations (
-  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  lead_id     INT UNSIGNED NOT NULL,
-  author      ENUM('client','vendor') NOT NULL,
-  message     TEXT NOT NULL,
-  sent_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  lead_id        INT UNSIGNED NOT NULL,
+  author         ENUM('client','vendor') NOT NULL,
+  message        TEXT NOT NULL,
+  media_json     JSON NULL COMMENT 'Pièces jointes (photos) reçues/envoyées',
+  twilio_sid     VARCHAR(64) NULL COMMENT 'SID du message Twilio (suivi statut)',
+  status         VARCHAR(20) NULL COMMENT 'queued|sent|delivered|read|failed',
+  author_user_id INT UNSIGNED NULL COMMENT 'Commercial ayant envoyé (vendor)',
+  sent_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY idx_conv_lead (lead_id, sent_at),
+  KEY idx_conv_sid (twilio_sid),
   CONSTRAINT fk_conv_lead FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- Migrations idempotentes pour bases existantes (erreurs "duplicate column" ignorées par migrate.php)
+ALTER TABLE conversations ADD COLUMN media_json JSON NULL;
+ALTER TABLE conversations ADD COLUMN twilio_sid VARCHAR(64) NULL;
+ALTER TABLE conversations ADD COLUMN status VARCHAR(20) NULL;
+ALTER TABLE conversations ADD COLUMN author_user_id INT UNSIGNED NULL;
+ALTER TABLE leads ADD COLUMN assigned_to INT UNSIGNED NULL;
+ALTER TABLE leads ADD COLUMN assigned_at DATETIME NULL;
 
 -- ---------------------------------------------------------
 -- 7. UTILISATEURS (accès au dashboard admin)
