@@ -21,9 +21,18 @@ export function photoUrl(path: string): string {
   return `${BASE}/${path.replace(/^\/+/, "")}`;
 }
 
-/** URL du devis imprimable (token en query car ouvert dans un onglet). */
+/** URL du devis PDF (token en query car ouvert dans un onglet). */
 export function devisUrl(leadId: string): string {
   return `${BASE}/devis.php?id=${encodeURIComponent(leadId)}&t=${encodeURIComponent(getToken() ?? "")}`;
+}
+
+/** Envoie le devis PDF au client par WhatsApp. */
+export async function sendDevis(leadId: string): Promise<{ ok: boolean; error?: string }> {
+  const res = await fetch(`${BASE}/send-devis.php?id=${encodeURIComponent(leadId)}`, {
+    method: "POST",
+    headers: { ...authHeaders() },
+  });
+  return res.json().catch(() => ({ ok: false, error: "Réponse invalide" }));
 }
 
 async function asJson<T>(res: Response): Promise<T> {

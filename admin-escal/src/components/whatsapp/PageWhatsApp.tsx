@@ -8,7 +8,7 @@ import {
   Search, WhatsApp as WhatsAppIcon, Paperclip, Smile, Send,
   Check2, CheckDouble, External, More, Euro, Edit, Download,
 } from "@/components/icons/Icons";
-import { photoUrl, devisUrl } from "@/lib/api";
+import { photoUrl, devisUrl, sendDevis } from "@/lib/api";
 
 // ✓ envoyé · ✓✓ livré · ✓✓ bleu lu · ! échec
 function DeliveryTicks({ status }: { status?: string | null }) {
@@ -294,6 +294,14 @@ export default function PageWhatsApp({
               <div className="ec-wactx__actions">
                 <button className="ec-btn" onClick={() => lead && window.open(devisUrl(lead.id), "_blank")}>
                   <Download size={13} /> Générer le devis PDF
+                </button>
+                <button className="ec-btn" onClick={async () => {
+                  if (!lead) return;
+                  if (!confirm("Envoyer le devis PDF au client par WhatsApp ?")) return;
+                  const r = await sendDevis(lead.id);
+                  alert(r.ok ? "Devis envoyé au client ✓" : "Échec : " + (r.error ?? "erreur"));
+                }}>
+                  <Send size={13} /> Envoyer le devis au client
                 </button>
                 <button className="ec-btn" onClick={() => onSetStatus(lead.id, "pending")}>
                   <Euro size={13} /> Générer le lien de paiement
