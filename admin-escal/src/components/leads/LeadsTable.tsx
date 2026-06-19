@@ -22,6 +22,7 @@ interface LeadsTableProps {
   onOpenChat: (id: string) => void;
   density: "compact" | "regular" | "comfy";
   query: string;
+  statusFilter: "all" | Lead["status"];
   accent: string;
 }
 
@@ -32,9 +33,11 @@ export default function LeadsTable({
   onOpenChat,
   density,
   query,
+  statusFilter,
   accent,
 }: LeadsTableProps) {
   const filtered = leads
+    .filter(l => statusFilter === "all" || l.status === statusFilter)
     .filter(l => {
       if (!query) return true;
       const q = query.toLowerCase();
@@ -42,6 +45,7 @@ export default function LeadsTable({
         l.name.toLowerCase().includes(q) ||
         l.email.toLowerCase().includes(q) ||
         l.id.toLowerCase().includes(q) ||
+        l.phone.toLowerCase().includes(q) ||
         l.snippet.toLowerCase().includes(q)
       );
     })

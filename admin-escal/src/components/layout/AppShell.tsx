@@ -29,6 +29,7 @@ export default function AppShell() {
   const [convs, setConvs]           = useState<Conversations>({});
   const [draft, setDraft]           = useState("");
   const [loading, setLoading]       = useState(true);
+  const [statusFilter, setStatusFilter] = useState<"all" | Lead["status"]>("all");
 
   // ── Authentification ───────────────────────────────────────────────────────
   const [user, setUser]             = useState<AuthUser | null>(null);
@@ -200,12 +201,23 @@ export default function AppShell() {
               <div className="ec-toolbar">
                 <div className="ec-toolbar__left">
                   <span className="ec-section-title">Master leads</span>
-                  <span className="ec-chip">Tous · {leads.length}</span>
-                </div>
-                <div className="ec-toolbar__right">
-                  <button className="ec-btn ec-btn--ghost">
-                    <Filter size={14} /> Filtrer
-                  </button>
+                  <Filter size={14} style={{ opacity: .5 }} />
+                  {([
+                    { key: "all",     label: "Tous",       count: leads.length },
+                    { key: "new",     label: "Nouveaux",   count: leads.filter(l => l.status === "new").length },
+                    { key: "pending", label: "En attente", count: leads.filter(l => l.status === "pending").length },
+                    { key: "won",     label: "Gagnés",     count: leads.filter(l => l.status === "won").length },
+                    { key: "lost",    label: "Perdus",     count: leads.filter(l => l.status === "lost").length },
+                  ] as const).map(f => (
+                    <button
+                      key={f.key}
+                      className={"ec-chip " + (statusFilter === f.key ? "is-on" : "")}
+                      style={statusFilter === f.key ? { background: ACCENT, color: "#fff", borderColor: ACCENT } : { cursor: "pointer" }}
+                      onClick={() => setStatusFilter(f.key)}
+                    >
+                      {f.label} · {f.count}
+                    </button>
+                  ))}
                 </div>
               </div>
               {loading ? (
@@ -218,6 +230,7 @@ export default function AppShell() {
                   onOpenChat={onOpenChat}
                   density={density}
                   query={query}
+                  statusFilter={statusFilter}
                   accent={ACCENT}
                 />
               )}

@@ -3,6 +3,7 @@
 import type { Lead, LeadConfig } from "@/lib/types";
 import { fmtEUR, avatarBg } from "@/lib/utils";
 import { LEAD_STATUS } from "@/lib/data";
+import { photoUrl } from "@/lib/api";
 
 // ── Labels lisibles ────────────────────────────────────────────────────────
 const DECOR_LABELS: Record<string, string> = {
@@ -157,6 +158,21 @@ export default function LeadConfigPanel({ lead, onClose, onSetStatus, accent }: 
               <Row label="Finition palier" value={c.landingFinish ? LANDING_LABELS[c.landingFinish] ?? c.landingFinish : null} />
             )}
           </Section>
+
+          {lead.photos.length > 0 && (
+            <Section title={`Photos du client (${lead.photos.length})`}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+                {lead.photos.map((p, i) => (
+                  <a key={i} href={photoUrl(p)} target="_blank" rel="noopener noreferrer"
+                    style={{ display: "block", aspectRatio: "1", borderRadius: 8, overflow: "hidden", border: "1px solid #e7e2dc" }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photoUrl(p)} alt={`Photo ${i + 1}`}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  </a>
+                ))}
+              </div>
+            </Section>
+          )}
         </div>
       ) : (
         <div className="lcp-empty">Aucune configuration disponible.</div>

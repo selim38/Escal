@@ -26,7 +26,8 @@ function list_leads(): never
             decor, riser_option, step_count,
             uniform_step_dimensions, width_band, depth_band,
             open_sides, intermediate_landing, landing_finish,
-            step_end_cap, open_step_end_side, lateral_end_side
+            step_end_cap, open_step_end_side, lateral_end_side,
+            photos_json
         FROM leads
         ORDER BY updated_at DESC
     ")->fetchAll();
@@ -53,6 +54,7 @@ function list_leads(): never
             'step'      => 'stage',
             'funnelHistory' => [],
             'internalNotes' => $r['internal_notes'] ?? '',
+            'photos'    => $r['photos_json'] ? (json_decode((string) $r['photos_json'], true) ?: []) : [],
             'config'    => [
                 'decor'                 => $r['decor'],
                 'riserOption'           => $r['riser_option'],

@@ -34,6 +34,7 @@ export interface Lead {
   funnelHistory: string[];
   config: LeadConfig | null;
   internalNotes: string;
+  photos: string[];
 }
 
 export interface Message {
