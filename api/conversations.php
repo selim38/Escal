@@ -79,9 +79,15 @@ function post_message(int $dbId, int $uid): never
     $status = null;
     if ($author === 'vendor') {
         require_once __DIR__ . '/twilio.php';
-        // URL publique du callback de statut (même domaine que cette requête)
-        $scheme = (($_SERVER['HTTPS'] ?? '') === 'on' || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') ? 'https' : 'http';
-        $statusCb = "{$scheme}://" . ($_SERVER['HTTP_HOST'] ?? '') . dirname($_SERVER['SCRIPT_NAME'] ?? '/api/x') . '/whatsapp-status.php';
+        // URL publique du callback de statut
+        global $CONFIG;
+        $apiDir = dirname($_SERVER['SCRIPT_NAME'] ?? '/api/x');
+        if (!empty($CONFIG['public_base_url'])) {
+            $statusCb = rtrim($CONFIG['public_base_url'], '/') . $apiDir . '/whatsapp-status.php';
+        } else {
+            $scheme = (($_SERVER['HTTPS'] ?? '') === 'on' || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') ? 'https' : 'http';
+            $statusCb = "{$scheme}://" . ($_SERVER['HTTP_HOST'] ?? '') . $apiDir . '/whatsapp-status.php';
+        }
         $whatsapp = twilio_send_whatsapp((string) $leadPhone, $message, null, $statusCb);
         if (!empty($whatsapp['ok'])) {
             $twilioSid = $whatsapp['sid'] ?? null;

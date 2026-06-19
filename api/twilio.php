@@ -226,10 +226,15 @@ function twilio_validate_signature(string $authToken, string $url, array $postPa
 /** Reconstitue l'URL publique complète de la requête courante (pour la signature). */
 function twilio_current_url(): string
 {
+    global $CONFIG;
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    // Base publique figée (recommandé sur mutualisé : TLS terminé en amont fausse la détection)
+    if (!empty($CONFIG['public_base_url'])) {
+        return rtrim($CONFIG['public_base_url'], '/') . $uri;
+    }
     $https  = (($_SERVER['HTTPS'] ?? '') === 'on') || (($_SERVER['SERVER_PORT'] ?? '') === '443')
               || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
     $scheme = $https ? 'https' : 'http';
     $host   = $_SERVER['HTTP_HOST'] ?? '';
-    $uri    = $_SERVER['REQUEST_URI'] ?? '';
     return "{$scheme}://{$host}{$uri}";
 }
