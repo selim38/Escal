@@ -26,11 +26,13 @@ if ($phone === '') { echo "\n(ajoute &phone=+33783318138 pour tester l'envoi)\n"
 if (empty($t['verify_service_sid'])) { echo "\nImpossible de tester : verify_service_sid manquant.\n"; exit; }
 
 $va = $t['verify_service_sid'];
+$channel = $_GET['channel'] ?? 'whatsapp';   // &channel=sms pour tester en SMS
+echo "canal      : {$channel}\n";
 $ch = curl_init("https://verify.twilio.com/v2/Services/{$va}/Verifications");
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_POST           => true,
-    CURLOPT_POSTFIELDS     => http_build_query(['To' => $phone, 'Channel' => 'whatsapp']),
+    CURLOPT_POSTFIELDS     => http_build_query(['To' => $phone, 'Channel' => $channel]),
     CURLOPT_USERPWD        => $t['account_sid'] . ':' . $t['auth_token'],
     CURLOPT_TIMEOUT        => 15,
 ]);
