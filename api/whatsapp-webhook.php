@@ -99,8 +99,15 @@ if ($body === '') {
 
 // ─── Enregistrer le message (+ médias) + incrémenter unread ─────────────────
 try {
-    $pdo->prepare('INSERT INTO conversations (lead_id, author, message, media_json) VALUES (?, ?, ?, ?)')
-        ->execute([$leadId, 'client', $body, $media ? json_encode($media, JSON_UNESCAPED_SLASHES) : null]);
+    try {
+        $pdo->prepare('INSERT INTO conversations (lead_id, author, message, media_json) VALUES (?, ?, ?, ?)')
+            ->execute([$leadId, 'client', $body, $media ? json_encode($media, JSON_UNESCAPED_SLASHES) : null]);
+    } catch (Throwable $inner) {
+        // Filet de sécurité : insertion minimale si une colonne manque (ex. migration non passée)
+        error_log('[webhook] insert complet KO, fallback minimal: ' . $inner->getMessage());
+        $pdo->prepare('INSERT INTO conversations (lead_id, author, message) VALUES (?, ?, ?)')
+            ->execute([$leadId, 'client', $body]);
+    }
 
     $snippet = $media && $body === '📷 Photo' ? '📷 Photo' : mb_substr($body, 0, 120);
     $pdo->prepare(
