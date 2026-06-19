@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import LeadsTable from "@/components/leads/LeadsTable";
@@ -11,8 +11,16 @@ import PageSettings from "@/components/settings/PageSettings";
 import type { Lead, Conversations } from "@/lib/types";
 import { api } from "@/lib/api";
 import { fetchMe, type AuthUser } from "@/lib/auth";
+import { notify, requestNotifyPermission } from "@/lib/notify";
 import AuthScreen from "@/components/auth/AuthScreen";
 import { Filter } from "@/components/icons/Icons";
+
+// Détecte nouveaux leads / messages entrants pour notifier (hors lead ouvert)
+function snapshot(leads: Lead[], openId: string) {
+  const ids = new Set(leads.map(l => l.id));
+  const unread = leads.reduce((s, l) => s + (l.id === openId ? 0 : l.unread), 0);
+  return { ids, unread };
+}
 
 type Page = "dashboard" | "leads" | "whatsapp" | "settings";
 type Density = "compact" | "regular" | "comfy";
@@ -34,6 +42,7 @@ export default function AppShell() {
   // ── Authentification ───────────────────────────────────────────────────────
   const [user, setUser]             = useState<AuthUser | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const notifyBaseline = useRef<{ ids: Set<string>; unread: number } | null>(null);
 
   useEffect(() => {
     fetchMe().then(setUser).finally(() => setAuthChecked(true));
@@ -42,9 +51,11 @@ export default function AppShell() {
   // ── Chargement initial des leads (une fois connecté) ───────────────────────
   useEffect(() => {
     if (!user) return;
+    requestNotifyPermission();
     api.listLeads()
       .then((data: Lead[]) => {
         setLeads(data);
+        notifyBaseline.current = snapshot(data, selectedId); // référence anti-notif au démarrage
         if (data.length > 0 && !selectedId) setSelectedId(data[0].id);
       })
       .catch(console.error)
@@ -67,8 +78,22 @@ export default function AppShell() {
     if (!user) return;
     const t = setInterval(() => {
       api.listLeads()
-        // Le lead ouvert est considéré comme lu côté affichage
-        .then(data => setLeads(data.map(l => l.id === selectedId ? { ...l, unread: 0 } : l)))
+        .then(data => {
+          // Notifications : nouveau lead ou nouveau message entrant (hors lead ouvert)
+          const prev = notifyBaseline.current;
+          const next = snapshot(data, selectedId);
+          if (prev) {
+            const newLead = [...next.ids].some(id => !prev.ids.has(id));
+            if (newLead) {
+              notify("Nouveau lead", "Une nouvelle demande vient d'arriver.");
+            } else if (next.unread > prev.unread) {
+              notify("Nouveau message WhatsApp", "Un client a répondu.");
+            }
+          }
+          notifyBaseline.current = next;
+          // Le lead ouvert est considéré comme lu côté affichage
+          setLeads(data.map(l => l.id === selectedId ? { ...l, unread: 0 } : l));
+        })
         .catch(() => {});
     }, 8000);
     return () => clearInterval(t);

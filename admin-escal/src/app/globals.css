@@ -1033,3 +1033,80 @@ input, textarea { font-family: inherit; color: inherit; }
 }
 .ec-notes-textarea:focus { border-color: var(--accent); }
 .ec-notes-textarea::placeholder { color: var(--ink-3); }
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE MOBILE (≤ 720px)
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 720px) {
+  /* App : sidebar en barre horizontale en haut */
+  .ec-app,
+  .ec-app.is-collapsed {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+    height: 100vh;
+    --sidebar-w: 0px;
+  }
+  .ec-sidebar {
+    grid-template-rows: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 8px 10px;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .ec-sidebar__brand,
+  .ec-sidebar__foot { display: none; }
+  .ec-nav {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    width: 100%;
+  }
+  .ec-nav__item { padding: 9px 12px; white-space: nowrap; }
+  .ec-nav__rail { display: none; }
+
+  /* Header : compact, recherche masquée */
+  .ec-header {
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    min-height: auto;
+    gap: 10px;
+  }
+  .ec-header__burger { display: none; }
+  .ec-header__title h1 { font-size: 18px; }
+  .ec-header__sub { display: none; }
+  .ec-header .ec-search { display: none; }
+  .ec-user__meta { display: none; }
+
+  /* Leads : fiche détail empilée sous le tableau */
+  .ec-page--with-panel { flex-direction: column; overflow: auto; }
+  .ec-page--with-panel .ec-page__main { padding: 12px 14px; }
+  .lcp {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--line-2);
+  }
+
+  /* Barre d'outils : chips qui passent à la ligne */
+  .ec-toolbar { flex-wrap: wrap; gap: 8px; }
+  .ec-toolbar__left { flex-wrap: wrap; gap: 6px; }
+
+  /* Tableau : défilement horizontal au lieu de déborder */
+  .ec-table { overflow-x: auto; }
+  .ec-table__head,
+  .ec-row { min-width: 640px; }
+
+  /* WhatsApp : liste visible (on annule le masquage hérité) */
+  .ec-wa-full {
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(220px, auto);
+    height: auto;
+    min-height: 0;
+  }
+  .ec-walist { display: block; max-height: 38vh; }
+  .ec-wactx { display: none; }
+  .ec-page { padding: 10px 14px !important; }
+}
