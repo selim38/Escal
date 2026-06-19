@@ -35,6 +35,9 @@ export interface Lead {
   config: LeadConfig | null;
   internalNotes: string;
   photos: string[];
+  assignedTo: number | null;
+  assignedAgent: string | null;
+  assignedAtTs: number | null;
 }
 
 export interface Message {

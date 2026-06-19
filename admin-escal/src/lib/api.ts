@@ -54,6 +54,16 @@ export const api = {
       body: JSON.stringify({ author, message }),
     }),
 
+  // Verrou anti-collision : prend/rafraîchit l'assignation d'une conversation
+  claimLead: (leadId: string): Promise<{
+    assignedTo: number | null; assignedAgent: string | null;
+    assignedAtTs: number | null; mine: boolean; locked: boolean;
+  }> =>
+    fetch(`${BASE}/assign.php?id=${encodeURIComponent(leadId)}`, {
+      method: "POST",
+      headers: { ...authHeaders() },
+    }).then(r => asJson(r)),
+
   // Mise à jour d'un lead (statut / notes / unread / snippet)
   // POST + override : certains hébergements mutualisés bloquent PATCH.
   patchLead: (

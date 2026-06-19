@@ -27,7 +27,9 @@ function list_leads(): never
             uniform_step_dimensions, width_band, depth_band,
             open_sides, intermediate_landing, landing_finish,
             step_end_cap, open_step_end_side, lateral_end_side,
-            photos_json
+            photos_json,
+            assigned_to, assigned_at,
+            (SELECT name FROM users WHERE id = leads.assigned_to) AS assigned_agent
         FROM leads
         ORDER BY updated_at DESC
     ")->fetchAll();
@@ -55,6 +57,9 @@ function list_leads(): never
             'funnelHistory' => [],
             'internalNotes' => $r['internal_notes'] ?? '',
             'photos'    => $r['photos_json'] ? (json_decode((string) $r['photos_json'], true) ?: []) : [],
+            'assignedTo'    => $r['assigned_to'] !== null ? (int) $r['assigned_to'] : null,
+            'assignedAgent' => $r['assigned_agent'],
+            'assignedAtTs'  => $r['assigned_at'] ? strtotime((string) $r['assigned_at'] . ' UTC') * 1000 : null,
             'config'    => [
                 'decor'                 => $r['decor'],
                 'riserOption'           => $r['riser_option'],

@@ -46,11 +46,12 @@ interface PageWhatsAppProps {
   convs: Conversations;
   onSetStatus: (id: string, status: Lead["status"]) => void;
   onSaveNotes: (id: string, notes: string) => void;
+  meId: number;
 }
 
 export default function PageWhatsApp({
   accent, leads, selectedId, setSelectedId,
-  draft, setDraft, onSend, convs, onSetStatus, onSaveNotes,
+  draft, setDraft, onSend, convs, onSetStatus, onSaveNotes, meId,
 }: PageWhatsAppProps) {
   const [search, setSearch] = useState("");
   const [notes, setNotes] = useState("");
@@ -83,6 +84,19 @@ export default function PageWhatsApp({
   });
 
   const conv: Message[] = lead ? (convs[lead.id] ?? []) : [];
+
+  // Verrou anti-collision : un autre commercial répond-il à ce client ?
+  const lockedByOther =
+    !!lead && lead.assignedTo != null && lead.assignedTo !== meId &&
+    lead.assignedAtTs != null && Date.now() - lead.assignedAtTs < 60000;
+
+  const handleSend = () => {
+    if (lockedByOther &&
+        !confirm(`${lead?.assignedAgent ?? "Un collègue"} est en train de répondre à ce client. Envoyer quand même ?`)) {
+      return;
+    }
+    onSend();
+  };
 
   return (
     <div className="ec-wa-full">
@@ -148,8 +162,16 @@ export default function PageWhatsApp({
               <div className="ec-wachat__title">
                 <div className="ec-wachat__name">{lead.name}</div>
                 <div className="ec-wachat__meta">
-                  <span className="ec-dot" style={{ background: "#5B8E5A" }} />
-                  en ligne · {lead.phone}
+                  {lockedByOther ? (
+                    <span style={{ color: "#C9821E", fontWeight: 600 }}>
+                      🔒 {lead.assignedAgent} est en train de répondre
+                    </span>
+                  ) : (
+                    <>
+                      <span className="ec-dot" style={{ background: "#5B8E5A" }} />
+                      en ligne · {lead.phone}
+                    </>
+                  )}
                 </div>
               </div>
               <div className="ec-wachat__actions">
@@ -201,13 +223,13 @@ export default function PageWhatsApp({
                   className="ec-wa__input"
                   value={draft}
                   onChange={e => setDraft(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend(); } }}
+                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                   placeholder={`Répondre à ${lead.name.split(" ")[0]}…`}
                 />
                 <button
                   className="ec-iconbtn ec-iconbtn--solid"
                   style={{ background: accent, color: "#fff" }}
-                  onClick={onSend}
+                  onClick={handleSend}
                 >
                   <Send size={16} />
                 </button>

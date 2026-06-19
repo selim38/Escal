@@ -99,6 +99,15 @@ export default function AppShell() {
     return () => clearInterval(t);
   }, [selectedId, user]);
 
+  // ── Verrou anti-collision : prend la conversation ouverte + heartbeat (25s)
+  useEffect(() => {
+    if (!user || !selectedId) return;
+    const claim = () => api.claimLead(selectedId).catch(() => {});
+    claim();
+    const t = setInterval(claim, 25000);
+    return () => clearInterval(t);
+  }, [selectedId, user]);
+
   // ── Polling : rafraîchit la conversation ouverte (messages entrants WhatsApp)
   useEffect(() => {
     if (!selectedId) return;
@@ -285,6 +294,7 @@ export default function AppShell() {
               convs={convs}
               onSetStatus={onSetStatus}
               onSaveNotes={onSaveNotes}
+              meId={user.id}
             />
           </div>
         )}
