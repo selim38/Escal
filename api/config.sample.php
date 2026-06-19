@@ -37,5 +37,11 @@ return [
     ],
 
     // Dossier de stockage des photos clients (relatif à api/ ou absolu)
+    // ─── Primotexto (alertes SMS aux commerciaux) ───────────────────────
+    'primotexto' => [
+        'api_key' => 'VOTRE_CLE_PRIMOTEXTO',
+        'sender'  => 'KitRenov',
+    ],
+
     'uploads_dir' => __DIR__ . '/uploads',
 ];

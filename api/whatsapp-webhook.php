@@ -118,4 +118,16 @@ try {
     // On acquitte quand même pour éviter que Twilio ne réessaie en boucle.
 }
 
+// ─── Alerte SMS aux commerciaux (réponse client) ────────────────────────────
+try {
+    require_once __DIR__ . '/primotexto.php';
+    $nameRow = $pdo->prepare('SELECT first_name, last_name FROM leads WHERE id = ?');
+    $nameRow->execute([$leadId]);
+    $who = $nameRow->fetch();
+    $clientName = $who ? trim($who['first_name'] . ' ' . $who['last_name']) : 'Client';
+    notify_commercials($pdo, "Message de {$clientName} : " . mb_substr($body, 0, 100));
+} catch (Throwable $e) {
+    error_log('[webhook] notif SMS: ' . $e->getMessage());
+}
+
 twiml_ok();

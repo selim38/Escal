@@ -146,6 +146,16 @@ function create_lead(): never
         json_error('Erreur lors de la soumission', 500, $e);
     }
 
+    // Alerte SMS aux commerciaux (non bloquant)
+    try {
+        require_once __DIR__ . '/primotexto.php';
+        $who = trim($b['firstName'] . ' ' . $b['lastName']);
+        $px  = $estimated !== null ? ' — ' . (int) round($estimated) . ' EUR' : '';
+        notify_commercials(db(), "Nouveau lead : {$who}{$px} ({$stepCount} marches). À traiter sur l'admin.");
+    } catch (Throwable $e) {
+        error_log('[leads] notif SMS: ' . $e->getMessage());
+    }
+
     json_out([
         'ok'     => true,
         'leadId' => 'L-' . $id,
