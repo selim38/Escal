@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Escal Concept — Accès</title>
+  <style>
+    :root {
+      --accent: #E8743C;
+      --accent-2: #C95E27;
+      --ink: #1c1917;
+      --muted: #6b6560;
+      --bg: #f6f4f1;
+      --card: #ffffff;
+      --line: #e7e2dc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(120% 120% at 50% 0%, #fff 0%, var(--bg) 60%);
+      color: var(--ink);
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .wrap { width: 100%; max-width: 880px; }
+    .brand {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .brand__logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--accent-2);
+    }
+    .brand__logo .dot {
+      width: 12px; height: 12px; border-radius: 3px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+    .brand h1 {
+      margin-top: 18px;
+      font-size: clamp(26px, 5vw, 40px);
+      line-height: 1.1;
+      letter-spacing: -.02em;
+    }
+    .brand p {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      display: flex;
+      flex-direction: column;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 28px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03);
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 18px 40px -18px rgba(201,94,39,.45);
+    }
+    .card__icon {
+      width: 54px; height: 54px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, rgba(232,116,60,.14), rgba(201,94,39,.14));
+      color: var(--accent-2);
+      margin-bottom: 20px;
+    }
+    .card__icon svg { width: 28px; height: 28px; }
+    .card h2 { font-size: 20px; letter-spacing: -.01em; }
+    .card p { margin-top: 8px; color: var(--muted); font-size: 14.5px; line-height: 1.5; }
+    .card__cta {
+      margin-top: 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--accent-2);
+    }
+    .card__cta svg { width: 16px; height: 16px; transition: transform .18s ease; }
+    .card:hover .card__cta svg { transform: translateX(4px); }
+    footer {
+      margin-top: 36px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">
+      <div class="brand__logo"><span class="dot"></span> Escal Concept</div>
+      <h1>Bienvenue</h1>
+      <p>Choisissez l'espace auquel vous souhaitez accéder.</p>
+    </div>
+
+    <div class="grid">
+      <!-- Configurateur -->
+      <a class="card" href="/calcul">
+        <div class="card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21h4l11-11-4-4L3 17v4z"/><path d="M14 6l4 4"/>
+          </svg>
+        </div>
+        <h2>Configurateur</h2>
+        <p>Créez et estimez un escalier sur mesure, puis envoyez votre demande de devis.</p>
+        <span class="card__cta">
+          Ouvrir le configurateur
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <!-- Admin -->
+      <a class="card" href="/admin">
+        <div class="card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/>
+            <rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>
+          </svg>
+        </div>
+        <h2>Espace administration</h2>
+        <p>Suivez les leads, gérez les conversations WhatsApp et le pilotage commercial.</p>
+        <span class="card__cta">
+          Ouvrir le dashboard
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+    </div>
+
+    <footer>© Escal Concept — accès réservé</footer>
+  </div>
+</body>
+</html>

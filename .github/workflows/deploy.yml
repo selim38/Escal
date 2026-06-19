@@ -88,3 +88,20 @@ jobs:
           local_path: './api/*'
           remote_path: 'api'
           sftp_only: true
+
+  # ────────────────────────────────────────────────────────────────
+  home:
+    name: Accueil → /
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy landing via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          server:    ${{ secrets.FTP_SERVER }}
+          username:  ${{ secrets.FTP_USERNAME }}
+          password:  ${{ secrets.FTP_PASSWORD }}
+          port:      22
+          local_path: './landing/*'
+          remote_path: '.'
+          sftp_only: true
