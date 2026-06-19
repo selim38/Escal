@@ -9,16 +9,17 @@ interface SidebarProps {
   onChange: (key: Page) => void;
   collapsed: boolean;
   accent: string;
+  leadsBadge: number;
+  whatsappBadge: number;
 }
 
-const NAV_ITEMS = [
-  { key: "dashboard" as Page, label: "Vue d'ensemble", Icon: Dashboard, badge: null },
-  { key: "leads"     as Page, label: "Leads",          Icon: Leads,     badge: 9   },
-  { key: "whatsapp"  as Page, label: "WhatsApp",       Icon: WhatsApp,  badge: 6   },
-  { key: "settings"  as Page, label: "Paramètres",     Icon: Settings,  badge: null },
-];
-
-export default function Sidebar({ active, onChange, collapsed, accent }: SidebarProps) {
+export default function Sidebar({ active, onChange, collapsed, accent, leadsBadge, whatsappBadge }: SidebarProps) {
+  const NAV_ITEMS = [
+    { key: "dashboard" as Page, label: "Vue d'ensemble", Icon: Dashboard, badge: 0 },
+    { key: "leads"     as Page, label: "Leads",          Icon: Leads,     badge: leadsBadge },
+    { key: "whatsapp"  as Page, label: "WhatsApp",       Icon: WhatsApp,  badge: whatsappBadge },
+    { key: "settings"  as Page, label: "Paramètres",     Icon: Settings,  badge: 0 },
+  ];
   return (
     <aside className={"ec-sidebar " + (collapsed ? "is-collapsed" : "")}>
       <div className="ec-sidebar__brand">
@@ -47,7 +48,7 @@ export default function Sidebar({ active, onChange, collapsed, accent }: Sidebar
             >
               <span className="ec-nav__icon"><Icon size={18} /></span>
               {!collapsed && <span className="ec-nav__label">{label}</span>}
-              {!collapsed && badge != null && (
+              {!collapsed && badge > 0 && (
                 <span className="ec-nav__badge">{badge}</span>
               )}
               {isActive && <span className="ec-nav__rail" />}

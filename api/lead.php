@@ -10,6 +10,8 @@
 
 require __DIR__ . '/bootstrap.php';
 
+require_auth();   // modification de lead réservée au dashboard admin
+
 $verb = method();
 if ($verb === 'POST' && ($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? '') === 'PATCH') {
     $verb = 'PATCH';

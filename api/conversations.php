@@ -8,6 +8,8 @@
 
 require __DIR__ . '/bootstrap.php';
 
+require_auth();   // conversations réservées au dashboard admin
+
 $leadId = $_GET['leadId'] ?? '';
 if ($leadId === '') {
     json_error('Paramètre leadId manquant', 400);

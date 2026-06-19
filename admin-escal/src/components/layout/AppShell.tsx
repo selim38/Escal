@@ -10,6 +10,8 @@ import PageWhatsApp from "@/components/whatsapp/PageWhatsApp";
 import PageSettings from "@/components/settings/PageSettings";
 import type { Lead, Conversations } from "@/lib/types";
 import { api } from "@/lib/api";
+import { fetchMe, type AuthUser } from "@/lib/auth";
+import AuthScreen from "@/components/auth/AuthScreen";
 import { Filter } from "@/components/icons/Icons";
 
 type Page = "dashboard" | "leads" | "whatsapp" | "settings";
@@ -28,8 +30,17 @@ export default function AppShell() {
   const [draft, setDraft]           = useState("");
   const [loading, setLoading]       = useState(true);
 
-  // ── Chargement initial des leads ──────────────────────────────────────────
+  // ── Authentification ───────────────────────────────────────────────────────
+  const [user, setUser]             = useState<AuthUser | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
   useEffect(() => {
+    fetchMe().then(setUser).finally(() => setAuthChecked(true));
+  }, []);
+
+  // ── Chargement initial des leads (une fois connecté) ───────────────────────
+  useEffect(() => {
+    if (!user) return;
     api.listLeads()
       .then((data: Lead[]) => {
         setLeads(data);
@@ -38,7 +49,7 @@ export default function AppShell() {
       .catch(console.error)
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   // ── Chargement conversations au changement de lead sélectionné ───────────
   useEffect(() => {
@@ -52,6 +63,7 @@ export default function AppShell() {
 
   // ── Polling : rafraîchit la liste des leads (nouveaux leads, unread, snippets)
   useEffect(() => {
+    if (!user) return;
     const t = setInterval(() => {
       api.listLeads()
         // Le lead ouvert est considéré comme lu côté affichage
@@ -59,7 +71,7 @@ export default function AppShell() {
         .catch(() => {});
     }, 8000);
     return () => clearInterval(t);
-  }, [selectedId]);
+  }, [selectedId, user]);
 
   // ── Polling : rafraîchit la conversation ouverte (messages entrants WhatsApp)
   useEffect(() => {
@@ -132,6 +144,23 @@ export default function AppShell() {
 
   const accentStyle = { "--accent": ACCENT, "--accent-2": "#C95E27" } as React.CSSProperties;
 
+  // ── Notifications réelles (dérivées des données) ───────────────────────────
+  const newLeadsCount   = leads.filter(l => l.status === "new").length; // prospects à traiter
+  const unreadConvCount = leads.filter(l => l.unread > 0).length;       // conversations non lues
+
+  // ── Gating authentification ────────────────────────────────────────────────
+  if (!authChecked) {
+    return (
+      <div style={{
+        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+        color: "#9a938c", fontFamily: "-apple-system, sans-serif", fontSize: 14,
+      }}>Chargement…</div>
+    );
+  }
+  if (!user) {
+    return <AuthScreen onAuthenticated={setUser} />;
+  }
+
   return (
     <div className={"ec-app " + (collapsed ? "is-collapsed" : "")} style={accentStyle}>
       <Sidebar
@@ -139,6 +168,8 @@ export default function AppShell() {
         onChange={setActive}
         collapsed={collapsed}
         accent={ACCENT}
+        leadsBadge={newLeadsCount}
+        whatsappBadge={unreadConvCount}
       />
 
       <main className="ec-app__main">
@@ -148,6 +179,8 @@ export default function AppShell() {
           onToggleSidebar={() => setCollapsed(c => !c)}
           query={query}
           onQuery={setQuery}
+          user={user}
+          unreadCount={newLeadsCount + unreadConvCount}
         />
 
         {active === "dashboard" && (

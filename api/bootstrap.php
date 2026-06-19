@@ -104,6 +104,74 @@ function db_id(string $leadId): int
     return (int) preg_replace('/^L-/', '', $leadId);
 }
 
+// ─── Authentification ───────────────────────────────────────────────────────
+/** Secret de signature des tokens (stable par serveur, dérivé si non défini). */
+function auth_secret(): string
+{
+    global $CONFIG;
+    if (!empty($CONFIG['auth_secret'])) {
+        return $CONFIG['auth_secret'];
+    }
+    // Fallback stable : dépend des secrets déjà présents → pas besoin d'éditer la config.
+    return hash('sha256', ($CONFIG['db']['password'] ?? '') . '|' . ($CONFIG['twilio']['auth_token'] ?? ''));
+}
+
+/** Fabrique un token signé (type JWT minimal) valable 30 jours. */
+function auth_make_token(int $userId): string
+{
+    $payload = base64_encode(json_encode(['uid' => $userId, 'exp' => time() + 60 * 60 * 24 * 30]));
+    $sig     = hash_hmac('sha256', $payload, auth_secret());
+    return $payload . '.' . $sig;
+}
+
+/** Vérifie un token, renvoie l'id utilisateur ou null. */
+function auth_verify_token(string $token): ?int
+{
+    $parts = explode('.', $token);
+    if (count($parts) !== 2) {
+        return null;
+    }
+    [$payload, $sig] = $parts;
+    if (!hash_equals(hash_hmac('sha256', $payload, auth_secret()), $sig)) {
+        return null;
+    }
+    $data = json_decode((string) base64_decode($payload), true);
+    if (!is_array($data) || ($data['exp'] ?? 0) < time()) {
+        return null;
+    }
+    return (int) $data['uid'];
+}
+
+/** Récupère le token (gère les serveurs qui masquent Authorization). */
+function bearer_token(): ?string
+{
+    // 1) En-tête custom X-Auth-Token — jamais filtré par Apache/CGI (le plus fiable)
+    if (!empty($_SERVER['HTTP_X_AUTH_TOKEN'])) {
+        return trim((string) $_SERVER['HTTP_X_AUTH_TOKEN']);
+    }
+    // 2) Authorization: Bearer …
+    $h = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    if ($h === '' && function_exists('getallheaders')) {
+        $hs = getallheaders();
+        $h = $hs['Authorization'] ?? $hs['authorization'] ?? '';
+    }
+    if (preg_match('/Bearer\s+(.+)/i', (string) $h, $m)) {
+        return trim($m[1]);
+    }
+    return null;
+}
+
+/** Exige un utilisateur authentifié, sinon 401. Renvoie l'id utilisateur. */
+function require_auth(): int
+{
+    $token = bearer_token();
+    $uid   = $token ? auth_verify_token($token) : null;
+    if ($uid === null) {
+        json_error('Non authentifié', 401);
+    }
+    return $uid;
+}
+
 /** Temps relatif en français — réplique relativeTime() de leads/route.ts. */
 function relative_time(string $datetimeUtc): string
 {

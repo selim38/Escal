@@ -16,6 +16,7 @@ switch (method()) {
 // ───────────────────────────────────────────────────────────────────────────
 function list_leads(): never
 {
+    require_auth();   // liste réservée au dashboard admin
     $rows = db()->query("
         SELECT
             id, first_name, last_name, email, phone, country,

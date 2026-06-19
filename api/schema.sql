@@ -138,3 +138,16 @@ CREATE TABLE IF NOT EXISTS conversations (
   KEY idx_conv_lead (lead_id, sent_at),
   CONSTRAINT fk_conv_lead FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------
+-- 7. UTILISATEURS (accès au dashboard admin)
+-- ---------------------------------------------------------
+CREATE TABLE IF NOT EXISTS users (
+  id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name          VARCHAR(120) NOT NULL DEFAULT '',
+  email         VARCHAR(255) NOT NULL UNIQUE,
+  phone         VARCHAR(50)  NOT NULL DEFAULT '',
+  password_hash VARCHAR(255) NOT NULL,
+  created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_login_at DATETIME NULL
+) ENGINE=InnoDB;

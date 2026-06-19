@@ -11,32 +11,41 @@
  * pour taper le serveur PHP local.
  */
 
+import type { Lead, Message } from "./types";
+import { authHeaders, clearToken } from "./auth";
+
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api";
 
 async function asJson<T>(res: Response): Promise<T> {
+  if (res.status === 401) {
+    // Session expirée/invalide → on déconnecte et on recharge
+    clearToken();
+    if (typeof window !== "undefined") window.location.reload();
+    throw new Error("Session expirée");
+  }
   if (!res.ok) {
     throw new Error(`API ${res.status} ${res.statusText}`);
   }
   return res.json() as Promise<T>;
 }
 
-import type { Lead, Message } from "./types";
-
 export const api = {
   // Liste des leads
   listLeads: (): Promise<Lead[]> =>
-    fetch(`${BASE}/leads.php`).then(r => asJson<Lead[]>(r)),
+    fetch(`${BASE}/leads.php`, { headers: { ...authHeaders() } })
+      .then(r => asJson<Lead[]>(r)),
 
   // Historique des messages d'un lead
   getConversation: (leadId: string): Promise<Message[]> =>
-    fetch(`${BASE}/conversations.php?leadId=${encodeURIComponent(leadId)}`)
-      .then(r => asJson<Message[]>(r)),
+    fetch(`${BASE}/conversations.php?leadId=${encodeURIComponent(leadId)}`, {
+      headers: { ...authHeaders() },
+    }).then(r => asJson<Message[]>(r)),
 
   // Envoi d'un message (vendeur → client via WhatsApp)
   sendMessage: (leadId: string, author: "client" | "vendor", message: string) =>
     fetch(`${BASE}/conversations.php?leadId=${encodeURIComponent(leadId)}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ author, message }),
     }),
 
@@ -56,6 +65,7 @@ export const api = {
       headers: {
         "Content-Type": "application/json",
         "X-HTTP-Method-Override": "PATCH",
+        ...authHeaders(),
       },
       body: JSON.stringify(body),
     }),
