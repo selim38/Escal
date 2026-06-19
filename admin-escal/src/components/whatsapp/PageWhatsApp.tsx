@@ -16,13 +16,13 @@ function DeliveryTicks({ status }: { status?: string | null }) {
     return <span style={{ marginLeft: 4, fontWeight: 700 }} title="Échec d'envoi">!</span>;
   }
   if (status === "read") {
-    return <CheckDouble size={12} style={{ marginLeft: 4, color: "#7CDBFF" }} />;
+    return <CheckDouble size={15} style={{ marginLeft: 5, color: "#7CDBFF" }} />;
   }
   if (status === "delivered") {
-    return <CheckDouble size={12} style={{ marginLeft: 4 }} />;
+    return <CheckDouble size={15} style={{ marginLeft: 5 }} />;
   }
   // queued | sent | null
-  return <Check2 size={12} style={{ marginLeft: 4 }} />;
+  return <Check2 size={15} style={{ marginLeft: 5 }} />;
 }
 
 function StatusPill({ status }: { status: Lead["status"] }) {
