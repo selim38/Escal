@@ -167,10 +167,7 @@ export default function PageWhatsApp({
                       🔒 {lead.assignedAgent} est en train de répondre
                     </span>
                   ) : (
-                    <>
-                      <span className="ec-dot" style={{ background: "#5B8E5A" }} />
-                      en ligne · {lead.phone}
-                    </>
+                    <span className="ec-mono">{lead.phone}</span>
                   )}
                 </div>
               </div>
