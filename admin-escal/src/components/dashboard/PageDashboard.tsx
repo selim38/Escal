@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import type { Lead } from "@/lib/types";
 import { KPIS, LEAD_STATUS } from "@/lib/data";
+import { api } from "@/lib/api";
 import { fmtEUR, avatarBg } from "@/lib/utils";
 import {
   Euro, Check2, ArrowUp, ChevronRight, WhatsApp,
@@ -63,8 +65,14 @@ export default function PageDashboard({ accent, leads, onSelectLead, onJumpTo }:
     .sort((a, b) => b.price - a.price)
     .slice(0, 4);
 
-  const hourly = [2,1,0,0,0,1,3,5,8,11,14,18,22,19,17,14,16,21,24,19,12,8,5,3];
-  const maxH   = Math.max(...hourly);
+  // Messages échangés par heure sur 24h — données réelles
+  const [hourly, setHourly] = useState<number[]>(Array(24).fill(0));
+  useEffect(() => {
+    api.getStats().then(s => setHourly(s.hourly)).catch(() => {});
+    const t = setInterval(() => api.getStats().then(s => setHourly(s.hourly)).catch(() => {}), 60000);
+    return () => clearInterval(t);
+  }, []);
+  const maxH = Math.max(1, ...hourly);
 
   return (
     <div className="ec-dash">

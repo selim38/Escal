@@ -49,6 +49,11 @@ async function asJson<T>(res: Response): Promise<T> {
 }
 
 export const api = {
+  // Statistiques dashboard (messages/heure sur 24h)
+  getStats: (): Promise<{ total: number; hourly: number[] }> =>
+    fetch(`${BASE}/stats.php`, { headers: { ...authHeaders() } })
+      .then(r => asJson<{ total: number; hourly: number[] }>(r)),
+
   // Liste des leads
   listLeads: (): Promise<Lead[]> =>
     fetch(`${BASE}/leads.php`, { headers: { ...authHeaders() } })
