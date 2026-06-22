@@ -17,6 +17,7 @@ switch ($action) {
     case 'login':         login();         break;
     case 'me':            me();            break;
     case 'invite':        invite();        break;   // protégé : créer une invitation
+    case 'list':          list_users();    break;   // protégé : liste des comptes
     case 'request-reset': request_reset(); break;   // public : envoie un code WhatsApp
     case 'reset':         reset_password(); break;   // public : valide le code + nouveau mdp
     default:              json_error('Action inconnue', 404);
@@ -134,6 +135,24 @@ function me(): never
     $u = $stmt->fetch();
     if (!$u) json_error('Utilisateur introuvable', 401);
     json_out(['user' => public_user($u)]);
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Liste des comptes admin (réservé aux utilisateurs connectés)
+function list_users(): never
+{
+    require_auth();
+    $rows = db()->query(
+        'SELECT id, name, email, phone, created_at, last_login_at FROM users ORDER BY created_at ASC'
+    )->fetchAll();
+    json_out(array_map(static fn(array $u) => [
+        'id'          => (int) $u['id'],
+        'name'        => $u['name'],
+        'email'       => $u['email'],
+        'phone'       => $u['phone'],
+        'createdAt'   => $u['created_at'],
+        'lastLoginAt' => $u['last_login_at'],
+    ], $rows));
 }
 
 // ───────────────────────────────────────────────────────────────────────────

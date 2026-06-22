@@ -51,6 +51,16 @@ export async function signup(data: {
   return json.user;
 }
 
+export interface UserAccount {
+  id: number; name: string; email: string; phone: string;
+  createdAt: string; lastLoginAt: string | null;
+}
+
+/** Liste tous les comptes admin (connecté). */
+export async function listUsers(): Promise<UserAccount[]> {
+  return parse(await fetch(`${BASE}/auth.php?action=list`, { headers: { ...authHeaders() } }));
+}
+
 /** Crée une invitation (admin connecté). Renvoie le code à partager. */
 export async function inviteUser(email: string): Promise<string> {
   const json = await parse(await fetch(`${BASE}/auth.php?action=invite`, {

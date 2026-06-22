@@ -1,8 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { WhatsApp, Euro, Settings, ChevronRight, Edit } from "@/components/icons/Icons";
-import { inviteUser } from "@/lib/auth";
+import { inviteUser, listUsers, type UserAccount } from "@/lib/auth";
+
+function UsersList() {
+  const [users, setUsers] = useState<UserAccount[]>([]);
+  const [error, setError] = useState("");
+  useEffect(() => { listUsers().then(setUsers).catch(() => setError("Impossible de charger les comptes.")); }, []);
+
+  const fmtDate = (s: string | null) =>
+    s ? new Date(s.replace(" ", "T") + "Z").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+
+  if (error) return <div style={{ color: "#B85850", fontSize: 13 }}>{error}</div>;
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table className="ec-set__pricing" style={{ minWidth: 460 }}>
+        <thead><tr><th>Nom</th><th>E-mail</th><th>Téléphone</th><th>Dernière connexion</th></tr></thead>
+        <tbody>
+          {users.map(u => (
+            <tr key={u.id}>
+              <td>{u.name || "—"}</td>
+              <td className="ec-mono">{u.email}</td>
+              <td className="ec-mono">{u.phone || "—"}</td>
+              <td>{fmtDate(u.lastLoginAt)}</td>
+            </tr>
+          ))}
+          {users.length === 0 && !error && (
+            <tr><td colSpan={4} style={{ color: "#9a938c" }}>Chargement…</td></tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 function InviteUsers({ accent }: { accent: string }) {
   const [email, setEmail] = useState("");
@@ -192,6 +223,10 @@ export default function PageSettings({ accent }: { accent: string }) {
             <SettingsCard title="Organisation" eyebrow="Espace Kit Rénovation Escalier">
               <SettingRow label="Raison sociale"><span>Kit Rénovation Escalier</span></SettingRow>
               <SettingRow label="Renouvellement"><span className="ec-mono">15 juin 2026</span></SettingRow>
+            </SettingsCard>
+
+            <SettingsCard title="Comptes existants" eyebrow="Accès au dashboard">
+              <UsersList />
             </SettingsCard>
 
             <SettingsCard title="Inviter un utilisateur" eyebrow="Accès sur invitation">
