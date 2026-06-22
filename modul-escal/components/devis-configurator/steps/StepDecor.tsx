@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { Check } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
+import { asset } from "@/lib/asset";
 import { DECOR_CATALOG } from "@/lib/decor-catalog";
 import type { Decor, QuoteFormDraft } from "@/lib/quote-schema";
 
@@ -44,12 +44,12 @@ export function StepDecor() {
             >
               <div className="relative aspect-square w-full overflow-hidden bg-[#f3f0ec]">
                 {item.imageSrc ? (
-                  <Image
-                    src={item.imageSrc}
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={asset(item.imageSrc)}
                     alt=""
-                    fill
-                    className="object-cover scale-100 sm:scale-[1.25]"
-                    sizes="(max-width: 640px) 50vw, 180px"
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover scale-100 sm:scale-[1.25]"
                   />
                 ) : (
                   <span
