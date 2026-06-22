@@ -95,17 +95,22 @@ export default function AppShell() {
           setLeads(data.map(l => l.id === selectedId ? { ...l, unread: 0 } : l));
         })
         .catch(() => {});
-    }, 8000);
+    }, 5000);
     return () => clearInterval(t);
   }, [selectedId, user]);
 
-  // ── Verrou anti-collision : prend la conversation ouverte + heartbeat (25s)
+  // ── Verrou anti-collision : prend la conversation ouverte + heartbeat (12s)
+  //    Libération immédiate quand on quitte la conversation.
   useEffect(() => {
     if (!user || !selectedId) return;
-    const claim = () => api.claimLead(selectedId).catch(() => {});
+    const lead = selectedId;
+    const claim = () => api.claimLead(lead).catch(() => {});
     claim();
-    const t = setInterval(claim, 25000);
-    return () => clearInterval(t);
+    const t = setInterval(claim, 12000);
+    return () => {
+      clearInterval(t);
+      api.releaseLead(lead);   // libère le verrou en partant
+    };
   }, [selectedId, user]);
 
   // ── Polling : rafraîchit la conversation ouverte (messages entrants WhatsApp)

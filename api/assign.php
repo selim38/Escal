@@ -21,7 +21,15 @@ if (method() !== 'POST') json_error('Méthode non autorisée', 405);
 
 $pdo = db();
 
-$STALE = 60; // secondes avant qu'un verrou soit considéré périmé
+// ─── Libération explicite (quand on quitte la conversation) ─────────────────
+if (isset($_GET['release'])) {
+    // On ne libère que si le verrou est à nous (évite de voler celui d'un autre)
+    $pdo->prepare('UPDATE leads SET assigned_to = NULL, assigned_at = NULL WHERE id = ? AND assigned_to = ?')
+        ->execute([$dbId, $uid]);
+    json_out(['ok' => true, 'released' => true]);
+}
+
+$STALE = 30; // secondes avant qu'un verrou soit considéré périmé
 
 $stmt = $pdo->prepare(
     'SELECT assigned_to, assigned_at,

@@ -88,7 +88,7 @@ export default function PageWhatsApp({
   // Verrou anti-collision : un autre commercial répond-il à ce client ?
   const lockedByOther =
     !!lead && lead.assignedTo != null && lead.assignedTo !== meId &&
-    lead.assignedAtTs != null && Date.now() - lead.assignedAtTs < 60000;
+    lead.assignedAtTs != null && Date.now() - lead.assignedAtTs < 30000;
 
   const handleSend = () => {
     if (lockedByOther &&

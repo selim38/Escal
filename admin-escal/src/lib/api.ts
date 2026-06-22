@@ -78,6 +78,13 @@ export const api = {
       headers: { ...authHeaders() },
     }).then(r => asJson(r)),
 
+  // Libère le verrou d'une conversation (au départ)
+  releaseLead: (leadId: string) =>
+    fetch(`${BASE}/assign.php?id=${encodeURIComponent(leadId)}&release=1`, {
+      method: "POST",
+      headers: { ...authHeaders() },
+    }).catch(() => {}),
+
   // Mise à jour d'un lead (statut / notes / unread / snippet)
   // POST + override : certains hébergements mutualisés bloquent PATCH.
   patchLead: (
