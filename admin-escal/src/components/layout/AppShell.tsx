@@ -28,7 +28,7 @@ type Density = "compact" | "regular" | "comfy";
 const ACCENT = "#E8743C";
 
 export default function AppShell() {
-  const [active, setActive]         = useState<Page>("leads");
+  const [active, setActive]         = useState<Page>("dashboard");
   const [collapsed, setCollapsed]   = useState(false);
   const [selectedId, setSelectedId] = useState<string>("");
   const [query, setQuery]           = useState("");
