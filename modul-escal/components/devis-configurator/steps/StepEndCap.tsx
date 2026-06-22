@@ -50,7 +50,7 @@ export function StepEndCap() {
 
       <input type="hidden" {...register("stepEndCap")} />
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {STEP_END_CAP_OPTIONS.map((option) => {
           const selected = stepEndCap === option.id;
           return (
@@ -86,16 +86,16 @@ export function StepEndCap() {
             firstStepSide={openStepEndSide}
             lateralSide={lateralEndSide}
           />
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium text-brand">
                 1ʳᵉ marche — côté
               </legend>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 {END_SIDE_OPTIONS.map((side) => (
                   <label
                     key={side.id}
-                    className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border-2 px-3 py-2 text-sm font-medium transition ${
+                    className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border-2 px-2 py-2 text-sm font-medium transition sm:px-3 ${
                       openStepEndSide === side.id
                         ? "border-primary bg-primary text-white"
                         : "border-border bg-surface text-muted"
@@ -122,11 +122,11 @@ export function StepEndCap() {
               <legend className="text-sm font-medium text-brand">
                 Embout latéral — côté
               </legend>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 {END_SIDE_OPTIONS.map((side) => (
                   <label
                     key={side.id}
-                    className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border-2 px-3 py-2 text-sm font-medium transition ${
+                    className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border-2 px-2 py-2 text-sm font-medium transition sm:px-3 ${
                       lateralEndSide === side.id
                         ? "border-primary bg-primary text-white"
                         : "border-border bg-surface text-muted"

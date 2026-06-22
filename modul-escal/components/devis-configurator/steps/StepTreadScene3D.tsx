@@ -160,7 +160,7 @@ function TreadQuad({
 function LegendBadge({ label, active }: { label: string; active: boolean }) {
   return (
     <span
-      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold leading-tight shadow-sm ${
+      className={`rounded-full px-2 py-0.5 text-xs sm:text-[10px] font-semibold leading-tight shadow-sm ${
         active
           ? "bg-primary text-white"
           : "border border-border bg-surface/95 text-muted"
@@ -192,7 +192,7 @@ function DimensionLegend({
           active={activeField === "depthBand"}
         />
       </div>
-      <span className="rounded-full bg-surface/90 px-2 py-0.5 text-[10px] text-muted shadow-sm">
+      <span className="rounded-full bg-surface/90 px-2 py-0.5 text-xs sm:text-[10px] text-muted shadow-sm">
         {sizeHint}
       </span>
     </div>
@@ -456,7 +456,7 @@ export default function StepTreadScene3D({
 
   return (
     <div className="flex w-full flex-col overflow-hidden rounded-xl bg-gradient-to-b from-[#ebe4dc] to-[#f5f0eb]">
-      <div className="relative h-[260px] w-full min-h-[220px]">
+      <div className="relative h-[200px] sm:h-[260px] w-full overflow-x-clip">
         <Canvas
           className={`!h-full !w-full ${isFiveSided ? "opacity-20" : ""}`}
           shadows={!isFiveSided}
@@ -479,7 +479,7 @@ export default function StepTreadScene3D({
           />
         )}
       </div>
-      <p className="border-t border-[#d4c5b5]/60 px-3 py-2 text-center text-[11px] text-[#5c4a3a]">
+      <p className="border-t border-[#d4c5b5]/60 px-2 py-2 text-center text-[10px] text-[#5c4a3a] sm:px-3 sm:text-[11px]">
         {FOOTER_BY_LAYOUT[layout]}
       </p>
     </div>

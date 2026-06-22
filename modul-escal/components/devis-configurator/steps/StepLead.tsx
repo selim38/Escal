@@ -59,7 +59,7 @@ export function StepLead() {
   ]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div className="flex items-start gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <Sparkles className="size-5" aria-hidden />
@@ -77,7 +77,7 @@ export function StepLead() {
 
       <div className="rounded-2xl border border-primary/35 bg-gradient-to-br from-primary/12 to-surface p-6 shadow-sm">
         {estimate ? (
-          <p className="text-center text-xl font-bold tracking-tight text-brand sm:text-2xl">
+          <p className="text-center text-lg font-bold tracking-tight text-brand sm:text-xl md:text-2xl">
             Prix estimé des matériaux :{" "}
             <span className="text-primary">{estimate.materialsSubtotal} €</span>
           </p>
@@ -94,7 +94,7 @@ export function StepLead() {
           <h3 className="text-base font-semibold">Vos coordonnées</h3>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label htmlFor="lastName" className="text-sm font-medium text-brand">
               Nom
@@ -222,7 +222,7 @@ export function StepLead() {
         </p>
 
         {photos.length > 0 && (
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
             {photos.map((p, i) => (
               <div key={i} className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted-bg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -234,7 +234,7 @@ export function StepLead() {
                 <button
                   type="button"
                   onClick={() => removePhoto(i)}
-                  className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition group-hover:opacity-100"
+                  className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/50 text-white opacity-100 sm:opacity-0 sm:transition sm:group-hover:opacity-100"
                   aria-label={`Supprimer photo ${i + 1}`}
                 >
                   <Trash2 className="size-3.5" />
@@ -258,7 +258,7 @@ export function StepLead() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface px-4 py-4 text-sm text-muted transition hover:border-primary/40 hover:text-brand"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface px-4 py-4 text-xs sm:text-sm text-muted transition hover:border-primary/40 hover:text-brand"
             >
               <Camera className="size-4" aria-hidden />
               {photos.length === 0 ? "Ajouter des photos" : "Ajouter d'autres photos"}

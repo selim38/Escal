@@ -70,13 +70,14 @@ export function FiveSidedPlanDiagram({
   const coteDX = Math.min(fl.x, inner.x) - 18;
 
   return (
-    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#f5f0eb]/92 px-2">
+    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#f5f0eb]/92 px-2 sm:px-4">
       <p className="mb-1 text-center text-[10px] font-medium text-[#5c4a3a]">
         Vue du dessus — contour de la marche
       </p>
       <svg
         viewBox={`0 0 ${VB_W} ${VB_H}`}
-        className="h-auto w-full max-w-[300px]"
+        preserveAspectRatio="xMidYMid meet"
+        className="h-auto w-full max-w-[240px] sm:max-w-[300px]"
         aria-label="Schéma pentagonal de la marche 5 côtés"
       >
         {/* Forme */}
@@ -128,7 +129,7 @@ export function FiveSidedPlanDiagram({
 
         {/* Label nez */}
         <text x={(fl.x + fr.x) / 2} y={fl.y + 14}
-          textAnchor="middle" fontSize={9} fill="#8a7358">
+          textAnchor="middle" fontSize={10} fill="#8a7358">
           Nez (avant)
         </text>
       </svg>

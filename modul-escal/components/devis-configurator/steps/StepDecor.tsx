@@ -22,7 +22,7 @@ export function StepDecor() {
         Choisir le décor
       </h2>
 
-      <div className="flex flex-wrap justify-center gap-4 sm:gap-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 md:grid-cols-6">
         {DECOR_CATALOG.map((item) => {
           const selected = value === item.id;
           return (
@@ -36,7 +36,7 @@ export function StepDecor() {
                   select(item.id);
                 }
               }}
-              className={`group relative w-[calc(50%-0.5rem)] max-w-[11.5rem] shrink-0 overflow-hidden rounded-lg bg-white text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-[min(11.5rem,calc(16.666%-1.1rem))] ${
+              className={`group relative min-w-0 overflow-hidden rounded-lg bg-white text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                 selected
                   ? "ring-2 ring-primary ring-offset-2 ring-offset-[var(--color-surface)]"
                   : "ring-1 ring-[#e8e4e0] hover:ring-[#c9bfb4] hover:shadow-md"
@@ -48,7 +48,7 @@ export function StepDecor() {
                     src={item.imageSrc}
                     alt=""
                     fill
-                    className="object-cover scale-[1.25]"
+                    className="object-cover scale-100 sm:scale-[1.25]"
                     sizes="(max-width: 640px) 50vw, 180px"
                   />
                 ) : (
@@ -65,7 +65,7 @@ export function StepDecor() {
                 ) : null}
               </div>
               <div className="flex h-10 items-center justify-center border-t border-[#ece8e4] px-2 text-center">
-                <span className="text-xs font-medium leading-tight text-[#6b6560]">
+                <span className="line-clamp-2 text-xs font-medium leading-tight text-[#6b6560]">
                   {item.label}
                 </span>
               </div>

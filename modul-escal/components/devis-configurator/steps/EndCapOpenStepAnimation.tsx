@@ -18,7 +18,8 @@ export function EndCapOpenStepAnimation({
   return (
     <svg
       viewBox="0 0 280 160"
-      className="mx-auto h-auto w-full max-w-[280px]"
+      preserveAspectRatio="xMidYMid meet"
+      className="mx-auto h-auto w-full max-w-[240px] sm:max-w-[280px]"
       aria-hidden
     >
       <rect x="40" y="100" width="200" height="12" fill="#d4c5b5" rx="1" />
@@ -37,14 +38,14 @@ export function EndCapOpenStepAnimation({
         <rect x="60" y="40" width="12" height="50" fill="#ff6d1b" opacity="0.85" rx="2" className="animate-pulse" />
       )}
 
-      <text x="140" y="55" textAnchor="middle" className="fill-[#5c4a3a] text-[9px] font-medium">
+      <text x="140" y="55" textAnchor="middle" className="fill-[#5c4a3a] text-[10px] font-medium">
         1ʳᵉ marche
       </text>
       <text
         x={capRight ? 225 : 55}
         y={capRight ? 58 : 58}
         textAnchor="middle"
-        className="fill-[#ff6d1b] text-[8px] font-semibold"
+        className="fill-[#ff6d1b] text-[10px] font-semibold"
       >
         {capRight ? "Droite" : "Gauche"}
       </text>
@@ -52,7 +53,7 @@ export function EndCapOpenStepAnimation({
         x={lateralRight ? 214 : 66}
         y={32}
         textAnchor="middle"
-        className="fill-[#ff6d1b] text-[8px] font-semibold"
+        className="fill-[#ff6d1b] text-[10px] font-semibold"
       >
         Latéral
       </text>

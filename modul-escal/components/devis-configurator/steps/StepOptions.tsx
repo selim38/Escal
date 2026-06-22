@@ -35,7 +35,7 @@ export function StepOptions() {
         <p className="text-sm font-medium text-brand">
           Côté(s) ouvert(s) — sélectionnez les marches concernées
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 overflow-x-auto">
           {Array.from({ length: stepCount }, (_, i) => {
             const isOpen = configs[i]?.openSide ?? false;
             return (

@@ -52,13 +52,13 @@ export function StepInclus() {
           <h3 className="text-sm font-bold text-brand">Matériels fournis</h3>
           <IncludedBadge />
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 md:grid-cols-5">
           {MATERIELS.map((item) => (
             <div
               key={item.label}
               className="flex flex-col items-center gap-2 rounded-xl border border-border bg-white p-3 text-center"
             >
-              <div className="flex size-12 items-center justify-center rounded-xl bg-[#f5f0eb] text-2xl">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-[#f5f0eb] text-xl sm:size-12 sm:text-2xl">
                 {item.emoji}
               </div>
               <span className="text-xs font-medium text-brand">{item.label}</span>
@@ -73,13 +73,13 @@ export function StepInclus() {
           <h3 className="text-sm font-bold text-brand">Accessoires &amp; Colles</h3>
           <IncludedBadge />
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 md:grid-cols-4">
           {ACCESSOIRES.map((item) => (
             <div
               key={item.label}
               className="flex flex-col items-center gap-2 rounded-xl border border-border bg-white p-3 text-center"
             >
-              <div className="flex size-12 items-center justify-center rounded-xl bg-[#f5f0eb] text-2xl">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-[#f5f0eb] text-xl sm:size-12 sm:text-2xl">
                 {item.emoji}
               </div>
               <span className="text-xs font-medium text-brand">{item.label}</span>
@@ -94,7 +94,7 @@ export function StepInclus() {
           <h3 className="text-sm font-bold text-brand">Notice de montage &amp; Tutoriels</h3>
           <IncludedBadge />
         </div>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {TUTORIELS.map((item) => (
             <div
               key={item.label}

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "modul-escal",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "modul-escal", "run", "dev"],
+      "port": 3030
+    }
+  ]
+}

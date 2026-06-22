@@ -58,7 +58,7 @@ export function StepLanding() {
 
       {/* ── Photo palier ─────────────────────────────────────────── */}
       <div className="overflow-hidden rounded-xl border border-border">
-        <div className="flex h-40 items-center justify-center bg-gradient-to-br from-[#f5f0eb] to-[#e8e0d6] sm:h-52">
+        <div className="flex h-32 items-center justify-center bg-gradient-to-br from-[#f5f0eb] to-[#e8e0d6] sm:h-40 md:h-52">
           <div className="text-center text-muted">
             <div className="mb-2 text-4xl">🪵</div>
             <p className="text-xs">Photo d'un palier</p>
@@ -67,7 +67,7 @@ export function StepLanding() {
       </div>
 
       {/* ── Choix ────────────────────────────────────────────────── */}
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {landingChoices.map((choice) => {
           const isActive = landingFinish === choice.value;
           return (

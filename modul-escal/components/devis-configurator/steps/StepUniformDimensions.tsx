@@ -56,7 +56,7 @@ export function StepUniformDimensions() {
         largeur)&nbsp;?
       </p>
 
-      <div className="mx-auto grid max-w-2xl gap-3 sm:grid-cols-2">
+      <div className="mx-auto grid w-full max-w-2xl grid-cols-1 gap-2 sm:gap-3 sm:grid-cols-2">
         {CHOICES.map((choice) => {
           const selected = uniform === choice.value;
           return (
@@ -70,7 +70,7 @@ export function StepUniformDimensions() {
                   select(choice.value);
                 }
               }}
-              className={`relative rounded-xl border-2 p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+              className={`relative rounded-xl border-2 p-3 sm:p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                 selected
                   ? "border-primary bg-primary/5 ring-2 ring-primary/25"
                   : "border-border bg-surface hover:border-brand-medium/35"

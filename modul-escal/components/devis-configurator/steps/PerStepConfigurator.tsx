@@ -67,7 +67,7 @@ export function PerStepConfigurator() {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-2">
+      <div className="flex flex-nowrap items-center justify-center gap-3 overflow-x-auto sm:flex-wrap sm:gap-2">
         {Array.from({ length: stepCount }, (_, i) => {
           const cfg = stepConfigs[i];
           const complete =
@@ -81,7 +81,7 @@ export function PerStepConfigurator() {
                 setActiveIndex(i);
                 setFocusedField(null);
               }}
-              className={`flex size-9 items-center justify-center rounded-full text-sm font-semibold transition ${
+              className={`flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition sm:size-9 ${
                 isActive
                   ? "bg-primary text-white shadow-sm"
                   : complete
@@ -101,12 +101,12 @@ export function PerStepConfigurator() {
         })}
       </div>
 
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="button"
           disabled={activeIndex === 0}
           onClick={() => setActiveIndex((i) => i - 1)}
-          className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-sm text-brand disabled:opacity-40"
+          className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-border px-3 py-2.5 text-sm text-brand disabled:opacity-40 sm:flex-none sm:py-1.5"
         >
           <ChevronLeft className="size-4" aria-hidden />
           Précédente
@@ -118,17 +118,17 @@ export function PerStepConfigurator() {
           type="button"
           disabled={activeIndex >= stepCount - 1}
           onClick={() => setActiveIndex((i) => i + 1)}
-          className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-sm text-brand disabled:opacity-40"
+          className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-border px-3 py-2.5 text-sm text-brand disabled:opacity-40 sm:flex-none sm:py-1.5"
         >
           Suivante
           <ChevronRight className="size-4" aria-hidden />
         </button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="space-y-4">
           <p className="text-sm font-medium text-brand">Type de marche</p>
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {STAIR_LAYOUT_OPTIONS.map((option) => {
               const selected = layout === option.id;
               return (
@@ -136,7 +136,7 @@ export function PerStepConfigurator() {
                   key={option.id}
                   type="button"
                   onClick={() => selectLayout(option.id)}
-                  className={`rounded-lg border-2 px-3 py-2.5 text-left text-sm transition ${
+                  className={`w-full rounded-lg border-2 px-2.5 py-2 text-left text-sm transition sm:px-3 sm:py-2.5 ${
                     selected
                       ? "border-primary bg-primary/5 font-semibold text-brand"
                       : "border-border bg-surface text-muted hover:border-brand-medium/35"
@@ -148,7 +148,7 @@ export function PerStepConfigurator() {
             })}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <div className="space-y-1.5">
               <label
                 htmlFor={`step-${activeIndex}-width`}

@@ -39,13 +39,13 @@ function DepthBlockedModal({ onClose }: { onClose: () => void }) {
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
           <a
             href="mailto:contact@escal-concept.fr"
-            className="inline-flex items-center justify-center rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-amber-600"
+            className="inline-flex w-full sm:w-auto items-center justify-center rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-amber-600"
           >
             Contacter le support
           </a>
           <button
             onClick={onClose}
-            className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50"
+            className="w-full sm:w-auto rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50"
           >
             Corriger la valeur
           </button>
@@ -138,7 +138,7 @@ export function DimensionsBandsFields() {
             Profondeur exacte{" "}
             <span className="font-normal text-gray-400">(optionnel, mm)</span>
           </label>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               id="exactDepth"
               type="number"
@@ -148,7 +148,7 @@ export function DimensionsBandsFields() {
               value={exactDepth}
               onChange={e => setExactDepth(e.target.value)}
               onBlur={handleDepthBlur}
-              className="w-40 rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+              className="w-24 sm:w-40 rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
             />
             <span className="text-sm text-gray-400">mm</span>
           </div>

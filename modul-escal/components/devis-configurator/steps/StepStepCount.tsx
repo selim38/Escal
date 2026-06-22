@@ -17,7 +17,7 @@ export function StepStepCount() {
         Indiquez le nombre de marches à recouvrir (entre 1 et 30).
       </p>
 
-      <div className="mx-auto max-w-xs">
+      <div className="mx-auto w-full max-w-xs">
         <label htmlFor="stepCount" className="sr-only">
           Nombre de marches
         </label>

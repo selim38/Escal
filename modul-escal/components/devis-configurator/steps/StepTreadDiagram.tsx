@@ -28,7 +28,7 @@ export function StepTreadDiagram({
   depthBand,
 }: StepTreadDiagramProps) {
   return (
-    <div className="rounded-xl border border-border bg-muted-bg/30 p-1">
+    <div className="rounded-xl border border-border bg-muted-bg/30 p-1 sm:p-2">
       <StepTreadScene3D
         layout={layout}
         activeField={activeField}

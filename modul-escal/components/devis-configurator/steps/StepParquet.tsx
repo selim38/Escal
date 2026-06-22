@@ -98,14 +98,14 @@ export function StepParquet() {
               +20 % recommandé
             </button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               id="landingAreaM2"
               type="number"
               min="0.1"
               step="0.1"
               placeholder="ex. 2.4"
-              className="w-36 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+              className="w-28 sm:w-36 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
               {...register("landingAreaM2", { valueAsNumber: true })}
             />
             <span className="text-sm text-muted">m²</span>
@@ -127,7 +127,7 @@ export function StepParquet() {
             Teinte assortie au décor sélectionné.
           </p>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
             {([true, false] as const).map((val) => {
               const isActive = wantPlinthes === val;
               return (
@@ -135,7 +135,7 @@ export function StepParquet() {
                   key={String(val)}
                   type="button"
                   onClick={() => setValue("wantPlinthes", val, { shouldDirty: true })}
-                  className={`rounded-xl border-2 px-5 py-2.5 text-sm font-semibold transition ${
+                  className={`w-full sm:w-auto rounded-xl border-2 px-5 py-2.5 text-sm font-semibold transition ${
                     isActive
                       ? "border-primary bg-primary/5 text-primary"
                       : "border-border text-muted hover:border-primary/30"
@@ -157,14 +157,14 @@ export function StepParquet() {
                   +20 % recommandé
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <input
                   id="plinthesML"
                   type="number"
                   min="0.1"
                   step="0.1"
                   placeholder="ex. 6.0"
-                  className="w-36 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+                  className="w-28 sm:w-36 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
                   {...register("plinthesML", { valueAsNumber: true })}
                 />
                 <span className="text-sm text-muted">ml</span>

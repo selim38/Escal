@@ -51,7 +51,7 @@ export function StepRiser() {
       </p>
 
       {/* Choix avec / sans */}
-      <div className="mx-auto grid max-w-sm gap-3 sm:grid-cols-2">
+      <div className="mx-auto grid w-full max-w-full grid-cols-1 gap-3 sm:max-w-sm sm:grid-cols-2">
         <button
           type="button"
           onClick={selectWithout}
@@ -101,7 +101,7 @@ export function StepRiser() {
           <p className="text-center text-sm font-medium text-[#1e2a4a]">
             Choisissez la finition des contremarches
           </p>
-          <div className="mx-auto grid max-w-2xl gap-3 sm:grid-cols-3">
+          <div className="mx-auto grid max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
             {WITH_RISER_OPTIONS.map((option) => {
               const selected = value === option.id;
               return (
@@ -115,7 +115,7 @@ export function StepRiser() {
                       selectOption(option.id);
                     }
                   }}
-                  className={`relative rounded-xl border-2 p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                  className={`relative rounded-xl border-2 p-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:p-4 ${
                     selected
                       ? "border-primary bg-primary/5 ring-2 ring-primary/25"
                       : "border-border bg-surface hover:border-brand-medium/35"

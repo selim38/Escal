@@ -18,7 +18,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-10 sm:px-6">
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-x-clip px-4 py-10 sm:px-6">
         <DevisConfigurator />
       </main>
 
