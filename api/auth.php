@@ -18,8 +18,9 @@ switch ($action) {
     case 'me':            me();            break;
     case 'invite':        invite();        break;   // protégé : créer une invitation
     case 'list':          list_users();    break;   // protégé : liste des comptes
-    case 'request-reset': request_reset(); break;   // public : envoie un code WhatsApp
-    case 'reset':         reset_password(); break;   // public : valide le code + nouveau mdp
+    case 'request-reset': request_reset();    break; // public : envoie un code
+    case 'verify-code':   verify_reset_code(); break; // public : valide le code → ticket
+    case 'reset':         reset_password();   break; // public : ticket + nouveau mdp
     default:              json_error('Action inconnue', 404);
 }
 
@@ -208,19 +209,37 @@ function request_reset(): never
     json_out($okResponse);
 }
 
+// ─── Ticket de réinitialisation (signé, 10 min) ─────────────────────────────
+// Émis après vérification du code, autorise le changement de mot de passe
+// sans re-vérifier le code (Twilio Verify le consomme à la 1re vérification).
+function reset_ticket_make(int $uid): string
+{
+    $payload = base64_encode(json_encode(['uid' => $uid, 'p' => 'pwreset', 'exp' => time() + 600]));
+    return $payload . '.' . hash_hmac('sha256', $payload, auth_secret());
+}
+function reset_ticket_uid(string $ticket): ?int
+{
+    $parts = explode('.', $ticket);
+    if (count($parts) !== 2) return null;
+    [$payload, $sig] = $parts;
+    if (!hash_equals(hash_hmac('sha256', $payload, auth_secret()), $sig)) return null;
+    $d = json_decode((string) base64_decode($payload), true);
+    if (!is_array($d) || ($d['p'] ?? '') !== 'pwreset' || ($d['exp'] ?? 0) < time()) return null;
+    return (int) $d['uid'];
+}
+
 // ───────────────────────────────────────────────────────────────────────────
-// Réinitialise le mot de passe avec le code reçu
-function reset_password(): never
+// Étape 2 : vérifie le code à 6 chiffres → renvoie un ticket de réinitialisation
+function verify_reset_code(): never
 {
     if (method() !== 'POST') json_error('Méthode non autorisée', 405);
     $b = read_json_body();
-
     $email = strtolower(trim((string) ($b['email'] ?? '')));
-    $code  = trim((string) ($b['code'] ?? ''));
-    $pwd   = (string) ($b['password'] ?? '');
+    $code  = preg_replace('/\D/', '', (string) ($b['code'] ?? '')) ?? '';
 
-    if ($email === '' || $code === '') json_error('Code et e-mail requis.', 400);
-    if ($err = password_problem($pwd))  json_error($err, 400);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($code) < 4) {
+        json_error('Code invalide ou expiré.', 400);
+    }
 
     $pdo = db();
     $stmt = $pdo->prepare('SELECT id, phone FROM users WHERE email = ?');
@@ -228,12 +247,51 @@ function reset_password(): never
     $u = $stmt->fetch();
     if (!$u || empty($u['phone'])) json_error('Code invalide ou expiré.', 400);
 
-    // Vérification du code via Twilio Verify
     require_once __DIR__ . '/twilio.php';
     if (!twilio_verify_check((string) $u['phone'], $code)) {
         json_error('Code invalide ou expiré.', 400);
     }
 
+    json_out(['ok' => true, 'ticket' => reset_ticket_make((int) $u['id'])]);
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Étape 3 : nouveau mot de passe via le ticket (ou repli code direct)
+function reset_password(): never
+{
+    if (method() !== 'POST') json_error('Méthode non autorisée', 405);
+    $b = read_json_body();
+
+    $email  = strtolower(trim((string) ($b['email'] ?? '')));
+    $ticket = trim((string) ($b['ticket'] ?? ''));
+    $code   = trim((string) ($b['code'] ?? ''));
+    $pwd    = (string) ($b['password'] ?? '');
+
+    if ($err = password_problem($pwd)) json_error($err, 400);
+
+    // Voie principale : ticket signé issu de verify-code
+    if ($ticket !== '') {
+        $uid = reset_ticket_uid($ticket);
+        if ($uid === null) {
+            json_error('Session de réinitialisation expirée. Recommencez.', 400);
+        }
+        db()->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
+            ->execute([password_hash($pwd, PASSWORD_DEFAULT), $uid]);
+        json_out(['ok' => true]);
+    }
+
+    // Repli : code direct (compat)
+    if ($email === '' || $code === '') json_error('Code et e-mail requis.', 400);
+    $pdo = db();
+    $stmt = $pdo->prepare('SELECT id, phone FROM users WHERE email = ?');
+    $stmt->execute([$email]);
+    $u = $stmt->fetch();
+    if (!$u || empty($u['phone'])) json_error('Code invalide ou expiré.', 400);
+
+    require_once __DIR__ . '/twilio.php';
+    if (!twilio_verify_check((string) $u['phone'], $code)) {
+        json_error('Code invalide ou expiré.', 400);
+    }
     $pdo->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
         ->execute([password_hash($pwd, PASSWORD_DEFAULT), $u['id']]);
 

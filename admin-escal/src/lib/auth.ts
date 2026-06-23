@@ -80,12 +80,22 @@ export async function requestReset(email: string): Promise<void> {
   }));
 }
 
-/** Réinitialise le mot de passe avec le code reçu. */
-export async function resetPassword(email: string, code: string, password: string): Promise<void> {
+/** Vérifie le code à 6 chiffres → renvoie un ticket de réinitialisation (10 min). */
+export async function verifyResetCode(email: string, code: string): Promise<string> {
+  const json = await parse(await fetch(`${BASE}/auth.php?action=verify-code`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, code }),
+  }));
+  return json.ticket as string;
+}
+
+/** Définit le nouveau mot de passe via le ticket. */
+export async function resetPassword(email: string, ticket: string, password: string): Promise<void> {
   await parse(await fetch(`${BASE}/auth.php?action=reset`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, code, password }),
+    body: JSON.stringify({ email, ticket, password }),
   }));
 }
 

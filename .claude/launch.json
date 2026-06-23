@@ -6,6 +6,13 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "modul-escal", "run", "dev"],
       "port": 3030
+    },
+    {
+      "name": "admin-escal",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "admin-escal", "run", "dev"],
+      "port": 3031,
+      "autoPort": true
     }
   ]
 }
