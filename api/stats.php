@@ -31,4 +31,36 @@ try {
     json_error('DB error', 500, $e);
 }
 
-json_out(['total' => array_sum($hourly), 'hourly' => $hourly]);
+// ─── CA estimé (hors leads perdus) + évolution vs semaine précédente ────────
+$totalCA = 0.0;
+$caDeltaPct = null;
+try {
+    $r = db()->query(
+        "SELECT
+            COALESCE(SUM(estimated_materials_eur), 0) AS total,
+            COALESCE(SUM(CASE WHEN created_at >= (NOW() - INTERVAL 7 DAY)
+                              THEN estimated_materials_eur END), 0) AS this_week,
+            COALESCE(SUM(CASE WHEN created_at >= (NOW() - INTERVAL 14 DAY)
+                              AND created_at < (NOW() - INTERVAL 7 DAY)
+                              THEN estimated_materials_eur END), 0) AS last_week
+         FROM leads
+         WHERE status <> 'lost'"
+    )->fetch();
+    $totalCA = (float) $r['total'];
+    $thisW   = (float) $r['this_week'];
+    $lastW   = (float) $r['last_week'];
+    if ($lastW > 0) {
+        $caDeltaPct = (int) round((($thisW - $lastW) / $lastW) * 100);
+    } elseif ($thisW > 0) {
+        $caDeltaPct = 100; // pas de base la semaine d'avant
+    }
+} catch (Throwable $e) {
+    // non bloquant
+}
+
+json_out([
+    'total'      => array_sum($hourly),
+    'hourly'     => $hourly,
+    'totalCA'    => (int) round($totalCA),
+    'caDeltaPct' => $caDeltaPct,   // null = pas d'historique comparable
+]);

@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import type { Lead } from "@/lib/types";
-import { KPIS, LEAD_STATUS } from "@/lib/data";
+import { LEAD_STATUS } from "@/lib/data";
 import { api } from "@/lib/api";
 import { fmtEUR, avatarBg } from "@/lib/utils";
 import {
-  Euro, Check2, ArrowUp, ChevronRight, WhatsApp,
+  Euro, Check2, ArrowUp, ArrowDown, ChevronRight, WhatsApp,
 } from "@/components/icons/Icons";
 
 interface KpiTileProps {
@@ -48,7 +48,6 @@ interface PageDashboardProps {
 }
 
 export default function PageDashboard({ accent, leads, onSelectLead, onJumpTo }: PageDashboardProps) {
-  const k = KPIS;
   const activeLeads = leads.filter(l => !["won", "lost"].includes(l.status)).length;
 
   const withPrice  = leads.filter(l => l.price > 0);
@@ -65,13 +64,19 @@ export default function PageDashboard({ accent, leads, onSelectLead, onJumpTo }:
     .sort((a, b) => b.price - a.price)
     .slice(0, 4);
 
-  // Messages échangés par heure sur 24h — données réelles
-  const [hourly, setHourly] = useState<number[]>(Array(24).fill(0));
+  // Stats réelles (messages/heure, CA estimé, évolution hebdo)
+  const [stats, setStats] = useState<{ hourly: number[]; totalCA: number; caDeltaPct: number | null }>({
+    hourly: Array(24).fill(0), totalCA: 0, caDeltaPct: null,
+  });
   useEffect(() => {
-    api.getStats().then(s => setHourly(s.hourly)).catch(() => {});
-    const t = setInterval(() => api.getStats().then(s => setHourly(s.hourly)).catch(() => {}), 60000);
+    const load = () => api.getStats()
+      .then(s => setStats({ hourly: s.hourly, totalCA: s.totalCA, caDeltaPct: s.caDeltaPct }))
+      .catch(() => {});
+    load();
+    const t = setInterval(load, 60000);
     return () => clearInterval(t);
   }, []);
+  const hourly = stats.hourly;
   const maxH = Math.max(1, ...hourly);
 
   return (
@@ -98,11 +103,14 @@ export default function PageDashboard({ accent, leads, onSelectLead, onJumpTo }:
         <div className="ec-hero__right">
           <div className="ec-hero__bigkpi">
             <div className="ec-card__eyebrow">Total CA estimé</div>
-            <div className="ec-hero__bignum" style={{ color: accent }}>{fmtEUR(k.totalCA)}</div>
+            <div className="ec-hero__bignum" style={{ color: accent }}>{fmtEUR(stats.totalCA)}</div>
             <div className="ec-hero__sub">
-              <span className="ec-kpi__trend is-up">
-                <ArrowUp size={11} /> 12 %
-              </span>
+              {stats.caDeltaPct !== null ? (
+                <span className={"ec-kpi__trend " + (stats.caDeltaPct >= 0 ? "is-up" : "is-down")}>
+                  {stats.caDeltaPct >= 0 ? <ArrowUp size={11} /> : <ArrowDown size={11} />}
+                  {" "}{Math.abs(stats.caDeltaPct)} %
+                </span>
+              ) : null}
               vs. semaine dernière
             </div>
           </div>
