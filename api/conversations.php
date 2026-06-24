@@ -23,6 +23,36 @@ switch (method()) {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
+/** Renvoie [heure "H:i", libellé de jour FR] pour un sent_at UTC, en Europe/Paris. */
+function fr_time_and_day(string $sentAtUtc): array
+{
+    static $tz = null, $today = null, $yesterday = null;
+    if ($tz === null) {
+        $tz = new DateTimeZone('Europe/Paris');
+        $now = new DateTime('now', $tz);
+        $today = $now->format('Y-m-d');
+        $yesterday = (clone $now)->modify('-1 day')->format('Y-m-d');
+    }
+    try {
+        $dt = new DateTime($sentAtUtc . ' UTC');
+        $dt->setTimezone($tz);
+    } catch (Throwable $e) {
+        return ['', ''];
+    }
+    $key  = $dt->format('Y-m-d');
+    $time = $dt->format('H:i');
+
+    if ($key === $today)          $label = "Aujourd'hui";
+    elseif ($key === $yesterday)  $label = 'Hier';
+    else {
+        $mois = ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+        $label = (int) $dt->format('j') . ' ' . $mois[(int) $dt->format('n')] . ' ' . $dt->format('Y');
+    }
+    return [$time, $label];
+}
+
+// ───────────────────────────────────────────────────────────────────────────
 function get_history(int $dbId): never
 {
     $stmt = db()->prepare(
@@ -35,14 +65,15 @@ function get_history(int $dbId): never
     $stmt->execute([$dbId]);
 
     $messages = array_map(static function (array $r): array {
-        $ts = strtotime((string) $r['sent_at'] . ' UTC');
+        [$time, $dayLabel] = fr_time_and_day((string) $r['sent_at']);
         return [
-            'author' => $r['author'],
-            'text'   => $r['message'],
-            'time'   => $ts ? date('H:i', $ts) : '',
-            'media'  => $r['media_json'] ? (json_decode((string) $r['media_json'], true) ?: []) : [],
-            'status' => $r['status'],          // null|queued|sent|delivered|read|failed
-            'agent'  => $r['agent_name'],      // nom du commercial (messages vendor)
+            'author'   => $r['author'],
+            'text'     => $r['message'],
+            'time'     => $time,
+            'dayLabel' => $dayLabel,           // "Aujourd'hui" / "Hier" / "24 juin 2026"
+            'media'    => $r['media_json'] ? (json_decode((string) $r['media_json'], true) ?: []) : [],
+            'status'   => $r['status'],         // null|queued|sent|delivered|read|failed
+            'agent'    => $r['agent_name'],     // nom du commercial (messages vendor)
         ];
     }, $stmt->fetchAll());
 

@@ -178,12 +178,14 @@ export default function PageWhatsApp({
             </header>
 
             <div className="ec-wa__thread" id="ec-wa-thread-full">
-              <div className="ec-wa__day">— Aujourd&apos;hui —</div>
               {conv.map((m, i) => (
-                <div
-                  key={i}
-                  className={"ec-bubble " + (m.author === "vendor" ? "ec-bubble--out" : "ec-bubble--in")}
-                >
+                <div key={i}>
+                  {m.dayLabel && m.dayLabel !== conv[i - 1]?.dayLabel && (
+                    <div className="ec-wa__day">— {m.dayLabel} —</div>
+                  )}
+                  <div
+                    className={"ec-bubble " + (m.author === "vendor" ? "ec-bubble--out" : "ec-bubble--in")}
+                  >
                   <div
                     className="ec-bubble__body"
                     style={m.author === "vendor" ? { background: accent, color: "#fff" } : undefined}
@@ -207,6 +209,7 @@ export default function PageWhatsApp({
                       {m.time}
                       {m.author === "vendor" && <DeliveryTicks status={m.status} />}
                     </div>
+                  </div>
                   </div>
                 </div>
               ))}

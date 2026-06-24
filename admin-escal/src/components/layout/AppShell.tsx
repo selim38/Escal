@@ -164,7 +164,7 @@ export default function AppShell() {
     // Optimistic update
     setConvs(prev => ({
       ...prev,
-      [selected.id]: [...(prev[selected.id] ?? []), { author: "vendor", text, time }],
+      [selected.id]: [...(prev[selected.id] ?? []), { author: "vendor", text, time, dayLabel: "Aujourd'hui" }],
     }));
     setLeads(ls => ls.map(l => l.id === selected.id
       ? { ...l, snippet: text, lastTime: "à l'instant", unread: 0 }
