@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import type { Lead, Message, Conversations } from "@/lib/types";
 import { LEAD_STATUS } from "@/lib/data";
 import { fmtEUR, avatarBg } from "@/lib/utils";
@@ -179,9 +179,9 @@ export default function PageWhatsApp({
 
             <div className="ec-wa__thread" id="ec-wa-thread-full">
               {conv.map((m, i) => (
-                <div key={i}>
+                <Fragment key={i}>
                   {m.dayLabel && m.dayLabel !== conv[i - 1]?.dayLabel && (
-                    <div className="ec-wa__day">— {m.dayLabel} —</div>
+                    <div className="ec-wa__day">{m.dayLabel}</div>
                   )}
                   <div
                     className={"ec-bubble " + (m.author === "vendor" ? "ec-bubble--out" : "ec-bubble--in")}
@@ -211,7 +211,7 @@ export default function PageWhatsApp({
                     </div>
                   </div>
                   </div>
-                </div>
+                </Fragment>
               ))}
             </div>
 
