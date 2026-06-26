@@ -84,9 +84,14 @@ export function DimensionsBandsFields() {
       )}
 
       <div className="grid gap-6 border-t border-border pt-8 sm:grid-cols-2">
-        <p className="text-sm font-medium text-brand sm:col-span-2">
-          Indiquez les fourchettes de mesure de vos marches.
-        </p>
+        <div className="space-y-1 sm:col-span-2">
+          <p className="text-sm font-medium text-brand">
+            Indiquez les fourchettes de mesure de vos marches.
+          </p>
+          <p className="text-xs text-muted">
+            Tolérance de 1&nbsp;cm pour la longueur et de 1&nbsp;cm pour la profondeur.
+          </p>
+        </div>
 
         {/* Largeur */}
         <div className="space-y-2">

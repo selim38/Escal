@@ -84,7 +84,7 @@ export function StepStaircaseType() {
               }`}
             >
               {selected && (
-                <span className="absolute right-3 top-3 z-10 flex size-6 items-center justify-center rounded-full bg-primary text-white shadow-sm">
+                <span className="absolute right-3 top-3 z-10 flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
                   <Check className="size-3.5 stroke-[3]" aria-hidden />
                 </span>
               )}

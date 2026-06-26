@@ -59,7 +59,7 @@ export function StepDecor() {
                   />
                 )}
                 {selected ? (
-                  <span className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-primary text-white shadow-sm">
+                  <span className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
                     <Check className="size-4 stroke-[3]" aria-hidden />
                   </span>
                 ) : null}

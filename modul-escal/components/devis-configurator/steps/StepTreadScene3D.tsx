@@ -436,7 +436,7 @@ const FOOTER_BY_LAYOUT: Record<StairLayout, string> = {
   STRAIGHT:
     "Aperçu à l’échelle · face orange = champ actif (largeur ou longueur)",
   BALANCED:
-    "Marche balancée · largeur = côté le plus large, longueur = côté le plus long",
+    "Marche tournante · largeur = côté le plus large, longueur = côté le plus long",
   FIVE_SIDED:
     "Le schéma indique la largeur max. (nez) et la profondeur max. (coin profond)",
 };

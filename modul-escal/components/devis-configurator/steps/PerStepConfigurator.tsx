@@ -85,7 +85,7 @@ export function PerStepConfigurator() {
                 isActive
                   ? "bg-primary text-white shadow-sm"
                   : complete
-                    ? "border-2 border-primary/50 bg-primary/10 text-brand"
+                    ? "border-2 border-emerald-500/60 bg-emerald-50 text-emerald-700"
                     : "border border-border bg-surface text-muted hover:border-brand-medium/40"
               }`}
               aria-label={`Marche ${i + 1}`}

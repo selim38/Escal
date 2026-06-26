@@ -9,13 +9,13 @@ export type StairLayoutEntry = {
 export const STAIR_LAYOUT_OPTIONS: StairLayoutEntry[] = [
   {
     id: "STRAIGHT",
-    label: "Droit",
-    description: "Escalier droit, sans changement de direction.",
+    label: "Droite",
+    description: "Marche droite, sans changement de direction.",
   },
   {
     id: "BALANCED",
-    label: "Balancée",
-    description: "Escalier avec palier ou retour en équilibre.",
+    label: "Tournante",
+    description: "Marche tournante (palier ou retour d'angle).",
   },
   {
     id: "FIVE_SIDED",
