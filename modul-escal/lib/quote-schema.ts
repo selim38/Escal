@@ -41,6 +41,13 @@ export type StepEndCap = (typeof STEP_END_CAP_VALUES)[number];
 export const END_SIDE_VALUES = ["LEFT", "RIGHT"] as const;
 export type EndSide = (typeof END_SIDE_VALUES)[number];
 
+export const stepEndCapConfigSchema = z.object({
+  between2Walls: z.boolean(),
+  cap: z.enum(STEP_END_CAP_VALUES),
+  side: z.enum(END_SIDE_VALUES).optional(),
+});
+export type StepEndCapConfig = z.infer<typeof stepEndCapConfigSchema>;
+
 export const LANDING_FINISH_VALUES = [
   "NONE",
   "NEZ_SEUIL",
@@ -99,6 +106,14 @@ export const quoteFormBaseSchema = z.object({
   riserOption: z.enum(RISER_OPTION_VALUES, {
     error: () => ({ message: "Choisissez une finition de contremarche." }),
   }),
+  riserHeightMm: z
+    .number({
+      error: () => ({ message: "Indiquez la hauteur des contremarches." }),
+    })
+    .int("Nombre entier requis.")
+    .min(100, "Minimum 100 mm.")
+    .max(300, "Maximum 300 mm.")
+    .optional(),
   stepCount: z
     .number({
       error: () => ({ message: "Indiquez le nombre de marches." }),
@@ -124,9 +139,10 @@ export const quoteFormBaseSchema = z.object({
   plinthesML: z.number().positive().optional(),
   stepEndCap: z.enum(STEP_END_CAP_VALUES, {
     error: () => ({ message: "Choisissez un type d’embout de marche." }),
-  }),
+  }).optional(),
   openStepEndSide: z.enum(END_SIDE_VALUES).optional(),
   lateralEndSide: z.enum(END_SIDE_VALUES).optional(),
+  stepEndCapConfigs: z.array(stepEndCapConfigSchema).optional(),
   firstName: z.string().min(1, "Le prénom est obligatoire."),
   lastName: z.string().min(1, "Le nom est obligatoire."),
   email: z.email({ error: () => ({ message: "E-mail invalide." }) }),
@@ -180,6 +196,11 @@ export type QuoteFormDraft = Partial<
     | "stepConfigs"
     | "widthBand"
     | "depthBand"
+    | "riserHeightMm"
+    | "stepEndCap"
+    | "openStepEndSide"
+    | "lateralEndSide"
+    | "stepEndCapConfigs"
   >
 > &
   Pick<
@@ -187,9 +208,6 @@ export type QuoteFormDraft = Partial<
     | "openSides"
     | "intermediateLanding"
     | "landingFinish"
-    | "stepEndCap"
-    | "openStepEndSide"
-    | "lateralEndSide"
     | "firstName"
     | "lastName"
     | "email"
@@ -215,14 +233,10 @@ export type QuotePricingInput = Pick<
 export const quoteStepSchemas = [
   quoteFormBaseSchema.pick({ staircaseType: true }),
   quoteFormBaseSchema.pick({ decor: true }),
-  quoteFormBaseSchema.pick({ riserOption: true }),
+  quoteFormBaseSchema.pick({ riserOption: true, riserHeightMm: true }),
   quoteFormBaseSchema.pick({ stepCount: true }),
   quoteFormBaseSchema.pick({ uniformStepDimensions: true }),
-  quoteFormBaseSchema.pick({
-    stepEndCap: true,
-    openStepEndSide: true,
-    lateralEndSide: true,
-  }),
+  quoteFormBaseSchema.pick({ stepEndCapConfigs: true }).partial(),
   quoteFormBaseSchema.pick({
     intermediateLanding: true,
     landingFinish: true,
@@ -263,17 +277,13 @@ export function pickQuoteStepValues(
     case 1:
       return { decor: values.decor };
     case 2:
-      return { riserOption: values.riserOption };
+      return { riserOption: values.riserOption, riserHeightMm: values.riserHeightMm };
     case 3:
       return { stepCount: values.stepCount };
     case 4:
       return { uniformStepDimensions: values.uniformStepDimensions };
     case 5:
-      return {
-        stepEndCap: values.stepEndCap,
-        openStepEndSide: values.openStepEndSide,
-        lateralEndSide: values.lateralEndSide,
-      };
+      return { stepEndCapConfigs: values.stepEndCapConfigs };
     case 6:
       return {
         intermediateLanding: values.intermediateLanding,
@@ -315,11 +325,16 @@ function validateDimensionsStep(values: QuoteFormDraft): boolean {
 }
 
 function validateStepEndCapStep(values: QuoteFormDraft): boolean {
-  if (!values.stepEndCap) return false;
-  if (values.stepEndCap === "OPEN_STEP") {
-    return Boolean(values.openStepEndSide && values.lateralEndSide);
-  }
-  return true;
+  const count = values.stepCount;
+  if (!count) return false;
+  const configs = values.stepEndCapConfigs;
+  if (!configs || configs.length !== count) return false;
+  return configs.every((c) => {
+    if (c.between2Walls) return c.cap === "NONE";
+    if (!c.cap || c.cap === "NONE") return false;
+    if (c.cap === "OPEN_STEP") return Boolean(c.side);
+    return true;
+  });
 }
 
 export function validateWizardStep(step: number, values: QuoteFormDraft): boolean {
@@ -381,19 +396,10 @@ export function getWizardStepFieldErrors(
   }
 
   if (step === 5) {
-    const errors: Partial<Record<keyof QuoteFormDraft, string>> = {};
-    if (!values.stepEndCap) {
-      errors.stepEndCap = "Choisissez un type d’embout de marche.";
+    if (!validateStepEndCapStep(values)) {
+      return { stepEndCapConfigs: "Configurez toutes les marches." };
     }
-    if (values.stepEndCap === "OPEN_STEP") {
-      if (!values.openStepEndSide) {
-        errors.openStepEndSide = "Indiquez le côté sur la 1ʳᵉ marche.";
-      }
-      if (!values.lateralEndSide) {
-        errors.lateralEndSide = "Indiquez le côté pour l’embout latéral.";
-      }
-    }
-    return errors;
+    return {};
   }
 
   const schema = quoteStepSchemas[step];

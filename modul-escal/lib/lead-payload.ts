@@ -21,6 +21,7 @@ export function buildLeadPayload(values: QuoteFormValues) {
     configuration: {
       decor: DECOR_LABELS[values.decor],
       riserOption: RISER_OPTION_LABELS[values.riserOption],
+      ...(values.riserHeightMm ? { riserHeightMm: values.riserHeightMm } : {}),
       stepCount: values.stepCount,
       uniformStepDimensions: values.uniformStepDimensions ? "Oui" : "Non",
       ...(values.stepConfigs &&
@@ -43,12 +44,17 @@ export function buildLeadPayload(values: QuoteFormValues) {
       openSides: values.openSides,
       intermediateLanding: values.intermediateLanding,
       landingFinish: LANDING_FINISH_LABELS[values.landingFinish],
-      stepEndCap: STEP_END_CAP_LABELS[values.stepEndCap],
-      ...(values.stepEndCap === "OPEN_STEP" && values.openStepEndSide
-        ? { openStepEndSide: END_SIDE_LABELS[values.openStepEndSide] }
-        : {}),
-      ...(values.stepEndCap === "OPEN_STEP" && values.lateralEndSide
-        ? { lateralEndSide: END_SIDE_LABELS[values.lateralEndSide] }
+      ...(values.stepEndCapConfigs
+        ? {
+            stepEndCapConfigs: values.stepEndCapConfigs.map((c, i) => ({
+              marche: i + 1,
+              entre2Murs: c.between2Walls ? "Oui" : "Non",
+              ...(c.cap !== "NONE"
+                ? { embout: STEP_END_CAP_LABELS[c.cap] }
+                : {}),
+              ...(c.side ? { cote: END_SIDE_LABELS[c.side] } : {}),
+            })),
+          }
         : {}),
     },
     contact: {

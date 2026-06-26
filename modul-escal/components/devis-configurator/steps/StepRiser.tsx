@@ -14,9 +14,10 @@ function formatPricePerStep(price: number): string {
 const WITH_RISER_OPTIONS = RISER_OPTIONS.filter((o) => o.id !== "NONE");
 
 export function StepRiser() {
-  const { watch, setValue, formState } = useFormContext<QuoteFormDraft>();
+  const { watch, setValue, register, formState } = useFormContext<QuoteFormDraft>();
   const value = watch("riserOption");
   const error = formState.errors.riserOption?.message;
+  const heightError = formState.errors.riserHeightMm?.message;
 
   const selectOption = (option: RiserOption) => {
     setValue("riserOption", option, { shouldValidate: true, shouldDirty: true });
@@ -77,6 +78,37 @@ export function StepRiser() {
           {error}
         </p>
       )}
+
+      <div className="mx-auto w-full max-w-xs space-y-2">
+        <label htmlFor="riserHeightMm" className="block text-sm font-medium text-brand">
+          Hauteur des contremarches{" "}
+          <span className="font-normal text-muted">(optionnel, mm)</span>
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            id="riserHeightMm"
+            type="number"
+            inputMode="numeric"
+            min={100}
+            max={300}
+            placeholder="Ex. 175"
+            className="w-32 rounded-lg border border-border bg-surface px-4 py-3 text-center text-lg text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+            {...register("riserHeightMm", {
+              setValueAs: (v) => {
+                if (v === "" || v === null || v === undefined) return undefined;
+                const n = Number(v);
+                return Number.isFinite(n) ? n : undefined;
+              },
+            })}
+          />
+          <span className="text-sm text-muted">mm</span>
+        </div>
+        {heightError && (
+          <p className="text-sm text-red-600" role="alert">
+            {heightError}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

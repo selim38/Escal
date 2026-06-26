@@ -43,7 +43,7 @@ const STEP_CLEAR_PATHS: (keyof QuoteFormDraft)[][] = [
   ["riserOption"],
   ["stepCount"],
   ["uniformStepDimensions", "widthBand", "depthBand", "stepConfigs"],
-  ["openSides", "stepEndCap", "openStepEndSide", "lateralEndSide"],
+  ["openSides", "stepEndCapConfigs"],
   ["intermediateLanding", "landingFinish"],
   ["landingAreaM2", "wantPlinthes", "plinthesML"],
   [], // étape inclus — aucun champ à effacer
@@ -69,7 +69,7 @@ const defaultValues: QuoteFormDraft = {
   openSides: false,
   intermediateLanding: false,
   landingFinish: "NONE",
-  stepEndCap: "NONE",
+
   firstName: "",
   lastName: "",
   email: "",
