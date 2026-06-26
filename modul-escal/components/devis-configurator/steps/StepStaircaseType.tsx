@@ -1,14 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Mail } from "lucide-react";
+import { Check } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
 import { asset } from "@/lib/asset";
 import type { QuoteFormDraft, StaircaseType } from "@/lib/quote-schema";
-
-// Contact support pour les cas spécifiques (escalier ouvert)
-const SUPPORT_EMAIL = "contact@escal-concept.fr";
 
 const CHOICES: Array<{
   value: StaircaseType;
@@ -100,24 +97,16 @@ export function StepStaircaseType() {
         })}
       </div>
 
-      {/* Cas spécifique : escalier ouvert → contacter le support */}
+      {/* Cas spécifique : escalier ouvert → information uniquement */}
       {value === "OPEN" && (
-        <div className="mx-auto max-w-2xl space-y-3 rounded-xl border border-amber-300 bg-amber-50 p-4">
+        <div className="mx-auto max-w-2xl rounded-xl border border-amber-300 bg-amber-50 p-4">
           <p className="text-sm font-semibold text-amber-800">
             Cas spécifique — escalier ouvert
           </p>
-          <p className="text-sm text-amber-800">
+          <p className="mt-1 text-sm text-amber-800">
             Les escaliers ouverts entre chaque marche nécessitent une étude sur mesure.
-            Merci d&apos;envoyer un e-mail avec des photos de votre escalier à notre support,
-            ou de le contacter directement. Nous revenons vers vous rapidement.
+            Notre équipe vous contactera pour affiner la configuration.
           </p>
-          <a
-            href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Devis escalier ouvert — photos")}`}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-600"
-          >
-            <Mail className="size-4" aria-hidden />
-            Envoyer mes photos au support
-          </a>
         </div>
       )}
 
