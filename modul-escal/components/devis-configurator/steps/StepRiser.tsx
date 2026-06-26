@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Check } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
 import { RISER_OPTIONS } from "@/lib/riser-options";
+import { getCMImagePath } from "@/lib/decor-catalog";
+import { asset } from "@/lib/asset";
 import type { QuoteFormDraft, RiserOption } from "@/lib/quote-schema";
 
 function formatPricePerStep(price: number): string {
@@ -13,9 +16,27 @@ function formatPricePerStep(price: number): string {
 
 const WITH_RISER_OPTIONS = RISER_OPTIONS.filter((o) => o.id !== "NONE");
 
+function CMPhoto({ src, label }: { src: string; label: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return (
+    <div className="mb-3 overflow-hidden rounded-lg">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={asset(src)}
+        alt={label}
+        loading="lazy"
+        onError={() => setFailed(true)}
+        className="h-28 w-full object-cover"
+      />
+    </div>
+  );
+}
+
 export function StepRiser() {
   const { watch, setValue, register, formState } = useFormContext<QuoteFormDraft>();
   const value = watch("riserOption");
+  const decor = watch("decor");
   const error = formState.errors.riserOption?.message;
   const heightError = formState.errors.riserHeightMm?.message;
 
@@ -37,6 +58,7 @@ export function StepRiser() {
       <div className="mx-auto grid max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
         {WITH_RISER_OPTIONS.map((option) => {
           const selected = value === option.id;
+          const photo = decor ? getCMImagePath(decor, option.id) : null;
           return (
             <button
               key={option.id}
@@ -55,10 +77,11 @@ export function StepRiser() {
               }`}
             >
               {selected && (
-                <span className="absolute right-3 top-3 flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white">
+                <span className="absolute right-3 top-3 z-10 flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white">
                   <Check className="size-3.5 stroke-[3]" aria-hidden />
                 </span>
               )}
+              {photo && <CMPhoto src={photo} label={option.label} />}
               <span className="block pr-8 text-base font-semibold text-brand">
                 {option.label}
               </span>

@@ -1,4 +1,36 @@
-import type { Decor } from "@/lib/quote-schema";
+import type { Decor, RiserOption } from "@/lib/quote-schema";
+
+/** Slug de fichier correspondant à chaque décor (utilisé pour les photos CM). */
+export const DECOR_SLUG: Record<Decor, string> = {
+  CHENE_NATUREL:      "chene-naturel",
+  CHENE_VINTAGE:      "chene-vintage",
+  CHENE_VINTAGE_GRIS: "chene-vintage-gris",
+  CHENE_CERUSE:       "chene-ceruse",
+  NOYER:              "noyer",
+  NOYER_BLANC:        "noyer-blanc",
+  HETRE:              "hetre",
+  PIN_RUSTIQUE:       "pin-rustique",
+  GRIS_MINERAL:       "gris-mineral",
+  PIERRE_ANTHRACITE:  "pierre-anthracite",
+  PIERRE_BETON_GRIS:  "pierre-beton-gris",
+};
+
+const CM_SUFFIX: Partial<Record<RiserOption, string>> = {
+  DECOR:       "",
+  BLACK_MATTE: "-cm-noire",
+  WHITE_MATTE: "-cm-blanche",
+};
+
+/**
+ * Retourne le chemin de la photo CM pour un décor + option de contremarche donnés.
+ * Retourne null si l'option n'a pas de photo associée (ex. NONE).
+ */
+export function getCMImagePath(decor: Decor, riserOption: RiserOption): string | null {
+  const slug = DECOR_SLUG[decor];
+  const suffix = CM_SUFFIX[riserOption];
+  if (suffix === undefined || !slug) return null;
+  return `/CM/${slug}${suffix}.jpg`;
+}
 
 export type DecorCatalogEntry = {
   id: Decor;
