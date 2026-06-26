@@ -13,6 +13,13 @@
       "runtimeArgs": ["--prefix", "admin-escal", "run", "dev"],
       "port": 3031,
       "autoPort": true
+    },
+    {
+      "name": "landing",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "3032", "--directory", "landing"],
+      "port": 3032,
+      "autoPort": true
     }
   ]
 }

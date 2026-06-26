@@ -91,6 +91,19 @@
     .card__icon svg { width: 28px; height: 28px; }
     .card h2 { font-size: 20px; letter-spacing: -.01em; }
     .card p { margin-top: 8px; color: var(--muted); font-size: 14.5px; line-height: 1.5; }
+    .card__feats {
+      list-style: none;
+      margin: 14px 0 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .card__feats li {
+      font-size: 13.5px;
+      color: var(--ink);
+      line-height: 1.35;
+    }
     .card__cta {
       margin-top: 22px;
       display: inline-flex;
@@ -127,7 +140,12 @@
           </svg>
         </div>
         <h2>Configurateur</h2>
-        <p>Créez et estimez un escalier sur mesure, puis envoyez votre demande de devis.</p>
+        <p>Créez et estimez un escalier sur mesure à poser soi-même, puis envoyez votre demande de devis.</p>
+        <ul class="card__feats">
+          <li>✅ Matériaux hydrofuges</li>
+          <li>✅ Outils de mesure et de découpe fournis</li>
+          <li>✅ Tutoriels vidéos complets</li>
+        </ul>
         <span class="card__cta">
           Ouvrir le configurateur
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
