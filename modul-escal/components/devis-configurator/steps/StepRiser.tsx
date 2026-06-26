@@ -79,12 +79,12 @@ export function StepRiser() {
         </p>
       )}
 
-      <div className="mx-auto w-full max-w-xs space-y-2">
+      <div className="mx-auto w-full max-w-xs space-y-2 text-center">
         <label htmlFor="riserHeightMm" className="block text-sm font-medium text-brand">
           Hauteur des contremarches{" "}
           <span className="font-normal text-muted">(optionnel, mm)</span>
         </label>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <input
             id="riserHeightMm"
             type="number"
