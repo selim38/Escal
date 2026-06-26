@@ -17,7 +17,7 @@ import { DEPTH_BAND_VALUES, WIDTH_BAND_VALUES } from "@/lib/quote-schema";
 
 import { DEPTH_LABELS, WIDTH_LABELS } from "@/lib/quote-labels";
 
-import { StepTreadDiagram } from "./StepTreadDiagram";
+import { StepTreadPhotos } from "./StepTreadPhotos";
 
 export function PerStepConfigurator() {
   const { watch, setValue, formState } = useFormContext<QuoteFormDraft>();
@@ -63,7 +63,7 @@ export function PerStepConfigurator() {
           Configurez chaque marche individuellement
         </p>
         <p className="mt-1 text-xs text-muted">
-          Type, largeur et profondeur — le schéma indique les mesures demandées.
+          Type, longueur et profondeur — les photos indiquent les mesures demandées.
         </p>
       </div>
 
@@ -155,9 +155,9 @@ export function PerStepConfigurator() {
                 className="text-sm font-medium text-brand"
               >
                 {layout === "BALANCED"
-                  ? "Largeur (la + large)"
+                  ? "Longueur (la + longue)"
                   : layout === "FIVE_SIDED"
-                    ? "Largeur max."
+                    ? "Longueur max."
                     : DIMENSION_FIELD_LABELS.widthBand}
               </label>
               <select
@@ -187,13 +187,9 @@ export function PerStepConfigurator() {
                 htmlFor={`step-${activeIndex}-depth`}
                 className="text-sm font-medium text-brand"
               >
-                {layout === "STRAIGHT"
-                  ? "Profondeur"
-                  : layout === "BALANCED"
-                    ? "Longueur (la + longue)"
-                    : layout === "FIVE_SIDED"
-                      ? "Profondeur max."
-                      : DIMENSION_FIELD_LABELS.depthBand}
+                {layout === "FIVE_SIDED"
+                  ? "Profondeur max."
+                  : DIMENSION_FIELD_LABELS.depthBand}
               </label>
               <select
                 id={`step-${activeIndex}-depth`}
@@ -219,12 +215,7 @@ export function PerStepConfigurator() {
           </div>
         </div>
 
-        <StepTreadDiagram
-          layout={layout}
-          activeField={focusedField}
-          widthBand={current.widthBand}
-          depthBand={current.depthBand}
-        />
+        <StepTreadPhotos layout={layout} activeField={focusedField} />
       </div>
 
       {rootError ? (

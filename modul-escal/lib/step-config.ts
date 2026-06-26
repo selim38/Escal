@@ -24,6 +24,6 @@ export function getStepConfigPanelPrice(config: StepConfig): number {
 export type DimensionField = "widthBand" | "depthBand";
 
 export const DIMENSION_FIELD_LABELS: Record<DimensionField, string> = {
-  widthBand: "Largeur",
+  widthBand: "Longueur",
   depthBand: "Profondeur",
 };

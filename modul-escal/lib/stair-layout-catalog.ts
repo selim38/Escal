@@ -19,8 +19,7 @@ export const STAIR_LAYOUT_OPTIONS: StairLayoutEntry[] = [
   },
   {
     id: "FIVE_SIDED",
-    label: "5 côtés",
-    description:
-      "Pentagone irrégulier : largeur max. et profondeur max. selon vos fourchettes.",
+    label: "Cercueil",
+    description: "Marche en cercueil : longueur max. et profondeur max.",
   },
 ];
