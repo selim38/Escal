@@ -9,6 +9,7 @@ import type {
   LandingFinish,
   EndSide,
   RiserOption,
+  SeuilColor,
   StairLayout,
   StepEndCap,
   WidthBand,
@@ -54,4 +55,10 @@ export const LANDING_FINISH_LABELS: Record<LandingFinish, string> = {
   NONE: "Sans palier",
   NEZ_SEUIL: "Nez + seuil",
   NEZ_RACCORD_PARQUET: "Nez de raccord parquet",
+};
+
+export const SEUIL_COLOR_LABELS: Record<SeuilColor, string> = {
+  OR: "Or",
+  NOIR: "Noir",
+  ALUMINIUM: "Aluminium",
 };

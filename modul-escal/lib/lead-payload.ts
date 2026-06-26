@@ -5,6 +5,7 @@ import {
   DECOR_LABELS,
   DEPTH_LABELS,
   LANDING_FINISH_LABELS,
+  SEUIL_COLOR_LABELS,
   END_SIDE_LABELS,
   RISER_OPTION_LABELS,
   STAIR_LAYOUT_LABELS,
@@ -43,7 +44,8 @@ export function buildLeadPayload(values: QuoteFormValues) {
         : {}),
       openSides: values.openSides,
       intermediateLanding: values.intermediateLanding,
-      landingFinish: LANDING_FINISH_LABELS[values.landingFinish],
+      landingFinish: values.landingFinish ? LANDING_FINISH_LABELS[values.landingFinish] : undefined,
+      ...(values.seuilColor ? { seuilColor: SEUIL_COLOR_LABELS[values.seuilColor] } : {}),
       ...(values.stepEndCapConfigs
         ? {
             stepEndCapConfigs: values.stepEndCapConfigs.map((c, i) => ({

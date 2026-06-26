@@ -43,7 +43,7 @@ const STEP_CLEAR_PATHS: (keyof QuoteFormDraft)[][] = [
   ["stepCount"],
   ["uniformStepDimensions", "widthBand", "depthBand", "stepConfigs"],
   ["openSides", "stepEndCapConfigs"],
-  ["intermediateLanding", "landingFinish"],
+  ["intermediateLanding", "landingFinish", "seuilColor"],
   ["landingAreaM2", "wantPlinthes", "plinthesML"],
   [], // étape inclus — aucun champ à effacer
   ["firstName", "lastName", "email", "phone"],
@@ -67,8 +67,6 @@ function applyZodIssues(
 const defaultValues: QuoteFormDraft = {
   openSides: false,
   intermediateLanding: false,
-  landingFinish: "NONE",
-
   firstName: "",
   lastName: "",
   email: "",

@@ -55,6 +55,9 @@ export const LANDING_FINISH_VALUES = [
 ] as const;
 export type LandingFinish = (typeof LANDING_FINISH_VALUES)[number];
 
+export const SEUIL_COLOR_VALUES = ["OR", "NOIR", "ALUMINIUM"] as const;
+export type SeuilColor = (typeof SEUIL_COLOR_VALUES)[number];
+
 export const STAIR_LAYOUT_VALUES = ["STRAIGHT", "BALANCED", "FIVE_SIDED"] as const;
 export type StairLayout = (typeof STAIR_LAYOUT_VALUES)[number];
 
@@ -143,6 +146,7 @@ export const quoteFormBaseSchema = z.object({
   openStepEndSide: z.enum(END_SIDE_VALUES).optional(),
   lateralEndSide: z.enum(END_SIDE_VALUES).optional(),
   stepEndCapConfigs: z.array(stepEndCapConfigSchema).optional(),
+  seuilColor: z.enum(SEUIL_COLOR_VALUES).optional(),
   firstName: z.string().min(1, "Le prénom est obligatoire."),
   lastName: z.string().min(1, "Le nom est obligatoire."),
   email: z.email({ error: () => ({ message: "E-mail invalide." }) }),
@@ -201,13 +205,14 @@ export type QuoteFormDraft = Partial<
     | "openStepEndSide"
     | "lateralEndSide"
     | "stepEndCapConfigs"
+    | "landingFinish"
+    | "seuilColor"
   >
 > &
   Pick<
     QuoteFormValues,
     | "openSides"
     | "intermediateLanding"
-    | "landingFinish"
     | "firstName"
     | "lastName"
     | "email"
@@ -240,7 +245,8 @@ export const quoteStepSchemas = [
   quoteFormBaseSchema.pick({
     intermediateLanding: true,
     landingFinish: true,
-  }),
+    seuilColor: true,
+  }).partial({ seuilColor: true }),
   // Étape parquet — tous les champs sont optionnels, toujours valide
   quoteFormBaseSchema.pick({ intermediateLanding: true }).partial(),
   // Étape inclus — purement informative, toujours valide
@@ -288,6 +294,7 @@ export function pickQuoteStepValues(
       return {
         intermediateLanding: values.intermediateLanding,
         landingFinish: values.landingFinish,
+        seuilColor: values.seuilColor,
       };
     case 7:
       return {}; // étape parquet — optionnelle
@@ -348,6 +355,12 @@ export function validateWizardStep(step: number, values: QuoteFormDraft): boolea
   if (step === 5) {
     return validateStepEndCapStep(values);
   }
+  if (step === 6) {
+    const finish = values.landingFinish;
+    if (!finish || finish === "NONE") return false;
+    if (finish === "NEZ_SEUIL") return Boolean(values.seuilColor);
+    return true;
+  }
 
   if (step === 7) return true; // étape parquet — toujours valide
   if (step === 8) return true; // étape inclus — toujours valide
@@ -400,6 +413,17 @@ export function getWizardStepFieldErrors(
       return { stepEndCapConfigs: "Configurez toutes les marches." };
     }
     return {};
+  }
+
+  if (step === 6) {
+    const errors: Partial<Record<keyof QuoteFormDraft, string>> = {};
+    const finish = values.landingFinish;
+    if (!finish || finish === "NONE") {
+      errors.landingFinish = "Choisissez un type de marche palière.";
+    } else if (finish === "NEZ_SEUIL" && !values.seuilColor) {
+      errors.seuilColor = "Choisissez la couleur du seuil.";
+    }
+    return errors;
   }
 
   const schema = quoteStepSchemas[step];
