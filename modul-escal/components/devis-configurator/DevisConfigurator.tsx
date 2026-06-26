@@ -28,7 +28,6 @@ import { StepRiser } from "./steps/StepRiser";
 import { StepUniformDimensions } from "./steps/StepUniformDimensions";
 import { StepEndCap } from "./steps/StepEndCap";
 import { StepLead } from "./steps/StepLead";
-import { StepOptions } from "./steps/StepOptions";
 import { StepStepCount } from "./steps/StepStepCount";
 import { StepLanding } from "./steps/StepLanding";
 import { StepParquet } from "./steps/StepParquet";
@@ -230,13 +229,7 @@ function WizardBody() {
         {currentStep === 2 ? <StepRiser /> : null}
         {currentStep === 3 ? <StepStepCount /> : null}
         {currentStep === 4 ? <StepUniformDimensions /> : null}
-        {currentStep === 5 ? (
-          <div className="space-y-8">
-            <StepOptions />
-            <hr className="border-[#ece8e4]" />
-            <StepEndCap />
-          </div>
-        ) : null}
+        {currentStep === 5 ? <StepEndCap /> : null}
         {currentStep === 6 ? <StepLanding /> : null}
         {currentStep === 7 ? <StepParquet /> : null}
         {currentStep === 8 ? <StepInclus /> : null}
