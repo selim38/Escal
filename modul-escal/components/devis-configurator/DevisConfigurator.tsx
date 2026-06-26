@@ -22,6 +22,7 @@ import { pendingPhotos } from "@/lib/pending-photos";
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api";
 import { ProgressBar } from "./ProgressBar";
 import { StepNavigation } from "./StepNavigation";
+import { StepStaircaseType } from "./steps/StepStaircaseType";
 import { StepDecor } from "./steps/StepDecor";
 import { StepRiser } from "./steps/StepRiser";
 import { StepUniformDimensions } from "./steps/StepUniformDimensions";
@@ -34,9 +35,10 @@ import { StepParquet } from "./steps/StepParquet";
 import { StepInclus } from "./steps/StepInclus";
 
 // Index de l'étape parquet (conditionnelle)
-const STEP_PARQUET = 6;
+const STEP_PARQUET = 7;
 
 const STEP_CLEAR_PATHS: (keyof QuoteFormDraft)[][] = [
+  ["staircaseType"],
   ["decor"],
   ["riserOption"],
   ["stepCount"],
@@ -223,21 +225,22 @@ function WizardBody() {
       <ProgressBar currentStep={currentStep} totalSteps={QUOTE_STEP_COUNT} />
 
       <div className="mt-8 min-h-[280px]">
-        {currentStep === 0 ? <StepDecor /> : null}
-        {currentStep === 1 ? <StepRiser /> : null}
-        {currentStep === 2 ? <StepStepCount /> : null}
-        {currentStep === 3 ? <StepUniformDimensions /> : null}
-        {currentStep === 4 ? (
+        {currentStep === 0 ? <StepStaircaseType /> : null}
+        {currentStep === 1 ? <StepDecor /> : null}
+        {currentStep === 2 ? <StepRiser /> : null}
+        {currentStep === 3 ? <StepStepCount /> : null}
+        {currentStep === 4 ? <StepUniformDimensions /> : null}
+        {currentStep === 5 ? (
           <div className="space-y-8">
             <StepOptions />
             <hr className="border-[#ece8e4]" />
             <StepEndCap />
           </div>
         ) : null}
-        {currentStep === 5 ? <StepLanding /> : null}
-        {currentStep === 6 ? <StepParquet /> : null}
-        {currentStep === 7 ? <StepInclus /> : null}
-        {currentStep === 8 ? <StepLead /> : null}
+        {currentStep === 6 ? <StepLanding /> : null}
+        {currentStep === 7 ? <StepParquet /> : null}
+        {currentStep === 8 ? <StepInclus /> : null}
+        {currentStep === 9 ? <StepLead /> : null}
       </div>
 
       {submitState.status === "error" && (

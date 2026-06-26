@@ -51,6 +51,9 @@ export type LandingFinish = (typeof LANDING_FINISH_VALUES)[number];
 export const STAIR_LAYOUT_VALUES = ["STRAIGHT", "BALANCED", "FIVE_SIDED"] as const;
 export type StairLayout = (typeof STAIR_LAYOUT_VALUES)[number];
 
+export const STAIRCASE_TYPE_VALUES = ["OPEN", "CLOSED"] as const;
+export type StaircaseType = (typeof STAIRCASE_TYPE_VALUES)[number];
+
 export const stepConfigSchema = z.object({
   layout: z.enum(STAIR_LAYOUT_VALUES, {
     error: () => ({ message: "Choisissez un type de marche." }),
@@ -87,6 +90,9 @@ export const stepDimensionsBandsSchema = z.object({
 });
 
 export const quoteFormBaseSchema = z.object({
+  staircaseType: z.enum(STAIRCASE_TYPE_VALUES, {
+    error: () => ({ message: "Indiquez le type d'escalier." }),
+  }),
   decor: z.enum(DECOR_VALUES, {
     error: () => ({ message: "Sélectionnez un décor." }),
   }),
@@ -166,6 +172,7 @@ export type QuoteFormValues = z.infer<typeof quoteFormBaseSchema>;
 export type QuoteFormDraft = Partial<
   Pick<
     QuoteFormValues,
+    | "staircaseType"
     | "decor"
     | "riserOption"
     | "stepCount"
@@ -204,8 +211,9 @@ export type QuotePricingInput = Pick<
   stepConfigs?: QuoteFormValues["stepConfigs"];
 };
 
-/** Schémas Zod pour chaque étape du tunnel (0 → 6). */
+/** Schémas Zod pour chaque étape du tunnel. */
 export const quoteStepSchemas = [
+  quoteFormBaseSchema.pick({ staircaseType: true }),
   quoteFormBaseSchema.pick({ decor: true }),
   quoteFormBaseSchema.pick({ riserOption: true }),
   quoteFormBaseSchema.pick({ stepCount: true }),
@@ -251,29 +259,31 @@ export function pickQuoteStepValues(
 ): unknown {
   switch (step) {
     case 0:
-      return { decor: values.decor };
+      return { staircaseType: values.staircaseType };
     case 1:
-      return { riserOption: values.riserOption };
+      return { decor: values.decor };
     case 2:
-      return { stepCount: values.stepCount };
+      return { riserOption: values.riserOption };
     case 3:
-      return { uniformStepDimensions: values.uniformStepDimensions };
+      return { stepCount: values.stepCount };
     case 4:
+      return { uniformStepDimensions: values.uniformStepDimensions };
+    case 5:
       return {
         stepEndCap: values.stepEndCap,
         openStepEndSide: values.openStepEndSide,
         lateralEndSide: values.lateralEndSide,
       };
-    case 5:
+    case 6:
       return {
         intermediateLanding: values.intermediateLanding,
         landingFinish: values.landingFinish,
       };
-    case 6:
-      return {}; // étape parquet — optionnelle
     case 7:
-      return {}; // étape inclus — informative
+      return {}; // étape parquet — optionnelle
     case 8:
+      return {}; // étape inclus — informative
+    case 9:
       return {
         firstName: values.firstName,
         lastName: values.lastName,
@@ -313,15 +323,19 @@ function validateStepEndCapStep(values: QuoteFormDraft): boolean {
 }
 
 export function validateWizardStep(step: number, values: QuoteFormDraft): boolean {
-  if (step === 3) {
-    return validateDimensionsStep(values);
+  if (step === 0) {
+    // Seul un escalier FERMÉ permet de continuer (OUVERT = cas spécifique, support).
+    return values.staircaseType === "CLOSED";
   }
   if (step === 4) {
+    return validateDimensionsStep(values);
+  }
+  if (step === 5) {
     return validateStepEndCapStep(values);
   }
 
-  if (step === 6) return true; // étape parquet — toujours valide
-  if (step === 7) return true; // étape inclus — toujours valide
+  if (step === 7) return true; // étape parquet — toujours valide
+  if (step === 8) return true; // étape inclus — toujours valide
 
   const schema = quoteStepSchemas[step];
   if (!schema) return false;
@@ -332,7 +346,7 @@ export function getWizardStepFieldErrors(
   step: number,
   values: QuoteFormDraft,
 ): Partial<Record<keyof QuoteFormDraft, string>> {
-  if (step === 3) {
+  if (step === 4) {
     const errors: Partial<Record<keyof QuoteFormDraft, string>> = {};
 
     const uniformRes = quoteFormBaseSchema
@@ -366,7 +380,7 @@ export function getWizardStepFieldErrors(
     };
   }
 
-  if (step === 4) {
+  if (step === 5) {
     const errors: Partial<Record<keyof QuoteFormDraft, string>> = {};
     if (!values.stepEndCap) {
       errors.stepEndCap = "Choisissez un type d’embout de marche.";
