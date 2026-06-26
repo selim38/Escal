@@ -22,7 +22,7 @@ export function StepDecor() {
         Choisir le décor
       </h2>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 md:grid-cols-6">
+      <div className="flex flex-wrap justify-center gap-3 sm:gap-5">
         {DECOR_CATALOG.map((item) => {
           const selected = value === item.id;
           return (
@@ -36,7 +36,7 @@ export function StepDecor() {
                   select(item.id);
                 }
               }}
-              className={`group relative min-w-0 overflow-hidden rounded-lg bg-white text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+              className={`group relative w-[calc(50%-6px)] min-w-0 overflow-hidden rounded-lg bg-white text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-[calc(33.333%-14px)] md:w-[calc(16.667%-17px)] ${
                 selected
                   ? "ring-2 ring-primary ring-offset-2 ring-offset-[var(--color-surface)]"
                   : "ring-1 ring-[#e8e4e0] hover:ring-[#c9bfb4] hover:shadow-md"
