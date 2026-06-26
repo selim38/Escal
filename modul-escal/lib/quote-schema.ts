@@ -147,6 +147,7 @@ export const quoteFormBaseSchema = z.object({
   lateralEndSide: z.enum(END_SIDE_VALUES).optional(),
   stepEndCapConfigs: z.array(stepEndCapConfigSchema).optional(),
   seuilColor: z.enum(SEUIL_COLOR_VALUES).optional(),
+  contactPreference: z.enum(["WHATSAPP", "EMAIL"]).optional(),
   firstName: z.string().min(1, "Le prénom est obligatoire."),
   lastName: z.string().min(1, "Le nom est obligatoire."),
   email: z.email({ error: () => ({ message: "E-mail invalide." }) }),
@@ -207,6 +208,7 @@ export type QuoteFormDraft = Partial<
     | "stepEndCapConfigs"
     | "landingFinish"
     | "seuilColor"
+    | "contactPreference"
   >
 > &
   Pick<

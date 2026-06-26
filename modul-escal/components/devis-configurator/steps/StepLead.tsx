@@ -1,144 +1,102 @@
 "use client";
 
-import { Camera, Mail, Sparkles, Trash2, User } from "lucide-react";
-import { useMemo, useRef, useState, useEffect } from "react";
+import { Camera, Mail, MessageCircle, Trash2, User } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { calculatePrice } from "@/lib/calculatePrice";
-import { quotePricingPreviewSchema, type QuoteFormDraft } from "@/lib/quote-schema";
+import { type QuoteFormDraft } from "@/lib/quote-schema";
 import { pendingPhotos } from "@/lib/pending-photos";
 
+type PhotoSlot = {
+  key: string;
+  label: string;
+  hint: string;
+};
+
+const PHOTO_SLOTS: PhotoSlot[] = [
+  { key: "bas",    label: "Vue du bas",    hint: "Depuis le rez-de-chaussée, en regardant vers le haut." },
+  { key: "milieu", label: "Vue du milieu", hint: "Depuis le milieu de l'escalier." },
+  { key: "haut",   label: "Vue du haut",   hint: "Depuis le palier supérieur, en regardant vers le bas." },
+];
+
+type SlotPhoto = { file: File; preview: string } | null;
+
 export function StepLead() {
-  const { register, watch, formState } = useFormContext<QuoteFormDraft>();
-  const values = watch();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([]);
+  const { register, watch, setValue, formState } = useFormContext<QuoteFormDraft>();
+  const contactPreference = watch("contactPreference");
+
+  const [slotPhotos, setSlotPhotos] = useState<Record<string, SlotPhoto>>({
+    bas: null, milieu: null, haut: null,
+  });
+  const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Synchronise le singleton à chaque changement
   useEffect(() => {
-    pendingPhotos.files = photos.map((p) => p.file);
-  }, [photos]);
+    pendingPhotos.files = Object.values(slotPhotos)
+      .filter((s): s is NonNullable<SlotPhoto> => s !== null)
+      .map((s) => s.file);
+  }, [slotPhotos]);
 
-  const addFiles = (files: FileList | null) => {
-    if (!files) return;
-    const next = Array.from(files).slice(0, 10 - photos.length);
-    const entries = next.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-    setPhotos((prev) => [...prev, ...entries]);
-  };
-
-  const removePhoto = (index: number) => {
-    setPhotos((prev) => {
-      URL.revokeObjectURL(prev[index].preview);
-      return prev.filter((_, i) => i !== index);
+  const setSlotFile = (key: string, file: File | null) => {
+    setSlotPhotos((prev) => {
+      if (prev[key]) URL.revokeObjectURL(prev[key]!.preview);
+      return {
+        ...prev,
+        [key]: file ? { file, preview: URL.createObjectURL(file) } : null,
+      };
     });
   };
-
-  const estimate = useMemo(() => {
-    const parsed = quotePricingPreviewSchema.safeParse({
-      riserOption: values.riserOption,
-      stepCount: values.stepCount,
-      widthBand: values.widthBand,
-      depthBand: values.depthBand,
-      stepConfigs: values.stepConfigs,
-      openSides: values.openSides,
-      intermediateLanding: values.intermediateLanding,
-    });
-    if (!parsed.success) return null;
-    return calculatePrice(parsed.data);
-  }, [
-    values.depthBand,
-    values.intermediateLanding,
-    values.openSides,
-    values.riserOption,
-    values.stepConfigs,
-    values.stepCount,
-    values.widthBand,
-  ]);
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <div className="flex items-start gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Sparkles className="size-5" aria-hidden />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-brand">
-            Résultat & demande de devis
-          </h2>
-          <p className="text-sm text-muted">
-            Voici une estimation matériaux. Laissez vos coordonnées pour être
-            recontacté par un commercial.
-          </p>
-        </div>
+      <div className="space-y-2 text-center">
+        <h2 className="text-xl font-bold tracking-tight text-[#1e2a4a] sm:text-2xl">
+          Vos coordonnées
+        </h2>
+        <p className="text-sm text-muted">
+          Un technicien vous recontactera pour finaliser votre devis.
+        </p>
       </div>
 
-      <div className="rounded-2xl border border-primary/35 bg-gradient-to-br from-primary/12 to-surface p-6 shadow-sm">
-        {estimate ? (
-          <p className="text-center text-lg font-bold tracking-tight text-brand sm:text-xl md:text-2xl">
-            Prix estimé des matériaux :{" "}
-            <span className="text-primary">{estimate.materialsSubtotal} €</span>
-          </p>
-        ) : (
-          <p className="text-center text-sm text-muted">
-            Complétez les étapes précédentes pour afficher l’estimation.
-          </p>
-        )}
-      </div>
-
+      {/* ── Formulaire contact ───────────────────────────────── */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-brand">
           <User className="size-5 text-primary" aria-hidden />
-          <h3 className="text-base font-semibold">Vos coordonnées</h3>
+          <h3 className="text-base font-semibold">Informations personnelles</h3>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <label htmlFor="lastName" className="text-sm font-medium text-brand">
-              Nom
-            </label>
+            <label htmlFor="lastName" className="text-sm font-medium text-brand">Nom</label>
             <input
               id="lastName"
               autoComplete="family-name"
               className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/25"
               {...register("lastName")}
             />
-            {formState.errors.lastName?.message ? (
-              <p className="text-sm text-red-600" role="alert">
-                {formState.errors.lastName.message}
-              </p>
-            ) : null}
+            {formState.errors.lastName?.message && (
+              <p className="text-sm text-red-600" role="alert">{formState.errors.lastName.message}</p>
+            )}
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="firstName" className="text-sm font-medium text-brand">
-              Prénom
-            </label>
+            <label htmlFor="firstName" className="text-sm font-medium text-brand">Prénom</label>
             <input
               id="firstName"
               autoComplete="given-name"
               className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/25"
               {...register("firstName")}
             />
-            {formState.errors.firstName?.message ? (
-              <p className="text-sm text-red-600" role="alert">
-                {formState.errors.firstName.message}
-              </p>
-            ) : null}
+            {formState.errors.firstName?.message && (
+              <p className="text-sm text-red-600" role="alert">{formState.errors.firstName.message}</p>
+            )}
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="email" className="text-sm font-medium text-brand">
-            E-mail
-          </label>
+          <label htmlFor="email" className="text-sm font-medium text-brand">E-mail</label>
           <div className="relative">
-            <Mail
-              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted"
-              aria-hidden
-            />
+            <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />
             <input
               id="email"
               type="email"
@@ -147,17 +105,13 @@ export function StepLead() {
               {...register("email")}
             />
           </div>
-          {formState.errors.email?.message ? (
-            <p className="text-sm text-red-600" role="alert">
-              {formState.errors.email.message}
-            </p>
-          ) : null}
+          {formState.errors.email?.message && (
+            <p className="text-sm text-red-600" role="alert">{formState.errors.email.message}</p>
+          )}
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="phone" className="text-sm font-medium text-brand">
-            Téléphone
-          </label>
+          <label htmlFor="phone" className="text-sm font-medium text-brand">Téléphone</label>
           <input
             id="phone"
             type="tel"
@@ -165,17 +119,13 @@ export function StepLead() {
             className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/25"
             {...register("phone")}
           />
-          {formState.errors.phone?.message ? (
-            <p className="text-sm text-red-600" role="alert">
-              {formState.errors.phone.message}
-            </p>
-          ) : null}
+          {formState.errors.phone?.message && (
+            <p className="text-sm text-red-600" role="alert">{formState.errors.phone.message}</p>
+          )}
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="country" className="text-sm font-medium text-brand">
-            Pays
-          </label>
+          <label htmlFor="country" className="text-sm font-medium text-brand">Pays</label>
           <select
             id="country"
             autoComplete="country-name"
@@ -203,68 +153,108 @@ export function StepLead() {
               <option value="Autre">Autre</option>
             </optgroup>
           </select>
-          {formState.errors.country?.message ? (
-            <p className="text-sm text-red-600" role="alert">
-              {formState.errors.country.message}
-            </p>
-          ) : null}
+          {formState.errors.country?.message && (
+            <p className="text-sm text-red-600" role="alert">{formState.errors.country.message}</p>
+          )}
         </div>
       </div>
 
-      {/* Section photos — en fin de formulaire */}
+      {/* ── Préférence de contact ────────────────────────────── */}
       <div className="space-y-3">
+        <div className="flex items-center gap-2 text-brand">
+          <MessageCircle className="size-5 text-primary" aria-hidden />
+          <h3 className="text-base font-semibold">Comment souhaitez-vous être contacté ?</h3>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {([
+            { value: "WHATSAPP", label: "WhatsApp", icon: "💬" },
+            { value: "EMAIL",    label: "E-mail",   icon: "✉️" },
+          ] as const).map((opt) => {
+            const active = contactPreference === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setValue("contactPreference", opt.value, { shouldDirty: true })}
+                className={`flex flex-1 items-center gap-3 rounded-xl border-2 px-4 py-3 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                  active
+                    ? "border-primary bg-primary/5 text-brand ring-2 ring-primary/25"
+                    : "border-border bg-surface text-muted hover:border-brand-medium/35"
+                }`}
+              >
+                <span className="text-lg">{opt.icon}</span>
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-xs text-muted">
+          Si vous n'avez pas WhatsApp, choisissez E-mail — un technicien vous répondra dans les 24 h.
+        </p>
+      </div>
+
+      {/* ── 3 photos labelisées ──────────────────────────────── */}
+      <div className="space-y-4">
         <div className="flex items-center gap-2 text-brand">
           <Camera className="size-5 text-primary" aria-hidden />
           <h3 className="text-base font-semibold">Photos de votre escalier</h3>
         </div>
         <p className="text-sm text-muted">
-          Ajoutez des photos pour aider notre équipe à affiner le devis (facultatif).
+          3 photos sont nécessaires pour que notre technicien puisse affiner votre devis.
         </p>
 
-        {photos.length > 0 && (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-            {photos.map((p, i) => (
-              <div key={i} className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted-bg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={p.preview}
-                  alt={`Photo ${i + 1}`}
-                  className="h-full w-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => removePhoto(i)}
-                  className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/50 text-white opacity-100 sm:opacity-0 sm:transition sm:group-hover:opacity-100"
-                  aria-label={`Supprimer photo ${i + 1}`}
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {PHOTO_SLOTS.map((slot) => {
+            const photo = slotPhotos[slot.key];
+            return (
+              <div key={slot.key} className="space-y-1.5">
+                <p className="text-xs font-semibold text-brand">{slot.label}</p>
+                <p className="text-xs text-muted">{slot.hint}</p>
 
-        {photos.length < 10 && (
-          <>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              capture="environment"
-              className="sr-only"
-              onChange={(e) => addFiles(e.target.files)}
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface px-4 py-4 text-xs sm:text-sm text-muted transition hover:border-primary/40 hover:text-brand"
-            >
-              <Camera className="size-4" aria-hidden />
-              {photos.length === 0 ? "Ajouter des photos" : "Ajouter d'autres photos"}
-            </button>
-          </>
-        )}
+                {photo ? (
+                  <div className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-border bg-muted-bg">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={photo.preview}
+                      alt={slot.label}
+                      className="h-full w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setSlotFile(slot.key, null)}
+                      className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-black/50 text-white"
+                      aria-label={`Supprimer ${slot.label}`}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      ref={(el) => { fileRefs.current[slot.key] = el; }}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="sr-only"
+                      onChange={(e) => setSlotFile(slot.key, e.target.files?.[0] ?? null)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileRefs.current[slot.key]?.click()}
+                      className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface text-muted transition hover:border-primary/40 hover:text-brand"
+                    >
+                      <Camera className="size-6" aria-hidden />
+                      <span className="text-xs">Ajouter une photo</span>
+                    </button>
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-xs text-muted">
+          Les photos sont facultatives mais fortement recommandées pour obtenir un devis précis.
+        </p>
       </div>
     </div>
   );

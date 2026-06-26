@@ -65,6 +65,9 @@ export function buildLeadPayload(values: QuoteFormValues) {
       email: values.email,
       phone: values.phone,
       country: values.country,
+      ...(values.contactPreference
+        ? { contactPreference: values.contactPreference === "WHATSAPP" ? "WhatsApp" : "E-mail" }
+        : {}),
     },
   };
 }
