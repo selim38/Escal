@@ -207,9 +207,11 @@ export function StepLead() {
           {PHOTO_SLOTS.map((slot) => {
             const photo = slotPhotos[slot.key];
             return (
-              <div key={slot.key} className="space-y-1.5">
-                <p className="text-xs font-semibold text-brand">{slot.label}</p>
-                <p className="text-xs text-muted">{slot.hint}</p>
+              <div key={slot.key} className="flex flex-col">
+                <div className="mb-2 min-h-[2.75rem]">
+                  <p className="text-xs font-semibold text-brand">{slot.label}</p>
+                  <p className="text-xs text-muted">{slot.hint}</p>
+                </div>
 
                 {photo ? (
                   <div className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-border bg-muted-bg">
