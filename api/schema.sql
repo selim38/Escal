@@ -152,6 +152,17 @@ ALTER TABLE conversations ADD COLUMN author_user_id INT UNSIGNED NULL;
 ALTER TABLE leads ADD COLUMN assigned_to INT UNSIGNED NULL;
 ALTER TABLE leads ADD COLUMN assigned_at DATETIME NULL;
 
+-- Intégration Web Component <kre-configurateur> dans WordPress.
+-- recipient_email : attribut recipient-email du composant, validé côté serveur
+--   contre config.php['allowed_recipient_emails'].
+-- origin : origine de la page qui portait le composant (utile pour distinguer
+--   les leads venant de WordPress de ceux du module autonome /calcul).
+-- tracking_json : paramètres de provenance (utm_*, gclid, fbclid) capturés à
+--   l'ouverture du configurateur.
+ALTER TABLE leads ADD COLUMN recipient_email VARCHAR(255) NULL;
+ALTER TABLE leads ADD COLUMN origin VARCHAR(255) NULL;
+ALTER TABLE leads ADD COLUMN tracking_json JSON NULL;
+
 -- ---------------------------------------------------------
 -- 7. UTILISATEURS (accès au dashboard admin)
 -- ---------------------------------------------------------

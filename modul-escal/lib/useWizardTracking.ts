@@ -39,8 +39,13 @@ export function useWizardTracking(
   const startSent = useRef(false);
   const lastViewSent = useRef(-1);
 
-  finished.current = isFinished;
-  lastStep.current = currentStep;
+  // Miroir des props dans des refs, pour que le gestionnaire `pagehide` (attaché
+  // une seule fois) lise toujours l'état courant. Écrit dans un effet et non
+  // pendant le rendu : muter une ref au rendu casse la réconciliation.
+  useEffect(() => {
+    finished.current = isFinished;
+    lastStep.current = currentStep;
+  });
 
   // devis_start — une seule fois par instance.
   // Le garde-fou est nécessaire : StrictMode double l'exécution des effets en

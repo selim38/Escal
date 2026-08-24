@@ -1,5 +1,7 @@
 import { fileURLToPath } from "node:url";
 
+import sirv from "sirv";
+
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
@@ -17,10 +19,37 @@ import { defineConfig } from "vite";
  */
 const publicBase = process.env.KRE_PUBLIC_BASE ?? "./";
 
+/**
+ * Expose `dist/release/` sous `/release/` pendant le dev.
+ *
+ * `demo/prod.html` recette le bundle réellement publié (minifié, sans
+ * StrictMode, assets résolus via `import.meta.url`) — ce que le serveur de dev,
+ * qui sert les sources, ne peut pas vérifier. Plugin dev uniquement.
+ */
+function serveReleases(): import("vite").Plugin {
+  const dir = fileURLToPath(new URL("./dist/release", import.meta.url));
+  return {
+    name: "kre-serve-releases",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use(
+        "/release",
+        sirv(dir, { dev: true, etag: true, single: false }),
+      );
+    },
+  };
+}
+
 export default defineConfig(({ command }) => ({
   base: command === "build" ? publicBase : "/",
 
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), serveReleases()],
+
+  server: {
+    // `.next/`, `out/` et `dist/` contiennent des .html buildés : sans exclusion,
+    // Vite les surveille et déclenche des rechargements parasites.
+    watch: { ignored: ["**/.next/**", "**/out/**", "**/dist/**"] },
+  },
 
   resolve: {
     alias: {

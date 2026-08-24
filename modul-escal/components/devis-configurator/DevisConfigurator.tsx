@@ -205,15 +205,16 @@ function WizardBody() {
       if (!response.ok) throw new Error(json.error ?? m.common.serverError);
 
       // Upload des photos si présentes
-      if (pendingPhotos.files.length > 0) {
+      const photos = pendingPhotos.get();
+      if (photos.length > 0) {
         const fd = new FormData();
         fd.append("leadId", json.leadId);
-        for (const file of pendingPhotos.files) fd.append("photos", file);
+        for (const file of photos) fd.append("photos", file);
         await fetch(`${config.endpoint}/photos.php`, {
           method: "POST",
           body: fd,
         }).catch(() => null);
-        pendingPhotos.files = [];
+        pendingPhotos.clear();
       }
 
       succeed(json.leadId, json.estimatedMaterialsEuro);

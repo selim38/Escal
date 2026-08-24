@@ -18,25 +18,35 @@ import { useFieldError } from "@/lib/useFieldError";
 
 import { StepTreadPhotos } from "./StepTreadPhotos";
 
+/**
+ * Repli stable pour `watch("stepConfigs")`. Un `?? []` littéral créerait un
+ * tableau neuf à chaque rendu, ce qui relancerait l'effet de normalisation en
+ * boucle.
+ */
+const NO_STEP_CONFIGS: StepConfigDraft[] = [];
+
 export function PerStepConfigurator() {
   const { watch, setValue } = useFormContext<QuoteFormDraft>();
   const stepCount = watch("stepCount") ?? 1;
-  const stepConfigs = watch("stepConfigs") ?? [];
-  const [activeIndex, setActiveIndex] = useState(0);
+  const stepConfigs = watch("stepConfigs") ?? NO_STEP_CONFIGS;
+  const [requestedIndex, setActiveIndex] = useState(0);
   const [focusedField, setFocusedField] = useState<DimensionField | null>(null);
   const { m, t } = useT();
 
   const rootError = useFieldError("stepConfigs");
 
+  // L'index actif est borné au rendu plutôt que corrigé par un `setState` dans
+  // un effet : si l'utilisateur réduit le nombre de marches à l'étape 4, l'index
+  // mémorisé peut dépasser. Dériver évite un rendu en cascade.
+  const activeIndex = Math.min(requestedIndex, Math.max(0, stepCount - 1));
+
+  // Aligne la longueur du tableau de configurations sur le nombre de marches.
   useEffect(() => {
     const next = ensureStepConfigs(stepConfigs, stepCount);
     if (next.length !== stepConfigs.length) {
       setValue("stepConfigs", next, { shouldValidate: true });
     }
-    if (activeIndex >= stepCount) {
-      setActiveIndex(Math.max(0, stepCount - 1));
-    }
-  }, [activeIndex, setValue, stepConfigs, stepCount]);
+  }, [setValue, stepConfigs, stepCount]);
 
   const current: StepConfigDraft =
     stepConfigs[activeIndex] ?? createDefaultStepConfig();

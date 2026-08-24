@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Sorties de build du Web Component (bundle minifié + dossiers publiables).
+    "dist/**",
   ]),
 ]);
 

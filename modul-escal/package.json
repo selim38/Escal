@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run assets:webp && next build",
     "start": "next start",
     "lint": "eslint",
-    "build:wc": "vite build",
+    "build:wc": "npm run assets:webp && vite build",
     "dev:wc": "vite dev --port 5174",
     "preview:wc": "vite preview --port 5174",
     "assets:webp": "node scripts/build-assets.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "package:wc": "node scripts/package-wc.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -32,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "geist": "^1.7.2",
+    "sirv": "^3.0.2",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite": "^8.2.2"

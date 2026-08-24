@@ -1,0 +1,78 @@
+# ---------------------------------------------------------------------------
+# À déposer dans le dossier /wc/ de escal.point-soft.fr, qui héberge le bundle
+# du Web Component. Couvre les exigences de performance du cahier des charges
+# (§6.1) : compression et chargement rapide.
+#
+# Arborescence visée :
+#   /wc/v1.0.0/kre-configurateur.js   ← immuable, cache 1 an
+#   /wc/v1.0.0/<assets webp, fonts>
+#   /wc/staging/kre-configurateur.js  ← recette Knewledge
+#
+# Note : Ionos mutualisé fournit mod_deflate (gzip). mod_brotli n'est pas
+# garanti — le bloc correspondant est conditionnel et sans effet s'il manque.
+# ---------------------------------------------------------------------------
+
+# ─── Compression ───────────────────────────────────────────────────────────
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE application/javascript text/javascript
+  AddOutputFilterByType DEFLATE application/json text/css text/plain
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS application/javascript text/javascript
+  AddOutputFilterByType BROTLI_COMPRESS application/json text/css text/plain
+  AddOutputFilterByType BROTLI_COMPRESS image/svg+xml
+</IfModule>
+
+# WebP et woff2 sont déjà compressés : les repasser en gzip coûte du CPU
+# pour un gain nul, voire négatif.
+<IfModule mod_setenvif.c>
+  SetEnvIfNoCase Request_URI \.(webp|woff2?)$ no-gzip dont-vary
+</IfModule>
+
+# ─── Types MIME ────────────────────────────────────────────────────────────
+# Certains hébergements mutualisés ne connaissent pas encore ces extensions ;
+# un woff2 servi en application/octet-stream est rejeté par le navigateur.
+<IfModule mod_mime.c>
+  AddType application/javascript .js
+  AddType image/webp             .webp
+  AddType font/woff2             .woff2
+</IfModule>
+
+# ─── Cache ─────────────────────────────────────────────────────────────────
+# Les dossiers versionnés (v1.0.0/) sont immuables : la seule façon de publier
+# une nouvelle version est de changer l'URL, donc cache maximal.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/webp             "access plus 1 year"
+  ExpiresByType font/woff2             "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|webp|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # `staging/` et `latest/` ne sont PAS versionnés : ils doivent pouvoir être
+  # republiés. Cache court, sinon Knewledge testerait une version périmée.
+  <If "%{REQUEST_URI} =~ m#/(staging|latest)/#">
+    <FilesMatch "\.(js|map)$">
+      Header set Cache-Control "public, max-age=300, must-revalidate"
+    </FilesMatch>
+  </If>
+
+  # Le bundle est chargé en cross-origin depuis kitrenovationescalier.fr :
+  # sans en-tête CORS, le navigateur refuse le module ES et la police woff2.
+  <FilesMatch "\.(js|map|webp|woff2)$">
+    Header set Access-Control-Allow-Origin "*"
+    Header set Timing-Allow-Origin "*"
+  </FilesMatch>
+
+  # Le composant n'a aucune raison d'être chargé dans un cadre tiers.
+  Header set X-Content-Type-Options "nosniff"
+</IfModule>
+
+# ─── Pas d'indexation du dossier technique ─────────────────────────────────
+Options -Indexes

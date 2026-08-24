@@ -38,9 +38,11 @@ export function StepLead() {
 
   // Synchronise le magasin de photos porté par l'instance
   useEffect(() => {
-    pendingPhotos.files = Object.values(slotPhotos)
-      .filter((s): s is NonNullable<SlotPhoto> => s !== null)
-      .map((s) => s.file);
+    pendingPhotos.set(
+      Object.values(slotPhotos)
+        .filter((s): s is NonNullable<SlotPhoto> => s !== null)
+        .map((s) => s.file),
+    );
   }, [slotPhotos, pendingPhotos]);
 
   // Libère les URLs d'aperçu au démontage (le composant peut être retiré de la

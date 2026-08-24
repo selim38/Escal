@@ -42,3 +42,10 @@ next-env.d.ts
 
 # Build Web Component
 /dist
+
+# WebP générés depuis assets-src/ (npm run assets:webp)
+/public/CM
+/public/decor
+/public/dimensions
+/public/escalier
+/public/etape

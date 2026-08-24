@@ -11,7 +11,7 @@
  * Vite ne fournit pas `process.env`, et le module doit être configurable sans rebuild.
  */
 
-import { createContext, useContext, useMemo, useRef } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
 import { DEFAULT_LOCALE, isSupportedLocale, type Locale } from "@/lib/i18n";
@@ -62,12 +62,33 @@ export function useKreConfig(): KreConfig {
 }
 
 /**
- * Fichiers photos en attente d'upload.
+ * Fichiers photos en attente d'upload, entre l'étape Coordonnées et la soumission.
  *
  * Porté par instance (et non par module) : deux <kre-configurateur> sur une même
  * page doivent avoir des jeux de photos indépendants.
+ *
+ * Exposé sous forme de méthodes plutôt que d'un objet mutable : muter la valeur
+ * d'un contexte React depuis un composant est un anti-pattern (et signalé comme
+ * tel par le compilateur React). Les fichiers vivent dans une clôture.
  */
-export type PendingPhotos = { files: File[] };
+export type PendingPhotos = {
+  get: () => File[];
+  set: (files: File[]) => void;
+  clear: () => void;
+};
+
+function createPendingPhotos(): PendingPhotos {
+  let files: File[] = [];
+  return {
+    get: () => files,
+    set: (next) => {
+      files = next;
+    },
+    clear: () => {
+      files = [];
+    },
+  };
+}
 
 const PendingPhotosContext = createContext<PendingPhotos | null>(null);
 
@@ -90,11 +111,13 @@ export function KreConfigProvider({
     () => ({ ...DEFAULT_CONFIG, ...stripUndefined(config) }),
     [config],
   );
-  const photos = useRef<PendingPhotos>({ files: [] });
+  // `useState` avec initialiseur paresseux : la clôture est créée une seule fois
+  // par instance et n'est jamais lue pendant le rendu.
+  const [photos] = useState(createPendingPhotos);
 
   return (
     <KreConfigContext.Provider value={value}>
-      <PendingPhotosContext.Provider value={photos.current}>
+      <PendingPhotosContext.Provider value={photos}>
         {children}
       </PendingPhotosContext.Provider>
     </KreConfigContext.Provider>

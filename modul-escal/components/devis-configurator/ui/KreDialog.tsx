@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { ReactNode } from "react";
 
 /**
@@ -32,14 +32,15 @@ export function KreDialog({
   className?: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
-  const [supportsModal, setSupportsModal] = useState(true);
 
-  useEffect(() => {
-    setSupportsModal(
+  // Détection de capacité au rendu plutôt que dans un effet : pas de second
+  // rendu, et rien à hydrater côté Next puisque la modale fermée ne rend rien.
+  const supportsModal = useMemo(
+    () =>
       typeof HTMLDialogElement !== "undefined" &&
-        typeof HTMLDialogElement.prototype.showModal === "function",
-    );
-  }, []);
+      typeof HTMLDialogElement.prototype.showModal === "function",
+    [],
+  );
 
   useEffect(() => {
     const el = ref.current;
@@ -51,20 +52,25 @@ export function KreDialog({
     }
   }, [open, supportsModal]);
 
-  // Échap déclenche `cancel` : on repasse par onClose pour garder l'état React source de vérité.
+  // Échap déclenche `cancel` : on repasse par onClose pour garder l'état React
+  // source de vérité. `open` fait partie des dépendances car le <dialog> n'est
+  // monté que lorsqu'il est ouvert — sans cela, l'écouteur ne serait jamais posé.
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || !open) return;
     const onCancel = (e: Event) => {
       e.preventDefault();
       onClose();
     };
     el.addEventListener("cancel", onCancel);
     return () => el.removeEventListener("cancel", onCancel);
-  }, [onClose]);
+  }, [onClose, open]);
+
+  // Fermée = rien dans le DOM. Évite toute divergence d'hydratation entre le
+  // rendu serveur (où HTMLDialogElement n'existe pas) et le navigateur.
+  if (!open) return null;
 
   if (!supportsModal) {
-    if (!open) return null;
     return (
       <FallbackOverlay onClose={onClose} labelledBy={labelledBy} className={className}>
         {children}

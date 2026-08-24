@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import {
   CheckCircle2,
   ChevronRight,
@@ -12,7 +11,9 @@ import { useFormContext } from "react-hook-form";
 
 import { calculatePrice } from "@/lib/calculatePrice";
 import { useKreConfig } from "@/lib/config";
+import type { Messages } from "@/lib/i18n";
 import { useT } from "@/lib/i18n/useT";
+import type { Translator } from "@/lib/i18n/useT";
 import { quotePricingPreviewSchema, type QuoteFormDraft } from "@/lib/quote-schema";
 
 /** Emojis du matériel inclus — même ordre que `steps.included.materials`. */
@@ -25,6 +26,50 @@ function Badge({ children }: { children: React.ReactNode }) {
       {children}
     </span>
   );
+}
+
+/** Résumé « 3 débordantes · 2 ouvertes » des embouts configurés. */
+function summarizeEndCaps(
+  configs: QuoteFormDraft["stepEndCapConfigs"],
+  m: Messages,
+  t: Translator["t"],
+): string | null {
+  if (!configs || configs.length === 0) return null;
+  const plural = (n: number) => (n > 1 ? "s" : "");
+  const overhang = configs.filter((c) => c.cap === "OVERHANGING").length;
+  const open = configs.filter((c) => c.cap === "OPEN_STEP").length;
+  const parts: string[] = [];
+  if (overhang > 0) {
+    parts.push(
+      t(m.steps.included.endCapOverhanging, {
+        count: overhang,
+        plural: plural(overhang),
+      }),
+    );
+  }
+  if (open > 0) {
+    parts.push(
+      t(m.steps.included.endCapOpen, { count: open, plural: plural(open) }),
+    );
+  }
+  return parts.length > 0 ? parts.join(" · ") : m.steps.included.endCapNone;
+}
+
+/**
+ * Estimation affichée avant la capture du lead. `null` tant que la
+ * configuration est incomplète — le schéma d'aperçu fait office de garde.
+ */
+function previewPrice(values: QuoteFormDraft) {
+  const parsed = quotePricingPreviewSchema.safeParse({
+    riserOption: values.riserOption,
+    stepCount: values.stepCount,
+    widthBand: values.widthBand,
+    depthBand: values.depthBand,
+    stepConfigs: values.stepConfigs,
+    openSides: values.openSides,
+    intermediateLanding: values.intermediateLanding,
+  });
+  return parsed.success ? calculatePrice(parsed.data) : null;
 }
 
 function RecapRow({ label, value }: { label: string; value: string }) {
@@ -48,52 +93,11 @@ export function StepInclus() {
   const glueCount = stepCount > 0 ? Math.ceil(stepCount / 3) : null;
   const plural = (n: number) => (n > 1 ? "s" : "");
 
-  const endCapSummary = useMemo(() => {
-    const configs = values.stepEndCapConfigs;
-    if (!configs || configs.length === 0) return null;
-    const overhang = configs.filter((c) => c.cap === "OVERHANGING").length;
-    const open = configs.filter((c) => c.cap === "OPEN_STEP").length;
-    const parts: string[] = [];
-    if (overhang > 0) {
-      parts.push(
-        t(m.steps.included.endCapOverhanging, {
-          count: overhang,
-          plural: plural(overhang),
-        }),
-      );
-    }
-    if (open > 0) {
-      parts.push(
-        t(m.steps.included.endCapOpen, {
-          count: open,
-          plural: plural(open),
-        }),
-      );
-    }
-    return parts.length > 0 ? parts.join(" · ") : m.steps.included.endCapNone;
-  }, [values.stepEndCapConfigs, m, t]);
-
-  const estimate = useMemo(() => {
-    const parsed = quotePricingPreviewSchema.safeParse({
-      riserOption: values.riserOption,
-      stepCount: values.stepCount,
-      widthBand: values.widthBand,
-      depthBand: values.depthBand,
-      stepConfigs: values.stepConfigs,
-      openSides: values.openSides,
-      intermediateLanding: values.intermediateLanding,
-    });
-    if (!parsed.success) return null;
-    return calculatePrice(parsed.data);
-  }, [
-    values.riserOption,
-    values.stepCount,
-    values.widthBand,
-    values.depthBand,
-    values.stepConfigs,
-    values.openSides,
-    values.intermediateLanding,
-  ]);
+  // Pas de `useMemo` : le compilateur React de Next 16 mémoïse ces dérivations
+  // automatiquement, et une mémoïsation manuelle dont les dépendances incluent
+  // le dictionnaire de traduction l'empêche de compiler ce composant.
+  const endCapSummary = summarizeEndCaps(values.stepEndCapConfigs, m, t);
+  const estimate = previewPrice(values);
 
   return (
     <div className="space-y-8">

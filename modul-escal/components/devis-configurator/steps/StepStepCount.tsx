@@ -30,12 +30,12 @@ export function StepStepCount() {
           </span>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={asset("/etape/etape-4.jpg")}
+            src={asset("/etape/etape-4.webp")}
             alt={m.steps.stepCount.exampleAlt}
             loading="lazy"
             decoding="async"
-            width={480}
-            height={640}
+            width={560}
+            height={747}
             className="block w-full"
           />
         </div>

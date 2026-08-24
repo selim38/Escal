@@ -27,13 +27,32 @@ return [
         'verify_service_sid' => 'VAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',  // Twilio Verify (codes OTP/reset)
     ],
 
-    // ─── Origines autorisées (CORS) — pour le dev local ──────────────────
-    // En prod tout est sur escal.point-soft.fr (même origine), donc inutile,
-    // mais on autorise localhost pour développer le frontend en `next dev`.
+    // ─── Origines autorisées (CORS) ──────────────────────────────────────
+    // Le configurateur est aussi livré en Web Component <kre-configurateur>,
+    // intégré dans les pages WordPress de Knewledge : l'appel à leads.php et
+    // photos.php part alors d'une AUTRE origine que l'API. Toute origine qui
+    // héberge le composant doit figurer ici, sinon la soumission échoue en CORS.
     'cors_allowed_origins' => [
-        'http://localhost:3000',
+        // Développement
+        'http://localhost:3000',   // next dev
         'http://localhost:3001',
+        'http://localhost:5174',   // vite dev (build Web Component)
+        // Module autonome
         'https://escal.point-soft.fr',
+        // WordPress — staging Knewledge
+        'https://kitrenovationescalier.knewledge.com',
+        // WordPress — production
+        'https://kitrenovationescalier.fr',
+        'https://www.kitrenovationescalier.fr',
+    ],
+
+    // ─── Destinataires autorisés (attribut recipient-email du composant) ──
+    // L'attribut est public : il est lisible et modifiable dans le HTML de
+    // n'importe quelle page. Sans allowlist, il transformerait l'API en relais
+    // d'adresses arbitraires. Une valeur hors liste est ignorée et le lead est
+    // enregistré sans destinataire.
+    'allowed_recipient_emails' => [
+        'contact@escal-concept.fr',
     ],
 
     // Dossier de stockage des photos clients (relatif à api/ ou absolu)

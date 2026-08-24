@@ -105,6 +105,38 @@ function create_lead(): never
         ? sprintf('Devis estimé : %s € — %d marches', (int) round($estimated), $stepCount)
         : sprintf('Nouvelle demande — %d marches', $stepCount);
 
+    // ─── Intégration Web Component (WordPress) ─────────────────────────────
+    // `recipientEmail` vient de l'attribut HTML recipient-email, donc d'une page
+    // publique éditable : on ne le stocke que s'il figure dans l'allowlist du
+    // serveur, sinon l'API deviendrait un relais d'adresses arbitraires.
+    global $CONFIG;
+    $allowedRecipients = $CONFIG['allowed_recipient_emails'] ?? [];
+    $recipient = isset($b['recipientEmail']) && is_string($b['recipientEmail'])
+        && in_array($b['recipientEmail'], $allowedRecipients, true)
+            ? $b['recipientEmail']
+            : null;
+
+    // Origine réelle de la page hôte (en-tête navigateur, non falsifiable par
+    // le composant) : distingue les leads WordPress de ceux du module /calcul.
+    $origin = isset($_SERVER['HTTP_ORIGIN']) ? substr((string) $_SERVER['HTTP_ORIGIN'], 0, 255) : null;
+
+    // Paramètres de provenance (utm_*, gclid, fbclid) lus dans l'URL par le
+    // composant. Bornés en nombre et en taille : ils viennent du client.
+    $tracking = null;
+    if (isset($b['tracking']) && is_array($b['tracking'])) {
+        $clean = [];
+        foreach (array_slice($b['tracking'], 0, 12, true) as $key => $value) {
+            if (!is_string($key) || !is_scalar($value)) {
+                continue;
+            }
+            if (!preg_match('/^[a-z0-9_]{1,40}$/', $key)) {
+                continue;
+            }
+            $clean[$key] = substr((string) $value, 0, 255);
+        }
+        $tracking = $clean !== [] ? json_encode($clean, JSON_UNESCAPED_UNICODE) : null;
+    }
+
     $sql = "INSERT INTO leads (
         first_name, last_name, email, phone, country,
         decor, riser_option, step_count,
@@ -113,8 +145,9 @@ function create_lead(): never
         open_sides, intermediate_landing, landing_finish,
         step_end_cap, open_step_end_side, lateral_end_side,
         estimated_materials_eur, price_breakdown_json,
+        recipient_email, origin, tracking_json,
         status, last_snippet, unread_count
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, 1)";
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, 1)";
 
     try {
         $stmt = db()->prepare($sql);
@@ -139,6 +172,9 @@ function create_lead(): never
             $b['lateralEndSide'] ?? null,
             $estimated,
             $breakdownJson,
+            $recipient,
+            $origin,
+            $tracking,
             $snippet,
         ]);
         $id = (int) db()->lastInsertId();

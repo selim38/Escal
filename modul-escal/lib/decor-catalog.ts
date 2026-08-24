@@ -29,7 +29,7 @@ export function getCMImagePath(decor: Decor, riserOption: RiserOption): string |
   const slug = DECOR_SLUG[decor];
   const suffix = CM_SUFFIX[riserOption];
   if (suffix === undefined || !slug) return null;
-  return `/CM/${slug}${suffix}.jpg`;
+  return `/CM/${slug}${suffix}.webp`;
 }
 
 export type DecorCatalogEntry = {
@@ -47,56 +47,56 @@ export const DECOR_CATALOG: DecorCatalogEntry[] = [
   {
     id: "CHENE_NATUREL",
     swatch: "linear-gradient(135deg, #ecd9c4 0%, #ddb995 42%, #c9a06f 100%)",
-    imageSrc: "/decor/chene-naturel.jpg",
+    imageSrc: "/decor/chene-naturel.webp",
   },
   {
     id: "CHENE_VINTAGE",
     swatch: "linear-gradient(135deg, #c4a882 0%, #a0795a 50%, #7a5c40 100%)",
-    imageSrc: "/decor/chene-vintage.jpg",
+    imageSrc: "/decor/chene-vintage.webp",
   },
   {
     id: "CHENE_VINTAGE_GRIS",
     swatch: "linear-gradient(135deg, #b8b0a4 0%, #9a9088 50%, #7c706a 100%)",
-    imageSrc: "/decor/chene-vintage-gris.jpg",
+    imageSrc: "/decor/chene-vintage-gris.webp",
   },
   {
     id: "CHENE_CERUSE",
     swatch: "linear-gradient(135deg, #e8e0d8 0%, #d0c4b8 50%, #b8a898 100%)",
-    imageSrc: "/decor/chene-ceruse.jpg",
+    imageSrc: "/decor/chene-ceruse.webp",
   },
   {
     id: "NOYER",
     swatch: "linear-gradient(135deg, #8b5e3c 0%, #6b4228 50%, #4a2c18 100%)",
-    imageSrc: "/decor/noyer.jpg",
+    imageSrc: "/decor/noyer.webp",
   },
   {
     id: "NOYER_BLANC",
     swatch: "linear-gradient(135deg, #d4c4b0 0%, #b8a890 50%, #9c8c74 100%)",
-    imageSrc: "/decor/noyer-blanc.jpg",
+    imageSrc: "/decor/noyer-blanc.webp",
   },
   {
     id: "HETRE",
     swatch: "linear-gradient(135deg, #f0e4d0 0%, #dcc8a8 50%, #c4a880 100%)",
-    imageSrc: "/decor/hetre.jpg",
+    imageSrc: "/decor/hetre.webp",
   },
   {
     id: "PIN_RUSTIQUE",
     swatch: "linear-gradient(135deg, #e8d4b0 0%, #d0b888 50%, #b89860 100%)",
-    imageSrc: "/decor/pin-rustique.jpg",
+    imageSrc: "/decor/pin-rustique.webp",
   },
   {
     id: "GRIS_MINERAL",
     swatch: "linear-gradient(135deg, #c8c8c8 0%, #a8a8a8 50%, #888888 100%)",
-    imageSrc: "/decor/gris-mineral.jpg",
+    imageSrc: "/decor/gris-mineral.webp",
   },
   {
     id: "PIERRE_ANTHRACITE",
     swatch: "linear-gradient(135deg, #606060 0%, #404040 50%, #202020 100%)",
-    imageSrc: "/decor/pierre-anthracite.jpg",
+    imageSrc: "/decor/pierre-anthracite.webp",
   },
   {
     id: "PIERRE_BETON_GRIS",
     swatch: "linear-gradient(135deg, #b0b0a8 0%, #909088 50%, #707068 100%)",
-    imageSrc: "/decor/pierre-beton-gris.jpg",
+    imageSrc: "/decor/pierre-beton-gris.webp",
   },
 ];

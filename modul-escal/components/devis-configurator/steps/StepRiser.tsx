@@ -25,8 +25,6 @@ function CMPhoto({ src, label }: { src: string; label: string }) {
         alt={label}
         loading="lazy"
         decoding="async"
-        width={400}
-        height={112}
         onError={() => setFailed(true)}
         className="h-28 w-full object-cover"
       />

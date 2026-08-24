@@ -34,10 +34,12 @@ export function StepTreadPhotos({ layout, activeField }: Props) {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={asset(`/dimensions/${slug}-${suffix}.png`)}
+              src={asset(`/dimensions/${slug}-${suffix}.webp`)}
               alt={t(m.steps.dimensions.photoAlt, { field: label, layout: slug })}
               loading="lazy"
               decoding="async"
+              width={800}
+              height={1067}
               className="block w-full object-contain"
             />
             <p

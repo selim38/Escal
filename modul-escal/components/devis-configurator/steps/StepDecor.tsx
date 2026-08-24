@@ -53,8 +53,6 @@ export function StepDecor() {
                     alt=""
                     loading="lazy"
                     decoding="async"
-                    width={400}
-                    height={400}
                     className="absolute inset-0 h-full w-full scale-100 object-cover sm:scale-[1.25]"
                   />
                 ) : (

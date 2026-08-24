@@ -10,8 +10,8 @@ import { useFieldError } from "@/lib/useFieldError";
 import type { QuoteFormDraft, StaircaseType } from "@/lib/quote-schema";
 
 const PHOTOS: Record<StaircaseType, string> = {
-  CLOSED: "/escalier/ferme.jpg",
-  OPEN: "/escalier/ouvert.jpg",
+  CLOSED: "/escalier/ferme.webp",
+  OPEN: "/escalier/ouvert.webp",
 };
 
 function CasePhoto({ src, label }: { src: string; label: string }) {
@@ -26,8 +26,6 @@ function CasePhoto({ src, label }: { src: string; label: string }) {
           alt={label}
           loading="lazy"
           decoding="async"
-          width={640}
-          height={360}
           onError={() => setFailed(true)}
           className="absolute inset-0 h-full w-full object-cover"
         />
