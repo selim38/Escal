@@ -3,64 +3,20 @@
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { useT } from "@/lib/i18n/useT";
+import { useFieldError } from "@/lib/useFieldError";
 import type { QuoteFormDraft } from "@/lib/quote-schema";
 import { DEPTH_BAND_VALUES, WIDTH_BAND_VALUES } from "@/lib/quote-schema";
-import { DEPTH_LABELS, WIDTH_LABELS } from "@/lib/quote-labels";
-import { StepTreadPhotos } from "./StepTreadPhotos";
 import type { DimensionField } from "@/lib/step-config";
 
-/** Profondeur maximale autorisée (mm). Au-delà → popup "Contacter le support". */
-const MAX_DEPTH_MM = 630;
-
-function DepthBlockedModal({ onClose }: { onClose: () => void }) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="depth-modal-title"
-    >
-      <div className="mx-4 max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <div className="mb-3 flex items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-2xl">
-            ⚠️
-          </span>
-          <h2 id="depth-modal-title" className="text-base font-semibold text-gray-900">
-            Profondeur hors catalogue
-          </h2>
-        </div>
-        <p className="mb-1 text-sm text-gray-700">
-          Les marches avec une profondeur supérieure à{" "}
-          <strong>{MAX_DEPTH_MM} mm</strong> dépassent les dimensions
-          standard de notre catalogue.
-        </p>
-        <p className="mb-5 text-sm text-gray-700">
-          Pour une configuration sur-mesure, veuillez contacter notre support
-          technique directement.
-        </p>
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-          <a
-            href="mailto:contact@escal-concept.fr"
-            className="inline-flex w-full sm:w-auto items-center justify-center rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-amber-600"
-          >
-            Contacter le support
-          </a>
-          <button
-            onClick={onClose}
-            className="w-full sm:w-auto rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50"
-          >
-            Corriger la valeur
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+import { DepthBlockedModal, MAX_DEPTH_MM } from "../ui/DepthBlockedModal";
+import { StepTreadPhotos } from "./StepTreadPhotos";
 
 export function DimensionsBandsFields() {
-  const { register, formState, setValue } = useFormContext<QuoteFormDraft>();
-  const wErr = formState.errors.widthBand?.message;
-  const dErr = formState.errors.depthBand?.message;
+  const { register, setValue } = useFormContext<QuoteFormDraft>();
+  const wErr = useFieldError("widthBand");
+  const dErr = useFieldError("depthBand");
+  const { m } = useT();
 
   const [exactDepth, setExactDepth] = useState("");
   const [showDepthModal, setShowDepthModal] = useState(false);
@@ -68,31 +24,30 @@ export function DimensionsBandsFields() {
 
   function handleDepthBlur() {
     const val = Number(exactDepth);
-    if (exactDepth && !isNaN(val) && val > MAX_DEPTH_MM) {
+    if (exactDepth && !Number.isNaN(val) && val > MAX_DEPTH_MM) {
       setShowDepthModal(true);
       // Réinitialise la bande sélectionnée
-      setValue("depthBand", undefined as unknown as "D_LT_320", { shouldValidate: false });
+      setValue("depthBand", undefined, { shouldValidate: false });
     }
   }
 
   return (
     <>
-      {showDepthModal && (
-        <DepthBlockedModal
-          onClose={() => {
-            setExactDepth("");
-            setShowDepthModal(false);
-          }}
-        />
-      )}
+      <DepthBlockedModal
+        open={showDepthModal}
+        onClose={() => {
+          setExactDepth("");
+          setShowDepthModal(false);
+        }}
+      />
 
-      <div className="border-t border-border pt-8 space-y-6">
+      <div className="space-y-6 border-t border-border pt-8">
         <div className="space-y-1">
           <p className="text-sm font-medium text-brand">
-            Indiquez les fourchettes de mesure de vos marches.
+            {m.steps.dimensions.bandsIntro}
           </p>
           <p className="text-xs text-muted">
-            Tolérance de 1&nbsp;cm pour la longueur et de 1&nbsp;cm pour la profondeur.
+            {m.steps.dimensions.bandsTolerance}
           </p>
         </div>
 
@@ -100,61 +55,86 @@ export function DimensionsBandsFields() {
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Longueur */}
             <div className="space-y-2">
-              <label htmlFor="widthBand" className="text-sm font-medium text-brand">
-                Longueur
+              <label
+                htmlFor="kre-widthBand"
+                className="text-sm font-medium text-brand"
+              >
+                {m.steps.dimensions.lengthLabel}
               </label>
               <select
-                id="widthBand"
+                id="kre-widthBand"
+                aria-invalid={wErr ? true : undefined}
                 className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
                 onFocus={() => setFocusedField("widthBand")}
                 {...register("widthBand", { onBlur: () => setFocusedField(null) })}
               >
-                <option value="">Choisir…</option>
+                <option value="">{m.common.choose}</option>
                 {WIDTH_BAND_VALUES.map((w) => (
-                  <option key={w} value={w}>{WIDTH_LABELS[w]}</option>
+                  <option key={w} value={w}>
+                    {m.catalog.width[w]}
+                  </option>
                 ))}
               </select>
-              {wErr && <p className="text-sm text-red-600" role="alert">{wErr}</p>}
+              {wErr && (
+                <p className="text-sm text-red-600" role="alert">
+                  {wErr}
+                </p>
+              )}
             </div>
 
             {/* Profondeur */}
             <div className="space-y-2">
-              <label htmlFor="depthBand" className="text-sm font-medium text-brand">
-                Profondeur
+              <label
+                htmlFor="kre-depthBand"
+                className="text-sm font-medium text-brand"
+              >
+                {m.steps.dimensions.depthLabel}
               </label>
               <select
-                id="depthBand"
+                id="kre-depthBand"
+                aria-invalid={dErr ? true : undefined}
                 className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
                 onFocus={() => setFocusedField("depthBand")}
                 {...register("depthBand", { onBlur: () => setFocusedField(null) })}
               >
-                <option value="">Choisir…</option>
+                <option value="">{m.common.choose}</option>
                 {DEPTH_BAND_VALUES.map((d) => (
-                  <option key={d} value={d}>{DEPTH_LABELS[d]}</option>
+                  <option key={d} value={d}>
+                    {m.catalog.depth[d]}
+                  </option>
                 ))}
               </select>
-              {dErr && <p className="text-sm text-red-600" role="alert">{dErr}</p>}
+              {dErr && (
+                <p className="text-sm text-red-600" role="alert">
+                  {dErr}
+                </p>
+              )}
             </div>
 
             {/* Profondeur exacte */}
             <div className="space-y-2 sm:col-span-2">
-              <label htmlFor="exactDepth" className="text-sm font-medium text-brand">
-                Profondeur exacte{" "}
-                <span className="font-normal text-gray-400">(optionnel, mm)</span>
+              <label
+                htmlFor="kre-exactDepth"
+                className="text-sm font-medium text-brand"
+              >
+                {m.steps.dimensions.exactDepthLabel}{" "}
+                <span className="font-normal text-muted">
+                  {m.common.optionalMm}
+                </span>
               </label>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <input
-                  id="exactDepth"
+                  id="kre-exactDepth"
                   type="number"
                   min="1"
                   max="999"
-                  placeholder="ex. 280"
+                  placeholder={m.steps.dimensions.exactDepthPlaceholder}
                   value={exactDepth}
-                  onChange={e => setExactDepth(e.target.value)}
+                  onChange={(e) => setExactDepth(e.target.value)}
                   onBlur={handleDepthBlur}
-                  className="w-24 sm:w-40 rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+                  className="w-24 rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25 sm:w-40"
                 />
-                <span className="text-sm text-gray-400">mm</span>
+                <span className="text-sm text-muted">{m.common.mm}</span>
               </div>
             </div>
           </div>

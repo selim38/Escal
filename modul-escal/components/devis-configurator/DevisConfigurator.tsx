@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FieldPath, UseFormSetError } from "react-hook-form";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import type { z } from "zod";
@@ -16,10 +16,10 @@ import {
 } from "@/lib/quote-schema";
 
 import { calculatePrice } from "@/lib/calculatePrice";
-import { pendingPhotos } from "@/lib/pending-photos";
+import { KreConfigProvider, usePendingPhotos, useKreConfig, type KreConfig } from "@/lib/config";
+import { useT } from "@/lib/i18n/useT";
+import { useWizardTracking } from "@/lib/useWizardTracking";
 
-// Backend PHP. En prod : même domaine → "/api". En dev : NEXT_PUBLIC_API_BASE.
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api";
 import { ProgressBar } from "./ProgressBar";
 import { StepNavigation } from "./StepNavigation";
 import { StepStaircaseType } from "./steps/StepStaircaseType";
@@ -86,6 +86,12 @@ function WizardBody() {
   const { watch, getValues, setError, clearErrors, handleSubmit } =
     useFormContext<QuoteFormDraft>();
   const values = watch();
+  const config = useKreConfig();
+  const pendingPhotos = usePendingPhotos();
+  const { m, t } = useT();
+  const stepHeadingRef = useRef<HTMLDivElement>(null);
+  const isFinished = submitState.status === "success";
+  const tracking = useWizardTracking(currentStep, isFinished);
 
   const canGoNext = useMemo(() => {
     return validateWizardStep(currentStep, values);
@@ -95,6 +101,18 @@ function WizardBody() {
 
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === QUOTE_STEP_COUNT - 1;
+
+  // Déplace le focus en tête d'étape à chaque transition (navigation clavier
+  // et annonce lecteur d'écran) — sauf au premier rendu, pour ne pas voler le
+  // focus à la page WordPress hôte.
+  const mounted = useRef(false);
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+    stepHeadingRef.current?.focus();
+  }, [currentStep]);
 
   const goPrev = () => {
     if (currentStep === 0) return;
@@ -131,6 +149,8 @@ function WizardBody() {
       return;
     }
 
+    tracking.trackStepComplete(currentStep);
+
     // Depuis l'étape palier (5) : sauter l'étape parquet si non pertinente
     if (currentStep === STEP_PARQUET - 1 && !isParquetStep(stepValues)) {
       setCurrentStep(STEP_PARQUET + 1);
@@ -147,68 +167,93 @@ function WizardBody() {
     }
     setSubmitState({ status: "loading" });
 
-    if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
-      await new Promise(r => setTimeout(r, 800));
-      setSubmitState({ status: "success", leadId: "DEMO-001", estimatedMaterialsEuro: 0 });
+    const price = calculatePrice(res.data);
+
+    const succeed = (leadId: string, estimatedMaterialsEuro: number) => {
+      tracking.trackSubmit({
+        estimated_price: estimatedMaterialsEuro,
+        step_count: res.data.stepCount,
+        lead_id: leadId,
+      });
+      setSubmitState({ status: "success", leadId, estimatedMaterialsEuro });
+      redirectToConfirmation(config, leadId, estimatedMaterialsEuro);
+    };
+
+    if (config.demo) {
+      await new Promise((r) => setTimeout(r, 800));
+      succeed("DEMO-001", price.materialsSubtotal);
       return;
     }
 
     try {
       // Le prix est calculé côté client (export statique = pas de serveur Node),
       // puis transmis au backend PHP qui enregistre le lead.
-      const price = calculatePrice(res.data);
-      const response = await fetch(`${API_BASE}/leads.php`, {
+      const response = await fetch(`${config.endpoint}/leads.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...res.data,
           estimatedMaterialsEuro: price.materialsSubtotal,
           priceBreakdown: price.breakdown,
+          ...(config.recipientEmail ? { recipientEmail: config.recipientEmail } : {}),
+          ...(Object.keys(tracking.context).length > 0
+            ? { tracking: tracking.context }
+            : {}),
         }),
       });
       const json = await response.json();
-      if (!response.ok) throw new Error(json.error ?? "Erreur serveur");
+      if (!response.ok) throw new Error(json.error ?? m.common.serverError);
 
       // Upload des photos si présentes
       if (pendingPhotos.files.length > 0) {
         const fd = new FormData();
         fd.append("leadId", json.leadId);
         for (const file of pendingPhotos.files) fd.append("photos", file);
-        await fetch(`${API_BASE}/photos.php`, { method: "POST", body: fd }).catch(() => null);
+        await fetch(`${config.endpoint}/photos.php`, {
+          method: "POST",
+          body: fd,
+        }).catch(() => null);
         pendingPhotos.files = [];
       }
 
-      setSubmitState({
-        status: "success",
-        leadId: json.leadId,
-        estimatedMaterialsEuro: json.estimatedMaterialsEuro,
-      });
+      succeed(json.leadId, json.estimatedMaterialsEuro);
     } catch (err) {
       setSubmitState({
         status: "error",
-        message: err instanceof Error ? err.message : "Erreur inconnue",
+        message: err instanceof Error ? err.message : m.common.unknownError,
       });
     }
   };
 
   if (submitState.status === "success") {
     return (
-      <div className="rounded-2xl border border-border bg-surface p-8 shadow-lg shadow-brand/10 text-center space-y-4">
+      <div
+        className="rounded-2xl border border-border bg-surface p-8 text-center shadow-lg shadow-brand/10 space-y-4"
+        role="status"
+        aria-live="polite"
+      >
         <div className="flex justify-center">
-          <span className="flex size-16 items-center justify-center rounded-full bg-green-100 text-4xl">✅</span>
+          <span
+            aria-hidden
+            className="flex size-16 items-center justify-center rounded-full bg-green-100 text-4xl"
+          >
+            ✅
+          </span>
         </div>
-        <h2 className="text-xl font-semibold text-brand">Demande envoyée !</h2>
+        <h2 className="text-xl font-semibold text-brand">{m.success.title}</h2>
         <p className="text-sm text-muted">
-          Votre référence :{" "}
-          <span className="font-mono font-semibold text-foreground">{submitState.leadId}</span>
+          {m.success.reference}{" "}
+          <span className="font-mono font-semibold text-foreground">
+            {submitState.leadId}
+          </span>
         </p>
         <p className="text-sm text-muted">
-          Estimation matériaux :{" "}
-          <strong className="text-foreground">{submitState.estimatedMaterialsEuro} €</strong>
+          {m.success.estimate}{" "}
+          <strong className="text-foreground">
+            {submitState.estimatedMaterialsEuro} €
+          </strong>
         </p>
-        <p className="text-sm text-muted">
-          Notre équipe vous contactera sous 24&nbsp;h pour finaliser votre devis.
-        </p>
+        <p className="text-sm text-muted">{m.success.followUp}</p>
       </div>
     );
   }
@@ -220,6 +265,20 @@ function WizardBody() {
       noValidate
     >
       <ProgressBar currentStep={currentStep} totalSteps={QUOTE_STEP_COUNT} />
+
+      {/* Annonce le changement d'étape et reçoit le focus à chaque transition. */}
+      <div
+        ref={stepHeadingRef}
+        tabIndex={-1}
+        aria-live="polite"
+        className="sr-only"
+      >
+        {t(m.progress.announce, {
+          current: currentStep + 1,
+          total: QUOTE_STEP_COUNT,
+          name: m.progress.stepLabels[currentStep] ?? "",
+        })}
+      </div>
 
       <div className="mt-8 min-h-[280px]">
         {currentStep === 0 ? <StepStaircaseType /> : null}
@@ -235,7 +294,10 @@ function WizardBody() {
       </div>
 
       {submitState.status === "error" && (
-        <p className="mt-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-700" role="alert">
+        <p
+          className="mt-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-700"
+          role="alert"
+        >
           {submitState.message}
         </p>
       )}
@@ -252,15 +314,68 @@ function WizardBody() {
   );
 }
 
-export function DevisConfigurator() {
+/**
+ * Redirection après soumission (attribut `confirmation-url`).
+ * Différée pour laisser GTM émettre `devis_submit` avant la navigation.
+ */
+function redirectToConfirmation(
+  config: KreConfig,
+  leadId: string,
+  estimatedMaterialsEuro: number,
+) {
+  if (!config.confirmationUrl || typeof window === "undefined") return;
+  try {
+    const url = new URL(config.confirmationUrl, window.location.href);
+    url.searchParams.set("lead", leadId);
+    url.searchParams.set("estimate", String(estimatedMaterialsEuro));
+    window.setTimeout(() => window.location.assign(url.toString()), 400);
+  } catch {
+    console.warn("[kre-configurateur] confirmation-url invalide, redirection annulée.");
+  }
+}
+
+/** En-tête interne, rendu quand le composant n'est pas encadré par la page hôte. */
+function ConfiguratorHeader() {
+  const { m } = useT();
+  return (
+    <header className="mb-8 flex flex-col gap-1">
+      <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+        {m.app.eyebrow}
+      </p>
+      <h2 className="text-2xl font-bold tracking-tight text-brand sm:text-3xl">
+        {m.app.title}
+      </h2>
+      <p className="text-sm text-muted sm:text-base">{m.app.intro}</p>
+    </header>
+  );
+}
+
+function ConfiguratorShell() {
+  const { showHeader } = useKreConfig();
+  return (
+    <>
+      {showHeader ? <ConfiguratorHeader /> : null}
+      <WizardBody />
+    </>
+  );
+}
+
+export function DevisConfigurator({
+  config = {},
+}: {
+  /** Surcharges de configuration (attributs du Web Component, ou props en Next). */
+  config?: Partial<KreConfig>;
+} = {}) {
   const methods = useForm<QuoteFormDraft>({
     defaultValues,
     mode: "onChange",
   });
 
   return (
-    <FormProvider {...methods}>
-      <WizardBody />
-    </FormProvider>
+    <KreConfigProvider config={config}>
+      <FormProvider {...methods}>
+        <ConfiguratorShell />
+      </FormProvider>
+    </KreConfigProvider>
   );
 }

@@ -4,22 +4,49 @@
     {
       "name": "modul-escal",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "modul-escal", "run", "dev"],
+      "runtimeArgs": [
+        "--prefix",
+        "modul-escal",
+        "run",
+        "dev"
+      ],
       "port": 3030
     },
     {
       "name": "admin-escal",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "admin-escal", "run", "dev"],
+      "runtimeArgs": [
+        "--prefix",
+        "admin-escal",
+        "run",
+        "dev"
+      ],
       "port": 3031,
       "autoPort": true
     },
     {
       "name": "landing",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "3032", "--directory", "landing"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "3032",
+        "--directory",
+        "landing"
+      ],
       "port": 3032,
       "autoPort": true
+    },
+    {
+      "name": "wc-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "modul-escal",
+        "run",
+        "dev:wc"
+      ],
+      "port": 5174
     }
   ]
 }

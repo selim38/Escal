@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>kre-configurateur — page de référence</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #fff;
+      }
+      /* Largeur en px, identique à demo/hostile.html : la comparaison
+         d'empreinte de rendu n'a de sens qu'à conteneur égal. */
+      .page {
+        width: min(860px, 100%);
+        margin: 0 auto;
+        padding: 32px 0;
+      }
+      .note {
+        margin: 0 0 1.5rem;
+        padding: 0.75rem 1rem;
+        border-left: 3px solid #ff6d1b;
+        background: #fff7f2;
+        font-size: 0.875rem;
+        color: #5c4a3a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <p class="note">
+        Page de <strong>référence</strong> : styles hôtes neutres. Le rendu ici est
+        la cible que <code>demo/hostile.html</code> doit reproduire à l'identique.
+      </p>
+
+      <!-- assets-base="/" : en dev, Vite sert public/ à la racine. -->
+      <kre-configurateur lang="fr" theme="kre" assets-base="/" demo></kre-configurateur>
+    </div>
+
+    <script src="/demo/probe.js"></script>
+    <script type="module" src="/wc/element.ts"></script>
+  </body>
+</html>

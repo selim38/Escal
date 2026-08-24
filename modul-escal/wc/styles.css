@@ -1,0 +1,208 @@
+/**
+ * Feuille de styles du Web Component — injectée DANS le shadow root.
+ *
+ * Deux différences fondamentales avec `app/globals.css` :
+ *
+ * 1. Le **preflight de Tailwind v4 n'est pas importé**. Il cible `html`, `body` et
+ *    `*` : les deux premiers ne peuvent jamais matcher dans un shadow root, et on
+ *    veut de toute façon un reset scopé à `:host` plutôt qu'au document. On importe
+ *    donc `theme.css` et `utilities.css` séparément, et on écrit le reset ci-dessous.
+ *
+ * 2. Les styles de document (`body { background; color; font-family }`) sont
+ *    ré-ancrés sur `:host`.
+ */
+
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* Tokens de la charte, partagés avec le build Next. */
+@import "../lib/theme.css";
+
+/* Les classes utilitaires sont scannées dans les sources TSX. */
+@source "../components";
+@source "../lib";
+@source "./";
+
+@layer base {
+  /**
+   * Isolation de l'hôte.
+   *
+   * `all: initial` est volontairement évité : il couperait l'héritage des custom
+   * properties, dont dépendent tous les tokens. On neutralise uniquement les
+   * propriétés héritées qu'un thème WordPress est susceptible d'imposer.
+   */
+  :host {
+    display: block;
+    box-sizing: border-box;
+    background: var(--kre-background);
+    color: var(--kre-foreground);
+    font-family: var(--kre-font-sans);
+    font-size: 16px;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1.5;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-align: start;
+    text-indent: 0;
+    text-shadow: none;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: manual;
+    tab-size: 4;
+    direction: ltr;
+    list-style: disc outside none;
+    font-variant: normal;
+    font-feature-settings: normal;
+    font-variation-settings: normal;
+    text-decoration: none;
+    -webkit-text-stroke: 0;
+    cursor: auto;
+    visibility: visible;
+    opacity: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Évite le flash de contenu avant l'upgrade du custom element. */
+  :host(:not(:defined)) {
+    display: none;
+  }
+
+  /*
+   * Reset minimal, équivalent fonctionnel du preflight de Tailwind, scopé au
+   * shadow root. `*` matche bien les descendants du shadow root, mais pas ceux
+   * de la page hôte : l'isolation est totale dans les deux sens.
+   */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    border: 0 solid;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  ul,
+  ol {
+    list-style: none;
+  }
+
+  img,
+  svg,
+  video,
+  canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    vertical-align: middle;
+  }
+
+  button,
+  input,
+  select,
+  textarea,
+  optgroup {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  button,
+  [type="button"],
+  [type="submit"] {
+    appearance: button;
+    cursor: pointer;
+  }
+
+  button:disabled,
+  input:disabled,
+  select:disabled {
+    cursor: default;
+  }
+
+  ::placeholder {
+    opacity: 1;
+    color: color-mix(in oklab, currentColor 50%, transparent);
+  }
+
+  fieldset,
+  legend {
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  legend {
+    display: block;
+  }
+
+  hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+
+  table {
+    border-collapse: collapse;
+    text-indent: 0;
+  }
+
+  [hidden]:not([hidden="until-found"]) {
+    display: none !important;
+  }
+
+  /*
+   * `<dialog>` en top layer (voir components/devis-configurator/ui/KreDialog.tsx).
+   * `::backdrop` doit être stylé ici : la feuille du document hôte ne l'atteint pas.
+   */
+  dialog.kre-dialog {
+    border: 0;
+    max-width: min(512px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+
+  dialog.kre-dialog:not([open]) {
+    display: none;
+  }
+
+  dialog.kre-dialog::backdrop {
+    background: rgb(0 0 0 / 0.4);
+    backdrop-filter: blur(4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

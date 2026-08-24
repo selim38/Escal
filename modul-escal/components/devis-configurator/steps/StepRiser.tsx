@@ -6,18 +6,16 @@ import { useFormContext } from "react-hook-form";
 
 import { RISER_OPTIONS } from "@/lib/riser-options";
 import { getCMImagePath } from "@/lib/decor-catalog";
-import { asset } from "@/lib/asset";
+import { useAsset } from "@/lib/asset";
+import { useT } from "@/lib/i18n/useT";
+import { useFieldError } from "@/lib/useFieldError";
 import type { QuoteFormDraft, RiserOption } from "@/lib/quote-schema";
-
-function formatPricePerStep(price: number): string {
-  if (price === 0) return "Inclus";
-  return `+${price} € / marche`;
-}
 
 const WITH_RISER_OPTIONS = RISER_OPTIONS.filter((o) => o.id !== "NONE");
 
 function CMPhoto({ src, label }: { src: string; label: string }) {
   const [failed, setFailed] = useState(false);
+  const asset = useAsset();
   if (failed) return null;
   return (
     <div className="mb-3 overflow-hidden rounded-lg">
@@ -26,6 +24,9 @@ function CMPhoto({ src, label }: { src: string; label: string }) {
         src={asset(src)}
         alt={label}
         loading="lazy"
+        decoding="async"
+        width={400}
+        height={112}
         onError={() => setFailed(true)}
         className="h-28 w-full object-cover"
       />
@@ -34,11 +35,15 @@ function CMPhoto({ src, label }: { src: string; label: string }) {
 }
 
 export function StepRiser() {
-  const { watch, setValue, register, formState } = useFormContext<QuoteFormDraft>();
+  const { watch, setValue, register } = useFormContext<QuoteFormDraft>();
   const value = watch("riserOption");
   const decor = watch("decor");
-  const error = formState.errors.riserOption?.message;
-  const heightError = formState.errors.riserHeightMm?.message;
+  const error = useFieldError("riserOption");
+  const heightError = useFieldError("riserHeightMm");
+  const { m, t } = useT();
+
+  const formatPricePerStep = (price: number) =>
+    price === 0 ? m.steps.riser.included : t(m.steps.riser.pricePerStep, { price });
 
   const selectOption = (option: RiserOption) => {
     setValue("riserOption", option, { shouldValidate: true, shouldDirty: true });
@@ -47,29 +52,26 @@ export function StepRiser() {
   return (
     <div className="space-y-8">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold tracking-tight text-[#1e2a4a] sm:text-2xl">
-          Contremarches
+        <h2 className="text-xl font-bold tracking-tight text-heading sm:text-2xl">
+          {m.steps.riser.title}
         </h2>
-        <p className="text-sm font-medium text-[#1e2a4a]">
-          Choisir le décor des contremarches :
+        <p className="text-sm font-medium text-heading">
+          {m.steps.riser.subtitle}
         </p>
       </div>
 
-      <div className="mx-auto grid max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
+      <fieldset className="mx-auto grid max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
+        <legend className="sr-only">{m.steps.riser.subtitle}</legend>
         {WITH_RISER_OPTIONS.map((option) => {
           const selected = value === option.id;
           const photo = decor ? getCMImagePath(decor, option.id) : null;
+          const label = m.catalog.riser[option.id].label;
           return (
             <button
               key={option.id}
               type="button"
               onClick={() => selectOption(option.id)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  selectOption(option.id);
-                }
-              }}
+              aria-pressed={selected}
               className={`relative rounded-xl border-2 p-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:p-4 ${
                 selected
                   ? "border-primary bg-primary/5 ring-2 ring-primary/25"
@@ -81,12 +83,12 @@ export function StepRiser() {
                   <Check className="size-3.5 stroke-[3]" aria-hidden />
                 </span>
               )}
-              {photo && <CMPhoto src={photo} label={option.label} />}
+              {photo && <CMPhoto src={photo} label={label} />}
               <span className="block pr-8 text-base font-semibold text-brand">
-                {option.label}
+                {label}
               </span>
               <span className="mt-1 block text-sm text-muted">
-                {option.description}
+                {m.catalog.riser[option.id].description}
               </span>
               <span className="mt-3 inline-block rounded-full bg-muted-bg px-2.5 py-1 text-xs font-medium text-brand">
                 {formatPricePerStep(option.pricePerStep)}
@@ -94,7 +96,7 @@ export function StepRiser() {
             </button>
           );
         })}
-      </div>
+      </fieldset>
 
       {error && (
         <p className="text-center text-sm text-red-600" role="alert">
@@ -103,18 +105,25 @@ export function StepRiser() {
       )}
 
       <div className="mx-auto w-full max-w-xs space-y-2 text-center">
-        <label htmlFor="riserHeightMm" className="block text-sm font-medium text-brand">
-          Hauteur des contremarches{" "}
-          <span className="font-normal text-muted">(optionnel, mm)</span>
+        <label
+          htmlFor="kre-riserHeightMm"
+          className="block text-sm font-medium text-brand"
+        >
+          {m.steps.riser.heightLabel}{" "}
+          <span className="font-normal text-muted">
+            {m.steps.riser.heightOptional}
+          </span>
         </label>
         <div className="flex items-center justify-center gap-2">
           <input
-            id="riserHeightMm"
+            id="kre-riserHeightMm"
             type="number"
             inputMode="numeric"
             min={100}
             max={300}
-            placeholder="Ex. 175"
+            placeholder={m.steps.riser.heightPlaceholder}
+            aria-invalid={heightError ? true : undefined}
+            aria-describedby={heightError ? "kre-riserHeightMm-error" : undefined}
             className="w-32 rounded-lg border border-border bg-surface px-4 py-3 text-center text-lg text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
             {...register("riserHeightMm", {
               setValueAs: (v) => {
@@ -124,10 +133,14 @@ export function StepRiser() {
               },
             })}
           />
-          <span className="text-sm text-muted">mm</span>
+          <span className="text-sm text-muted">{m.common.mm}</span>
         </div>
         {heightError && (
-          <p className="text-sm text-red-600" role="alert">
+          <p
+            id="kre-riserHeightMm-error"
+            className="text-sm text-red-600"
+            role="alert"
+          >
             {heightError}
           </p>
         )}

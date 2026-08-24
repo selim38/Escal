@@ -1,5 +1,42 @@
 import { z } from "zod";
 
+import { vKey } from "@/lib/i18n/validation";
+
+/**
+ * Clés de messages de validation.
+ *
+ * Les schémas sont construits une seule fois au niveau module : ils ne peuvent
+ * pas connaître la locale de l'instance. Ils émettent donc des clés, traduites
+ * à l'affichage par `resolveMessage()` / `useFieldError()`.
+ */
+const V = {
+  chooseStepLayout: vKey("chooseStepLayout"),
+  selectWidth: vKey("selectWidth"),
+  selectDepth: vKey("selectDepth"),
+  staircaseTypeRequired: vKey("staircaseTypeRequired"),
+  decorRequired: vKey("decorRequired"),
+  riserOptionRequired: vKey("riserOptionRequired"),
+  riserHeightRequired: vKey("riserHeightRequired"),
+  integerRequired: vKey("integerRequired"),
+  riserHeightMin: vKey("riserHeightMin"),
+  riserHeightMax: vKey("riserHeightMax"),
+  stepCountRequired: vKey("stepCountRequired"),
+  stepCountMin: vKey("stepCountMin"),
+  stepCountMax: vKey("stepCountMax"),
+  uniformRequired: vKey("uniformRequired"),
+  landingFinishRequired: vKey("landingFinishRequired"),
+  seuilColorRequired: vKey("seuilColorRequired"),
+  endCapRequired: vKey("endCapRequired"),
+  endCapConfigsIncomplete: vKey("endCapConfigsIncomplete"),
+  stepConfigsIncomplete: vKey("stepConfigsIncomplete"),
+  firstNameRequired: vKey("firstNameRequired"),
+  lastNameRequired: vKey("lastNameRequired"),
+  emailInvalid: vKey("emailInvalid"),
+  phoneRequired: vKey("phoneRequired"),
+  countryRequired: vKey("countryRequired"),
+  answerRequired: vKey("answerRequired"),
+};
+
 export const DECOR_VALUES = [
   "CHENE_NATUREL",
   "CHENE_VINTAGE",
@@ -66,13 +103,13 @@ export type StaircaseType = (typeof STAIRCASE_TYPE_VALUES)[number];
 
 export const stepConfigSchema = z.object({
   layout: z.enum(STAIR_LAYOUT_VALUES, {
-    error: () => ({ message: "Choisissez un type de marche." }),
+    error: () => ({ message: V.chooseStepLayout }),
   }),
   widthBand: z.enum(WIDTH_BAND_VALUES, {
-    error: () => ({ message: "Sélectionnez une largeur." }),
+    error: () => ({ message: V.selectWidth }),
   }),
   depthBand: z.enum(DEPTH_BAND_VALUES, {
-    error: () => ({ message: "Sélectionnez une profondeur." }),
+    error: () => ({ message: V.selectDepth }),
   }),
   openSide: z.boolean().optional(),
 });
@@ -92,41 +129,41 @@ export function validateStepConfigs(
 
 export const stepDimensionsBandsSchema = z.object({
   widthBand: z.enum(WIDTH_BAND_VALUES, {
-    error: () => ({ message: "Sélectionnez une largeur." }),
+    error: () => ({ message: V.selectWidth }),
   }),
   depthBand: z.enum(DEPTH_BAND_VALUES, {
-    error: () => ({ message: "Sélectionnez une profondeur." }),
+    error: () => ({ message: V.selectDepth }),
   }),
 });
 
 export const quoteFormBaseSchema = z.object({
   staircaseType: z.enum(STAIRCASE_TYPE_VALUES, {
-    error: () => ({ message: "Indiquez le type d'escalier." }),
+    error: () => ({ message: V.staircaseTypeRequired }),
   }),
   decor: z.enum(DECOR_VALUES, {
-    error: () => ({ message: "Sélectionnez un décor." }),
+    error: () => ({ message: V.decorRequired }),
   }),
   riserOption: z.enum(RISER_OPTION_VALUES, {
-    error: () => ({ message: "Choisissez une finition de contremarche." }),
+    error: () => ({ message: V.riserOptionRequired }),
   }),
   riserHeightMm: z
     .number({
-      error: () => ({ message: "Indiquez la hauteur des contremarches." }),
+      error: () => ({ message: V.riserHeightRequired }),
     })
-    .int("Nombre entier requis.")
-    .min(100, "Minimum 100 mm.")
-    .max(300, "Maximum 300 mm.")
+    .int(V.integerRequired)
+    .min(100, V.riserHeightMin)
+    .max(300, V.riserHeightMax)
     .optional(),
   stepCount: z
     .number({
-      error: () => ({ message: "Indiquez le nombre de marches." }),
+      error: () => ({ message: V.stepCountRequired }),
     })
-    .int("Nombre entier requis.")
-    .min(1, "Minimum 1 marche.")
-    .max(30, "Maximum 30 marches."),
+    .int(V.integerRequired)
+    .min(1, V.stepCountMin)
+    .max(30, V.stepCountMax),
   uniformStepDimensions: z.boolean({
     error: () => ({
-      message: "Indiquez si toutes les marches ont les mêmes dimensions.",
+      message: V.uniformRequired,
     }),
   }),
   stepConfigs: z.array(stepConfigSchema.partial()).optional(),
@@ -135,24 +172,24 @@ export const quoteFormBaseSchema = z.object({
   openSides: z.boolean(),
   intermediateLanding: z.boolean(),
   landingFinish: z.enum(LANDING_FINISH_VALUES, {
-    error: () => ({ message: "Choisissez un type de marche palière." }),
+    error: () => ({ message: V.landingFinishRequired }),
   }),
   landingAreaM2: z.number().positive().optional(),
   wantPlinthes: z.boolean().optional(),
   plinthesML: z.number().positive().optional(),
   stepEndCap: z.enum(STEP_END_CAP_VALUES, {
-    error: () => ({ message: "Choisissez un type d’embout de marche." }),
+    error: () => ({ message: V.endCapRequired }),
   }).optional(),
   openStepEndSide: z.enum(END_SIDE_VALUES).optional(),
   lateralEndSide: z.enum(END_SIDE_VALUES).optional(),
   stepEndCapConfigs: z.array(stepEndCapConfigSchema).optional(),
   seuilColor: z.enum(SEUIL_COLOR_VALUES).optional(),
   contactPreference: z.enum(["WHATSAPP", "EMAIL"]).optional(),
-  firstName: z.string().min(1, "Le prénom est obligatoire."),
-  lastName: z.string().min(1, "Le nom est obligatoire."),
-  email: z.email({ error: () => ({ message: "E-mail invalide." }) }),
-  phone: z.string().min(1, "Le téléphone est obligatoire."),
-  country: z.string().min(1, "Le pays est obligatoire."),
+  firstName: z.string().min(1, V.firstNameRequired),
+  lastName: z.string().min(1, V.lastNameRequired),
+  email: z.email({ error: () => ({ message: V.emailInvalid }) }),
+  phone: z.string().min(1, V.phoneRequired),
+  country: z.string().min(1, V.countryRequired),
 });
 
 function refineDimensionsBranch(
@@ -164,21 +201,21 @@ function refineDimensionsBranch(
       ctx.addIssue({
         code: "custom",
         path: ["widthBand"],
-        message: "Sélectionnez une largeur.",
+        message: V.selectWidth,
       });
     }
     if (!data.depthBand) {
       ctx.addIssue({
         code: "custom",
         path: ["depthBand"],
-        message: "Sélectionnez une profondeur.",
+        message: V.selectDepth,
       });
     }
   } else if (!validateStepConfigs(data.stepConfigs, data.stepCount)) {
     ctx.addIssue({
       code: "custom",
       path: ["stepConfigs"],
-      message: "Configurez le type et les dimensions de chaque marche.",
+      message: V.stepConfigsIncomplete,
     });
   }
 }
@@ -384,7 +421,7 @@ export function getWizardStepFieldErrors(
       .safeParse({ uniformStepDimensions: values.uniformStepDimensions });
     if (!uniformRes.success) {
       errors.uniformStepDimensions =
-        uniformRes.error.issues[0]?.message ?? "Réponse requise.";
+        uniformRes.error.issues[0]?.message ?? V.answerRequired;
       return errors;
     }
 
@@ -406,13 +443,13 @@ export function getWizardStepFieldErrors(
     }
     return {
       stepConfigs:
-        "Configurez le type et les dimensions de chaque marche.",
+        V.stepConfigsIncomplete,
     };
   }
 
   if (step === 5) {
     if (!validateStepEndCapStep(values)) {
-      return { stepEndCapConfigs: "Configurez toutes les marches." };
+      return { stepEndCapConfigs: V.endCapConfigsIncomplete };
     }
     return {};
   }
@@ -421,9 +458,9 @@ export function getWizardStepFieldErrors(
     const errors: Partial<Record<keyof QuoteFormDraft, string>> = {};
     const finish = values.landingFinish;
     if (!finish || finish === "NONE") {
-      errors.landingFinish = "Choisissez un type de marche palière.";
+      errors.landingFinish = V.landingFinishRequired;
     } else if (finish === "NEZ_SEUIL" && !values.seuilColor) {
-      errors.seuilColor = "Choisissez la couleur du seuil.";
+      errors.seuilColor = V.seuilColorRequired;
     }
     return errors;
   }

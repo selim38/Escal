@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n/useT";
+
 type ProgressBarProps = {
   currentStep: number;
   totalSteps: number;
@@ -7,12 +9,13 @@ type ProgressBarProps = {
 
 export function ProgressBar({ currentStep, totalSteps }: ProgressBarProps) {
   const pct = Math.round(((currentStep + 1) / totalSteps) * 100);
+  const { m, t } = useT();
 
   return (
     <div className="space-y-2">
       <div className="flex justify-between text-sm text-muted">
         <span>
-          Étape {currentStep + 1} sur {totalSteps}
+          {t(m.progress.stepOf, { current: currentStep + 1, total: totalSteps })}
         </span>
         <span>{pct} %</span>
       </div>
@@ -22,10 +25,14 @@ export function ProgressBar({ currentStep, totalSteps }: ProgressBarProps) {
         aria-valuenow={currentStep + 1}
         aria-valuemin={1}
         aria-valuemax={totalSteps}
-        aria-label="Progression du configurateur"
+        aria-valuetext={t(m.progress.stepOf, {
+          current: currentStep + 1,
+          total: totalSteps,
+        })}
+        aria-label={m.progress.label}
       >
         <div
-          className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out"
+          className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out motion-reduce:transition-none"
           style={{ width: `${pct}%` }}
         />
       </div>

@@ -4,46 +4,45 @@ import { useState } from "react";
 import { Check, ChevronLeft } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
-import type { QuoteFormDraft, StepEndCapConfig, EndSide } from "@/lib/quote-schema";
+import { useT } from "@/lib/i18n/useT";
+import type {
+  QuoteFormDraft,
+  StepEndCapConfig,
+  EndSide,
+} from "@/lib/quote-schema";
 
 type SubStep = "between2Walls" | "capType" | "side";
 
-function btn(active: boolean) {
-  return `flex-1 rounded-xl border-2 px-4 py-4 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-    active
-      ? "border-primary bg-primary/5 ring-2 ring-primary/25 text-brand"
-      : "border-border bg-surface hover:border-brand-medium/35 text-brand"
-  }`;
+function btn() {
+  return "flex-1 rounded-xl border-2 border-border bg-surface px-4 py-4 text-sm font-semibold text-brand transition hover:border-brand-medium/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 }
 
 export function StepEndCap() {
   const { watch, setValue } = useFormContext<QuoteFormDraft>();
   const stepCount = watch("stepCount") ?? 0;
   const configs: StepEndCapConfig[] = watch("stepEndCapConfigs") ?? [];
+  const { m, t } = useT();
 
   // Sous-étape en cours pour la marche actuellement configurée
   const [subStep, setSubStep] = useState<SubStep>("between2Walls");
-  // Valeur intermédiaire avant de confirmer et passer à la marche suivante
-  const [pendingBetween2Walls, setPendingBetween2Walls] = useState<boolean | null>(null);
-  const [pendingCap, setPendingCap] = useState<"OPEN_STEP" | "OVERHANGING" | null>(null);
 
   const currentIndex = configs.length; // index de la prochaine marche à configurer
   const allDone = currentIndex >= stepCount;
 
   function saveConfig(config: StepEndCapConfig) {
     const next = [...configs, config];
-    setValue("stepEndCapConfigs", next, { shouldValidate: true, shouldDirty: true });
+    setValue("stepEndCapConfigs", next, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
     // Réinitialise l'état local pour la prochaine marche
     setSubStep("between2Walls");
-    setPendingBetween2Walls(null);
-    setPendingCap(null);
   }
 
   function handleBetween2Walls(yes: boolean) {
     if (yes) {
       saveConfig({ between2Walls: true, cap: "NONE" });
     } else {
-      setPendingBetween2Walls(false);
       setSubStep("capType");
     }
   }
@@ -52,7 +51,6 @@ export function StepEndCap() {
     if (cap === "OVERHANGING") {
       saveConfig({ between2Walls: false, cap: "OVERHANGING" });
     } else {
-      setPendingCap("OPEN_STEP");
       setSubStep("side");
     }
   }
@@ -63,60 +61,63 @@ export function StepEndCap() {
 
   function handleGoBack() {
     if (subStep === "side") {
-      setPendingCap(null);
       setSubStep("capType");
     } else if (subStep === "capType") {
-      setPendingBetween2Walls(null);
       setSubStep("between2Walls");
     }
   }
 
   function handleEditMarche(index: number) {
     const next = configs.slice(0, index);
-    setValue("stepEndCapConfigs", next, { shouldValidate: false, shouldDirty: true });
+    setValue("stepEndCapConfigs", next, {
+      shouldValidate: false,
+      shouldDirty: true,
+    });
     setSubStep("between2Walls");
-    setPendingBetween2Walls(null);
-    setPendingCap(null);
   }
 
   function capLabel(c: StepEndCapConfig) {
-    if (c.between2Walls) return "Entre 2 murs";
-    if (c.cap === "OVERHANGING") return "Débordante";
-    if (c.cap === "OPEN_STEP") return `Ouverte — ${c.side === "LEFT" ? "gauche" : "droite"}`;
-    return "—";
+    if (c.between2Walls) return m.steps.endCap.summaryBetween2Walls;
+    if (c.cap === "OVERHANGING") return m.steps.endCap.summaryOverhanging;
+    if (c.cap === "OPEN_STEP") {
+      return c.side === "LEFT"
+        ? m.steps.endCap.summaryOpenLeft
+        : m.steps.endCap.summaryOpenRight;
+    }
+    return m.steps.endCap.summaryNone;
   }
 
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold tracking-tight text-[#1e2a4a] sm:text-2xl">
-          Embout de marche
+        <h2 className="text-xl font-bold tracking-tight text-heading sm:text-2xl">
+          {m.steps.endCap.title}
         </h2>
-        <p className="text-sm text-muted">
-          Nous allons configurer chaque marche de bas en haut.
-        </p>
+        <p className="text-sm text-muted">{m.steps.endCap.subtitle}</p>
       </div>
 
       {/* Récap des marches déjà configurées */}
       {configs.length > 0 && (
-        <div className="mx-auto w-full max-w-sm space-y-1.5">
+        <ul className="mx-auto w-full max-w-sm space-y-1.5">
           {configs.map((c, i) => (
-            <div
+            <li
               key={i}
               className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-sm"
             >
-              <span className="font-medium text-brand">Marche {i + 1}</span>
+              <span className="font-medium text-brand">
+                {t(m.steps.endCap.stepLabel, { index: i + 1 })}
+              </span>
               <span className="text-muted">{capLabel(c)}</span>
               <button
                 type="button"
                 onClick={() => handleEditMarche(i)}
-                className="ml-3 text-xs text-primary underline-offset-2 hover:underline"
+                className="ml-3 rounded text-xs text-primary underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
-                Modifier
+                {m.common.edit}
               </button>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
 
       {/* Wizard pour la marche en cours */}
@@ -125,12 +126,17 @@ export function StepEndCap() {
           {/* En-tête de progression */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs text-muted">
-              <span>Marche {currentIndex + 1} sur {stepCount}</span>
+              <span>
+                {t(m.steps.endCap.progress, {
+                  index: currentIndex + 1,
+                  total: stepCount,
+                })}
+              </span>
               <span>{Math.round((currentIndex / stepCount) * 100)} %</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted-bg">
               <div
-                className="h-full rounded-full bg-primary transition-all"
+                className="h-full rounded-full bg-primary transition-all motion-reduce:transition-none"
                 style={{ width: `${(currentIndex / stepCount) * 100}%` }}
               />
             </div>
@@ -140,14 +146,24 @@ export function StepEndCap() {
           {subStep === "between2Walls" && (
             <div className="space-y-4">
               <p className="text-center text-sm font-semibold text-brand">
-                Votre marche {currentIndex + 1} est-elle prise entre 2 murs ?
+                {t(m.steps.endCap.askBetween2Walls, {
+                  index: currentIndex + 1,
+                })}
               </p>
               <div className="flex gap-3">
-                <button type="button" onClick={() => handleBetween2Walls(true)} className={btn(false)}>
-                  Oui
+                <button
+                  type="button"
+                  onClick={() => handleBetween2Walls(true)}
+                  className={btn()}
+                >
+                  {m.common.yes}
                 </button>
-                <button type="button" onClick={() => handleBetween2Walls(false)} className={btn(false)}>
-                  Non
+                <button
+                  type="button"
+                  onClick={() => handleBetween2Walls(false)}
+                  className={btn()}
+                >
+                  {m.common.no}
                 </button>
               </div>
             </div>
@@ -159,20 +175,28 @@ export function StepEndCap() {
               <button
                 type="button"
                 onClick={handleGoBack}
-                className="flex items-center gap-1 text-xs text-muted hover:text-brand"
+                className="flex items-center gap-1 rounded text-xs text-muted hover:text-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
-                <ChevronLeft className="size-3.5" />
-                Retour
+                <ChevronLeft className="size-3.5" aria-hidden />
+                {m.common.back}
               </button>
               <p className="text-center text-sm font-semibold text-brand">
-                Comment est cette marche côté ouvert ?
+                {m.steps.endCap.askCapType}
               </p>
               <div className="flex flex-col gap-3">
-                <button type="button" onClick={() => handleCapType("OVERHANGING")} className={btn(false)}>
-                  Marche débordante
+                <button
+                  type="button"
+                  onClick={() => handleCapType("OVERHANGING")}
+                  className={btn()}
+                >
+                  {m.steps.endCap.capOverhanging}
                 </button>
-                <button type="button" onClick={() => handleCapType("OPEN_STEP")} className={btn(false)}>
-                  Ouverte sur le côté
+                <button
+                  type="button"
+                  onClick={() => handleCapType("OPEN_STEP")}
+                  className={btn()}
+                >
+                  {m.steps.endCap.capOpenStep}
                 </button>
               </div>
             </div>
@@ -184,21 +208,31 @@ export function StepEndCap() {
               <button
                 type="button"
                 onClick={handleGoBack}
-                className="flex items-center gap-1 text-xs text-muted hover:text-brand"
+                className="flex items-center gap-1 rounded text-xs text-muted hover:text-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
-                <ChevronLeft className="size-3.5" />
-                Retour
+                <ChevronLeft className="size-3.5" aria-hidden />
+                {m.common.back}
               </button>
               <p className="text-center text-sm font-semibold text-brand">
-                De quel côté est-elle ouverte ?{" "}
-                <span className="font-normal text-muted">(vu du bas de l'escalier)</span>
+                {m.steps.endCap.askSide}{" "}
+                <span className="font-normal text-muted">
+                  {m.steps.endCap.askSideHint}
+                </span>
               </p>
               <div className="flex gap-3">
-                <button type="button" onClick={() => handleSide("LEFT")} className={btn(false)}>
-                  Gauche
+                <button
+                  type="button"
+                  onClick={() => handleSide("LEFT")}
+                  className={btn()}
+                >
+                  {m.catalog.endSide.LEFT}
                 </button>
-                <button type="button" onClick={() => handleSide("RIGHT")} className={btn(false)}>
-                  Droite
+                <button
+                  type="button"
+                  onClick={() => handleSide("RIGHT")}
+                  className={btn()}
+                >
+                  {m.catalog.endSide.RIGHT}
                 </button>
               </div>
             </div>
@@ -208,12 +242,15 @@ export function StepEndCap() {
 
       {/* Tout configuré */}
       {allDone && (
-        <div className="mx-auto flex w-full max-w-sm items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+        <div
+          className="mx-auto flex w-full max-w-sm items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3"
+          role="status"
+        >
           <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
-            <Check className="size-3.5 stroke-[3]" />
+            <Check className="size-3.5 stroke-[3]" aria-hidden />
           </span>
           <p className="text-sm font-medium text-emerald-800">
-            Toutes les marches sont configurées.
+            {m.steps.endCap.allDone}
           </p>
         </div>
       )}

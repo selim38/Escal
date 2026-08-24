@@ -1,0 +1,115 @@
+/**
+ * Tokens de la charte Kit Rénovation Escalier — source unique.
+ *
+ * Importé à la fois par `app/globals.css` (build Next) et par `wc/styles.css`
+ * (build Web Component). Le sélecteur `:root, :host` couvre les deux contextes.
+ *
+ * Les échelles d'espacement et de typographie sont volontairement exprimées en
+ * **px** et non en `rem` : dans une page WordPress, `rem` se résout contre le
+ * `font-size` du `<html>` du thème hôte (un `html { font-size: 62.5% }` réduirait
+ * tout le configurateur de 37,5 %). Le px garantit un rendu identique partout.
+ */
+
+/**
+ * Palette — thème « kre » par défaut.
+ *
+ * Le sélecteur couvre les deux modes de consommation : `:root` correspond au
+ * `<html>` du build Next, `:host` à l'élément `<kre-configurateur>`. Les custom
+ * properties héritent à travers la frontière du Shadow DOM, mais on les déclare
+ * sur `:host` pour que le composant reste autonome dans n'importe quelle page.
+ *
+ * Préfixe `--kre-` : évite toute collision avec les variables d'un thème WordPress.
+ * Un thème supplémentaire = un bloc `:host([theme="…"])` ci-dessous.
+ */
+:root,
+:host {
+  --kre-background: #f5f0eb;
+  --kre-foreground: #1a1a1a;
+  --kre-primary: #ff6d1b;
+  --kre-brand: #6b3010;
+  --kre-brand-medium: #7a3b10;
+  --kre-heading: #1e2a4a;
+  --kre-surface: #ffffff;
+  --kre-muted: #5c4a3a;
+  --kre-border: #d4c5b5;
+  --kre-muted-bg: #ebe4dc;
+
+  --kre-font-sans: "Geist", system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --kre-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@theme inline {
+  --color-background: var(--kre-background);
+  --color-foreground: var(--kre-foreground);
+  /* Orange vif — CTA, liens d’action */
+  --color-primary: var(--kre-primary);
+  /* Brun chocolat — titres, accents forts */
+  --color-brand: var(--kre-brand);
+  /* Brun moyen — accents secondaires */
+  --color-brand-medium: var(--kre-brand-medium);
+  /* Bleu nuit — titres d'étape */
+  --color-heading: var(--kre-heading);
+  /* Surfaces cartes */
+  --color-surface: var(--kre-surface);
+  /* Texte secondaire */
+  --color-muted: var(--kre-muted);
+  /* Gris chaud — bordures, pistes */
+  --color-border: var(--kre-border);
+  /* Fond légèrement plus marqué (hover, zones) */
+  --color-muted-bg: var(--kre-muted-bg);
+
+  --font-sans: var(--kre-font-sans);
+  --font-mono: var(--kre-font-mono);
+
+  /* Échelle d'espacement en px — voir commentaire d'en-tête. */
+  --spacing: 4px;
+
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 14px;
+  --text-sm--line-height: 20px;
+  --text-base: 16px;
+  --text-base--line-height: 24px;
+  --text-lg: 18px;
+  --text-lg--line-height: 28px;
+  --text-xl: 20px;
+  --text-xl--line-height: 28px;
+  --text-2xl: 24px;
+  --text-2xl--line-height: 32px;
+  --text-3xl: 30px;
+  --text-3xl--line-height: 36px;
+  --text-4xl: 36px;
+  --text-4xl--line-height: 40px;
+  --text-5xl: 48px;
+  --text-5xl--line-height: 1;
+
+  /*
+   * Largeurs de conteneur en px pour la même raison que l'échelle d'espacement :
+   * `max-w-2xl` valant 42rem, un thème hôte en `font-size: 62.5%` réduirait la
+   * grille de 672 px à 420 px (constaté sur demo/hostile.html).
+   * Les `--breakpoint-*` restent en rem : dans une media query, `rem` se résout
+   * contre la taille de police initiale (16 px) et non celle du `<html>`.
+   */
+  --container-3xs: 256px;
+  --container-2xs: 288px;
+  --container-xs: 320px;
+  --container-sm: 384px;
+  --container-md: 448px;
+  --container-lg: 512px;
+  --container-xl: 576px;
+  --container-2xl: 672px;
+  --container-3xl: 768px;
+  --container-4xl: 896px;
+  --container-5xl: 1024px;
+  --container-6xl: 1152px;
+  --container-7xl: 1280px;
+
+  --radius-sm: 2px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+  --radius-full: 9999px;
+}

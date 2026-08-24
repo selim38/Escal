@@ -1,12 +1,29 @@
-/**
- * Préfixe les chemins d'assets publics par le basePath de l'app.
- * DOIT correspondre au `basePath` de next.config.ts ("/calcul").
- * Nécessaire car en export statique sous sous-dossier, next/image (unoptimized)
- * ne préfixe pas le basePath au src → 404 sur /decor/... au lieu de /calcul/decor/...
- */
-export const BASE_PATH = "/calcul";
+"use client";
 
-/** Renvoie l'URL publique correcte (ex. asset("/decor/x.jpg") → "/calcul/decor/x.jpg"). */
-export function asset(path: string): string {
-  return `${BASE_PATH}${path.startsWith("/") ? "" : "/"}${path}`;
+import { useCallback } from "react";
+
+import { useKreConfig } from "@/lib/config";
+
+/**
+ * Résolution des URLs d'assets publics.
+ *
+ * La base n'est plus une constante : elle dépend du mode de consommation.
+ *   - build Next (export statique sous /calcul) → "/calcul"
+ *   - Web Component → dérivée de l'URL du script, ou de l'attribut `assets-base`
+ *
+ * Un chemin absolu (http/https, //, data:) est renvoyé tel quel.
+ */
+export function assetUrl(base: string, path: string): string {
+  if (/^(https?:)?\/\//i.test(path) || path.startsWith("data:") || path.startsWith("blob:")) {
+    return path;
+  }
+  const cleanBase = base.replace(/\/+$/, "");
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `${cleanBase}${cleanPath}`;
+}
+
+/** Hook d'accès à `asset()` avec la base de l'instance courante. */
+export function useAsset(): (path: string) => string {
+  const { assetsBase } = useKreConfig();
+  return useCallback((path: string) => assetUrl(assetsBase, path), [assetsBase]);
 }

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Merci — page de confirmation de test</title>
+    <style>body{font-family:system-ui,sans-serif;padding:3rem;max-width:40rem;margin:auto}</style>
+  </head>
+  <body>
+    <h1>Page de confirmation (test)</h1>
+    <p>
+      Cible de l'attribut <code>confirmation-url</code>. Les paramètres
+      <code>lead</code> et <code>estimate</code> sont ajoutés par le composant.
+    </p>
+    <pre id="q"></pre>
+    <script>
+      document.getElementById("q").textContent = location.search || "(aucun paramètre)";
+    </script>
+  </body>
+</html>

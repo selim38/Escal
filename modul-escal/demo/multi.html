@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>kre-configurateur — deux instances</title>
+    <style>
+      body { margin: 0; font-family: system-ui, sans-serif; background: #fff; }
+      .col { width: 620px; padding: 24px 0; }
+      .wrap { display: flex; gap: 32px; justify-content: center; }
+      .note { font: 13px/1.5 monospace; color: #5c4a3a; background: #f7f2ec; padding: 8px 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="col">
+        <p class="note">Instance A — sans CTA échantillon</p>
+        <kre-configurateur lang="fr" theme="kre" assets-base="/" demo></kre-configurateur>
+      </div>
+      <div class="col">
+        <p class="note">
+          Instance B — show-sample-cta + recipient-email + confirmation-url
+        </p>
+        <kre-configurateur
+          lang="fr"
+          theme="kre"
+          assets-base="/"
+          demo
+          show-sample-cta
+          recipient-email="contact@escal-concept.fr"
+          confirmation-url="/demo/merci.html"
+          show-header="false"
+        ></kre-configurateur>
+      </div>
+    </div>
+
+    <script src="/demo/probe.js"></script>
+    <script type="module" src="/wc/element.ts"></script>
+  </body>
+</html>

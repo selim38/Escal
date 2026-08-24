@@ -1,18 +1,13 @@
 "use client";
 
-import { asset } from "@/lib/asset";
+import { useAsset } from "@/lib/asset";
+import { useT } from "@/lib/i18n/useT";
 import type { DimensionField } from "@/lib/step-config";
 import type { StairLayout } from "@/lib/quote-schema";
 
-const LAYOUT_SLUG: Record<StairLayout, string> = {
-  STRAIGHT: "droite",
-  BALANCED: "tournante",
-  FIVE_SIDED: "cercueil",
-};
-
-const PHOTOS: Array<{ field: DimensionField; label: string; suffix: string }> = [
-  { field: "widthBand", label: "Longueur", suffix: "longueur" },
-  { field: "depthBand", label: "Profondeur", suffix: "profondeur" },
+const PHOTO_FIELDS: Array<{ field: DimensionField; suffix: string }> = [
+  { field: "widthBand", suffix: "longueur" },
+  { field: "depthBand", suffix: "profondeur" },
 ];
 
 type Props = {
@@ -21,12 +16,15 @@ type Props = {
 };
 
 export function StepTreadPhotos({ layout, activeField }: Props) {
-  const slug = LAYOUT_SLUG[layout];
+  const asset = useAsset();
+  const { m, t } = useT();
+  const slug = m.steps.dimensions.layoutSlug[layout];
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      {PHOTOS.map(({ field, label, suffix }) => {
+      {PHOTO_FIELDS.map(({ field, suffix }) => {
         const active = activeField === field;
+        const label = m.catalog.dimensionField[field];
         return (
           <div
             key={field}
@@ -37,8 +35,9 @@ export function StepTreadPhotos({ layout, activeField }: Props) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={asset(`/dimensions/${slug}-${suffix}.png`)}
-              alt={`${label} — marche ${slug}`}
+              alt={t(m.steps.dimensions.photoAlt, { field: label, layout: slug })}
               loading="lazy"
+              decoding="async"
               className="block w-full object-contain"
             />
             <p

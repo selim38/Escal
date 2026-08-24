@@ -3,42 +3,47 @@
 import { Check } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
-import type { QuoteFormDraft, LandingFinish, SeuilColor } from "@/lib/quote-schema";
+import { useT } from "@/lib/i18n/useT";
+import { useFieldError } from "@/lib/useFieldError";
+import type {
+  QuoteFormDraft,
+  LandingFinish,
+  SeuilColor,
+} from "@/lib/quote-schema";
 
-const SEUIL_COLORS: Array<{ value: SeuilColor; label: string; hex: string }> = [
-  { value: "OR",        label: "Or",        hex: "#C9A84C" },
-  { value: "NOIR",      label: "Noir",      hex: "#1C1C1C" },
-  { value: "ALUMINIUM", label: "Aluminium", hex: "#A8A9AD" },
-];
+/** Pastilles de couleur du seuil — données, libellés dans `catalog.seuilColor`. */
+const SEUIL_COLOR_HEX: Record<SeuilColor, string> = {
+  OR: "#C9A84C",
+  NOIR: "#1C1C1C",
+  ALUMINIUM: "#A8A9AD",
+};
 
-const CHOICES: Array<{
-  value: LandingFinish;
-  label: string;
-  description: string;
-  note: string;
-}> = [
-  {
-    value: "NEZ_SEUIL",
-    label: "Nez + seuil",
-    description: "Nez de marche avec seuil décoratif pour finir le palier.",
-    note: "À choisir si vous ne prenez pas le parquet chez nous.",
-  },
-  {
-    value: "NEZ_RACCORD_PARQUET",
-    label: "Nez de raccord parquet",
-    description: "Nez de raccord fourni avec votre commande de parquet.",
-    note: "Inclus automatiquement si vous prenez le parquet chez nous.",
-  },
-];
+const SEUIL_COLORS: SeuilColor[] = ["OR", "NOIR", "ALUMINIUM"];
 
 export function StepLanding() {
-  const { watch, setValue, formState } = useFormContext<QuoteFormDraft>();
+  const { watch, setValue } = useFormContext<QuoteFormDraft>();
   const landingFinish = watch("landingFinish");
   const seuilColor = watch("seuilColor");
+  const finishError = useFieldError("landingFinish");
+  const seuilError = useFieldError("seuilColor");
+  const { m } = useT();
+
+  const choices: Array<{
+    value: LandingFinish;
+    label: string;
+    description: string;
+    note: string;
+  }> = [
+    { value: "NEZ_SEUIL", ...m.steps.landing.nezSeuil },
+    { value: "NEZ_RACCORD_PARQUET", ...m.steps.landing.nezRaccordParquet },
+  ];
 
   const setLanding = (next: LandingFinish) => {
     setValue("landingFinish", next, { shouldValidate: true, shouldDirty: true });
-    setValue("intermediateLanding", true, { shouldValidate: true, shouldDirty: true });
+    setValue("intermediateLanding", true, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
     if (next !== "NEZ_SEUIL") {
       setValue("seuilColor", undefined, { shouldValidate: true });
     }
@@ -51,22 +56,22 @@ export function StepLanding() {
   return (
     <div className="space-y-8">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold tracking-tight text-[#1e2a4a] sm:text-2xl">
-          Marche palière
+        <h2 className="text-xl font-bold tracking-tight text-heading sm:text-2xl">
+          {m.steps.landing.title}
         </h2>
-        <p className="text-sm text-muted">
-          Choisissez le type de finition pour votre marche palière.
-        </p>
+        <p className="text-sm text-muted">{m.steps.landing.subtitle}</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {CHOICES.map((choice) => {
+      <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <legend className="sr-only">{m.steps.landing.subtitle}</legend>
+        {choices.map((choice) => {
           const isActive = landingFinish === choice.value;
           return (
             <button
               key={choice.value}
               type="button"
               onClick={() => setLanding(choice.value)}
+              aria-pressed={isActive}
               className={`relative w-full rounded-xl border-2 p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                 isActive
                   ? "border-primary bg-primary/5 ring-2 ring-primary/25"
@@ -90,49 +95,57 @@ export function StepLanding() {
             </button>
           );
         })}
-      </div>
+      </fieldset>
 
-      {formState.errors.landingFinish?.message && (
+      {finishError && (
         <p className="text-center text-sm text-red-600" role="alert">
-          {formState.errors.landingFinish.message}
+          {finishError}
         </p>
       )}
 
       {/* Choix couleur seuil — uniquement pour NEZ_SEUIL */}
       {landingFinish === "NEZ_SEUIL" && (
-        <div className="space-y-3">
-          <p className="text-sm font-medium text-brand">Couleur du seuil</p>
+        <fieldset className="space-y-3">
+          <legend className="text-sm font-medium text-brand">
+            {m.steps.landing.seuilColorLabel}
+          </legend>
           <div className="flex flex-wrap gap-3">
-            {SEUIL_COLORS.map((c) => {
-              const active = seuilColor === c.value;
+            {SEUIL_COLORS.map((id) => {
+              const active = seuilColor === id;
               return (
                 <button
-                  key={c.value}
+                  key={id}
                   type="button"
-                  onClick={() => setSeuilColor(c.value)}
+                  onClick={() => setSeuilColor(id)}
+                  aria-pressed={active}
                   className={`flex items-center gap-2.5 rounded-xl border-2 px-4 py-2.5 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                     active
-                      ? "border-primary bg-primary/5 ring-2 ring-primary/25 text-brand"
+                      ? "border-primary bg-primary/5 text-brand ring-2 ring-primary/25"
                       : "border-border bg-surface text-muted hover:border-brand-medium/35"
                   }`}
                 >
                   <span
                     className="size-4 shrink-0 rounded-full border border-black/10"
-                    style={{ backgroundColor: c.hex }}
+                    style={{ backgroundColor: SEUIL_COLOR_HEX[id] }}
                     aria-hidden
                   />
-                  {c.label}
-                  {active && <Check className="ml-1 size-3.5 stroke-[3] text-emerald-500" aria-hidden />}
+                  {m.catalog.seuilColor[id]}
+                  {active && (
+                    <Check
+                      className="ml-1 size-3.5 stroke-[3] text-emerald-500"
+                      aria-hidden
+                    />
+                  )}
                 </button>
               );
             })}
           </div>
-          {formState.errors.seuilColor?.message && (
+          {seuilError && (
             <p className="text-sm text-red-600" role="alert">
-              {formState.errors.seuilColor.message}
+              {seuilError}
             </p>
           )}
-        </div>
+        </fieldset>
       )}
     </div>
   );

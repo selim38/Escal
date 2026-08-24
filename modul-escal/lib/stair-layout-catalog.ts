@@ -1,25 +1,7 @@
-import type { StairLayout } from "@/lib/quote-schema";
+import { STAIR_LAYOUT_VALUES, type StairLayout } from "@/lib/quote-schema";
 
-export type StairLayoutEntry = {
-  id: StairLayout;
-  label: string;
-  description: string;
-};
-
-export const STAIR_LAYOUT_OPTIONS: StairLayoutEntry[] = [
-  {
-    id: "STRAIGHT",
-    label: "Droite",
-    description: "Marche droite, sans changement de direction.",
-  },
-  {
-    id: "BALANCED",
-    label: "Tournante",
-    description: "Marche tournante (palier ou retour d'angle).",
-  },
-  {
-    id: "FIVE_SIDED",
-    label: "Cercueil",
-    description: "Marche en cercueil : longueur max. et profondeur max.",
-  },
-];
+/**
+ * Ordre d'affichage des types de marche. Les libellés vivent dans
+ * `lib/i18n/<locale>.ts` sous `catalog.layout`.
+ */
+export const STAIR_LAYOUT_OPTIONS: StairLayout[] = [...STAIR_LAYOUT_VALUES];

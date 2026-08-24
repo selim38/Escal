@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>kre-configurateur — page hôte hostile</title>
+    <style>
+      /*
+       * Reproduit ce qu'un thème / page builder WordPress fait de pire.
+       * Le configurateur doit rendre à l'identique de index.html malgré tout ça.
+       */
+
+      /* 1. Échelle rem cassée — le piège classique (`font-size: 62.5%`). */
+      html {
+        font-size: 62.5%;
+      }
+
+      /* 2. box-sizing inversé. */
+      *,
+      *::before,
+      *::after {
+        box-sizing: content-box !important;
+      }
+
+      /* 3. Reset agressif des contrôles de formulaire. */
+      button,
+      input,
+      select {
+        all: unset;
+        display: inline;
+      }
+
+      /* 4. Typographie et couleurs imposées globalement. */
+      body {
+        margin: 0;
+        font-family: "Comic Sans MS", "Brush Script MT", cursive;
+        font-size: 2.4rem;
+        line-height: 3;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #00aa00;
+        background: #101020;
+      }
+
+      /* 5. Styles d'éléments qui fuiraient sans Shadow DOM. */
+      h2,
+      h3 {
+        color: magenta !important;
+        font-size: 5rem !important;
+      }
+      p {
+        color: cyan !important;
+      }
+      a {
+        color: red !important;
+        text-decoration: underline wavy !important;
+      }
+      img {
+        border: 5px dashed lime !important;
+        filter: invert(1) !important;
+      }
+      ul,
+      li {
+        list-style: square inside !important;
+      }
+
+      /* 6. Header sticky à z-index absurde — doit passer SOUS la modale. */
+      .theme-header {
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        padding: 1.5rem;
+        background: #ff00aa;
+        color: #fff;
+        font-weight: bold;
+      }
+
+      /*
+       * 7. Ancêtre qui crée un bloc conteneur ET un contexte d'empilement.
+       *    C'est le cas qui casse un overlay `position: fixed` : la modale doit
+       *    passer par la top layer (<dialog>) pour y échapper.
+       */
+      .animated-section {
+        transform: translateZ(0);
+        will-change: transform;
+        filter: saturate(1.05);
+        contain: paint;
+        /* Même largeur en px que index.html — cf. probe.js. */
+        width: min(860px, 100%);
+        padding: 32px 0;
+        margin: 0 auto;
+      }
+
+      .note {
+        max-width: 80rem;
+        margin: 0 auto 2rem;
+        padding: 1rem;
+        background: #202040;
+        color: #ffd;
+        font-size: 1.4rem;
+        line-height: 1.6;
+        text-transform: none;
+        letter-spacing: normal;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="theme-header">Header sticky du thème — z-index: 9999</div>
+
+    <div class="animated-section">
+      <p class="note">
+        Page <strong>hostile</strong> : html à 62.5 %, content-box forcé,
+        <code>button/input/select { all: unset }</code>, Comic Sans en 2.4rem
+        majuscules, couleurs !important sur h2/h3/p/a/img/li, ancêtre en
+        <code>transform + will-change + contain: paint</code>, header sticky en
+        z-index 9999.<br />
+        Critère de réussite : rendu identique à <code>/index.html</code>, et la
+        modale « profondeur &gt; 630 mm » passe au-dessus du header rose.
+      </p>
+
+      <kre-configurateur
+        lang="fr"
+        theme="kre"
+        assets-base="/"
+        demo
+      ></kre-configurateur>
+    </div>
+
+    <script src="/demo/probe.js"></script>
+    <script type="module" src="/wc/element.ts"></script>
+  </body>
+</html>

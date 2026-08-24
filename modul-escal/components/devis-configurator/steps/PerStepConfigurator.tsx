@@ -6,7 +6,6 @@ import { useFormContext } from "react-hook-form";
 
 import {
   createDefaultStepConfig,
-  DIMENSION_FIELD_LABELS,
   ensureStepConfigs,
   type DimensionField,
   type StepConfigDraft,
@@ -14,22 +13,20 @@ import {
 import { STAIR_LAYOUT_OPTIONS } from "@/lib/stair-layout-catalog";
 import type { QuoteFormDraft, StairLayout } from "@/lib/quote-schema";
 import { DEPTH_BAND_VALUES, WIDTH_BAND_VALUES } from "@/lib/quote-schema";
-
-import { DEPTH_LABELS, WIDTH_LABELS } from "@/lib/quote-labels";
+import { useT } from "@/lib/i18n/useT";
+import { useFieldError } from "@/lib/useFieldError";
 
 import { StepTreadPhotos } from "./StepTreadPhotos";
 
 export function PerStepConfigurator() {
-  const { watch, setValue, formState } = useFormContext<QuoteFormDraft>();
+  const { watch, setValue } = useFormContext<QuoteFormDraft>();
   const stepCount = watch("stepCount") ?? 1;
   const stepConfigs = watch("stepConfigs") ?? [];
   const [activeIndex, setActiveIndex] = useState(0);
   const [focusedField, setFocusedField] = useState<DimensionField | null>(null);
+  const { m, t } = useT();
 
-  const rootError =
-    typeof formState.errors.stepConfigs?.message === "string"
-      ? formState.errors.stepConfigs.message
-      : undefined;
+  const rootError = useFieldError("stepConfigs");
 
   useEffect(() => {
     const next = ensureStepConfigs(stepConfigs, stepCount);
@@ -56,22 +53,29 @@ export function PerStepConfigurator() {
     setFocusedField(null);
   };
 
+  const widthLabel =
+    layout === "BALANCED"
+      ? m.steps.perStep.lengthBalanced
+      : layout === "FIVE_SIDED"
+        ? m.steps.perStep.lengthFiveSided
+        : m.catalog.dimensionField.widthBand;
+
+  const depthLabel =
+    layout === "FIVE_SIDED"
+      ? m.steps.perStep.depthFiveSided
+      : m.catalog.dimensionField.depthBand;
+
   return (
     <div className="space-y-6 border-t border-border pt-8">
       <div className="text-center">
-        <p className="text-sm font-medium text-brand">
-          Configurez chaque marche individuellement
-        </p>
-        <p className="mt-1 text-xs text-muted">
-          Type, longueur et profondeur — les photos indiquent les mesures demandées.
-        </p>
+        <p className="text-sm font-medium text-brand">{m.steps.perStep.intro}</p>
+        <p className="mt-1 text-xs text-muted">{m.steps.perStep.hint}</p>
       </div>
 
       <div className="flex flex-nowrap items-center justify-center gap-3 overflow-x-auto sm:flex-wrap sm:gap-2">
         {Array.from({ length: stepCount }, (_, i) => {
           const cfg = stepConfigs[i];
-          const complete =
-            cfg?.layout && cfg?.widthBand && cfg?.depthBand;
+          const complete = cfg?.layout && cfg?.widthBand && cfg?.depthBand;
           const isActive = i === activeIndex;
           return (
             <button
@@ -81,14 +85,14 @@ export function PerStepConfigurator() {
                 setActiveIndex(i);
                 setFocusedField(null);
               }}
-              className={`flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition sm:size-9 ${
+              className={`flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:size-9 ${
                 isActive
                   ? "bg-primary text-white shadow-sm"
                   : complete
                     ? "border-2 border-emerald-500/60 bg-emerald-50 text-emerald-700"
                     : "border border-border bg-surface text-muted hover:border-brand-medium/40"
               }`}
-              aria-label={`Marche ${i + 1}`}
+              aria-label={t(m.steps.perStep.stepAria, { index: i + 1 })}
               aria-current={isActive ? "step" : undefined}
             >
               {complete && !isActive ? (
@@ -106,62 +110,66 @@ export function PerStepConfigurator() {
           type="button"
           disabled={activeIndex === 0}
           onClick={() => setActiveIndex((i) => i - 1)}
-          className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-border px-3 py-2.5 text-sm text-brand disabled:opacity-40 sm:flex-none sm:py-1.5"
+          className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-border px-3 py-2.5 text-sm text-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-40 sm:flex-none sm:py-1.5"
         >
           <ChevronLeft className="size-4" aria-hidden />
-          Précédente
+          {m.steps.perStep.previous}
         </button>
-        <span className="text-sm font-semibold text-brand">
-          Marche {activeIndex + 1} / {stepCount}
+        <span className="text-sm font-semibold text-brand" aria-live="polite">
+          {t(m.steps.perStep.counter, {
+            index: activeIndex + 1,
+            total: stepCount,
+          })}
         </span>
         <button
           type="button"
           disabled={activeIndex >= stepCount - 1}
           onClick={() => setActiveIndex((i) => i + 1)}
-          className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-border px-3 py-2.5 text-sm text-brand disabled:opacity-40 sm:flex-none sm:py-1.5"
+          className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-border px-3 py-2.5 text-sm text-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-40 sm:flex-none sm:py-1.5"
         >
-          Suivante
+          {m.steps.perStep.next}
           <ChevronRight className="size-4" aria-hidden />
         </button>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="space-y-4">
-          <p className="text-sm font-medium text-brand">Type de marche</p>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {STAIR_LAYOUT_OPTIONS.map((option) => {
-              const selected = layout === option.id;
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => selectLayout(option.id)}
-                  className={`w-full rounded-lg border-2 px-2.5 py-2 text-left text-sm transition sm:px-3 sm:py-2.5 ${
-                    selected
-                      ? "border-primary bg-primary/5 font-semibold text-brand"
-                      : "border-border bg-surface text-muted hover:border-brand-medium/35"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
+          <fieldset className="space-y-4">
+            <legend className="text-sm font-medium text-brand">
+              {m.steps.perStep.layoutLabel}
+            </legend>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {STAIR_LAYOUT_OPTIONS.map((id) => {
+                const selected = layout === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => selectLayout(id)}
+                    aria-pressed={selected}
+                    className={`w-full rounded-lg border-2 px-2.5 py-2 text-left text-sm transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:px-3 sm:py-2.5 ${
+                      selected
+                        ? "border-primary bg-primary/5 font-semibold text-brand"
+                        : "border-border bg-surface text-muted hover:border-brand-medium/35"
+                    }`}
+                  >
+                    {m.catalog.layout[id].label}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <div className="space-y-1.5">
               <label
-                htmlFor={`step-${activeIndex}-width`}
+                htmlFor={`kre-step-${activeIndex}-width`}
                 className="text-sm font-medium text-brand"
               >
-                {layout === "BALANCED"
-                  ? "Longueur (la + longue)"
-                  : layout === "FIVE_SIDED"
-                    ? "Longueur max."
-                    : DIMENSION_FIELD_LABELS.widthBand}
+                {widthLabel}
               </label>
               <select
-                id={`step-${activeIndex}-width`}
+                id={`kre-step-${activeIndex}-width`}
                 value={current.widthBand ?? ""}
                 onFocus={() => setFocusedField("widthBand")}
                 onBlur={() => setFocusedField(null)}
@@ -173,10 +181,10 @@ export function PerStepConfigurator() {
                 }}
                 className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/25"
               >
-                <option value="">Choisir…</option>
+                <option value="">{m.common.choose}</option>
                 {WIDTH_BAND_VALUES.map((w) => (
                   <option key={w} value={w}>
-                    {WIDTH_LABELS[w]}
+                    {m.catalog.width[w]}
                   </option>
                 ))}
               </select>
@@ -184,15 +192,13 @@ export function PerStepConfigurator() {
 
             <div className="space-y-1.5">
               <label
-                htmlFor={`step-${activeIndex}-depth`}
+                htmlFor={`kre-step-${activeIndex}-depth`}
                 className="text-sm font-medium text-brand"
               >
-                {layout === "FIVE_SIDED"
-                  ? "Profondeur max."
-                  : DIMENSION_FIELD_LABELS.depthBand}
+                {depthLabel}
               </label>
               <select
-                id={`step-${activeIndex}-depth`}
+                id={`kre-step-${activeIndex}-depth`}
                 value={current.depthBand ?? ""}
                 onFocus={() => setFocusedField("depthBand")}
                 onBlur={() => setFocusedField(null)}
@@ -204,10 +210,10 @@ export function PerStepConfigurator() {
                 }}
                 className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/25"
               >
-                <option value="">Choisir…</option>
+                <option value="">{m.common.choose}</option>
                 {DEPTH_BAND_VALUES.map((d) => (
                   <option key={d} value={d}>
-                    {DEPTH_LABELS[d]}
+                    {m.catalog.depth[d]}
                   </option>
                 ))}
               </select>

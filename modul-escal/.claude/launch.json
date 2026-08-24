@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3030
+    },
+    {
+      "name": "wc-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:wc"],
+      "port": 5174
     }
   ]
 }

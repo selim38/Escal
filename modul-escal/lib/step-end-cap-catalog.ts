@@ -1,33 +1,17 @@
-import type { EndSide, StepEndCap } from "@/lib/quote-schema";
+import {
+  END_SIDE_VALUES,
+  STEP_END_CAP_VALUES,
+  type EndSide,
+  type StepEndCap,
+} from "@/lib/quote-schema";
 
-export type StepEndCapEntry = {
-  id: StepEndCap;
-  label: string;
-  description: string;
-};
+/**
+ * Ordre d'affichage des embouts de marche. Les libellés vivent dans
+ * `lib/i18n/<locale>.ts` sous `catalog.endCap` / `catalog.endSide`.
+ */
+export const STEP_END_CAP_OPTIONS: StepEndCap[] = [...STEP_END_CAP_VALUES];
 
-export const STEP_END_CAP_OPTIONS: StepEndCapEntry[] = [
-  {
-    id: "NONE",
-    label: "Sans",
-    description: "Pas d’embout de marche.",
-  },
-  {
-    id: "OPEN_STEP",
-    label: "Pour marche ouverte",
-    description: "Embout en 1 pièce — côtés ouverts.",
-  },
-  {
-    id: "OVERHANGING",
-    label: "Pour marche débordante",
-    description: "Embout en 2 pièces — nez débordant.",
-  },
-];
-
-export const END_SIDE_OPTIONS: { id: EndSide; label: string }[] = [
-  { id: "LEFT", label: "Gauche" },
-  { id: "RIGHT", label: "Droite" },
-];
+export const END_SIDE_OPTIONS: EndSide[] = [...END_SIDE_VALUES];
 
 /** Limite métier indiquée sur le cahier des charges. */
 export const STEP_END_CAP_MAX_COUNT = 60;
