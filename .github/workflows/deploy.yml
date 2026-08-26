@@ -128,30 +128,35 @@ jobs:
           cp -R "dist/release/$WC_VERSION" "dist/publish/wc/$WC_VERSION"
           find dist/publish -maxdepth 3 -type d
 
-      - name: Deploy /wc via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server:    ${{ secrets.FTP_SERVER }}
-          username:  ${{ secrets.FTP_USERNAME }}
-          password:  ${{ secrets.FTP_PASSWORD }}
-          port:      22
-          local_path: './modul-escal/dist/publish/*'
-          remote_path: '.'
-          sftp_only: true
-
-      # Étape séparée avec un chemin de fichier explicite : le glob `*` ignore
-      # les fichiers commençant par un point. `wc/` existe après l'étape
-      # précédente.
-      - name: Deploy /wc/.htaccess via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server:    ${{ secrets.FTP_SERVER }}
-          username:  ${{ secrets.FTP_USERNAME }}
-          password:  ${{ secrets.FTP_PASSWORD }}
-          port:      22
-          local_path: './modul-escal/deliverables/hosting/.htaccess'
-          remote_path: 'wc'
-          sftp_only: true
+      # `wlixcc/SFTP-Deploy-Action` échouait ici sur les trois premiers runs,
+      # sans annotation ni message exploitable (les logs demandent une auth), quel
+      # que soit le `remote_path`. On passe à lftp : il crée les dossiers
+      # manquants, téléverse les fichiers commençant par un point, et surtout
+      # affiche une erreur lisible en cas d'échec.
+      #
+      # `mirror -R` ne supprime rien sans `--delete` : la politique upload-only
+      # du workflow (config.php et uploads/ jamais touchés) est préservée.
+      - name: Deploy /wc via lftp
+        working-directory: modul-escal
+        env:
+          LFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+        run: |
+          sudo apt-get install -y -qq lftp
+          lftp -c "
+            set cmd:fail-exit yes;
+            set sftp:auto-confirm yes;
+            set net:timeout 30;
+            set net:max-retries 3;
+            set xfer:parallel 3;
+            open -u \"$FTP_USERNAME\" --env-password sftp://\"$FTP_SERVER\";
+            mkdir -pf wc;
+            mirror --reverse --verbose --no-symlinks --no-perms \
+              dist/publish/wc wc;
+            put -O wc deliverables/hosting/.htaccess;
+            bye
+          "
 
       # Sans ce contrôle, un échec d'upload est silencieux : le job passe au vert
       # et le 404 n'est découvert qu'en testant à la main.
