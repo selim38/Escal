@@ -115,10 +115,34 @@ jobs:
             --base https://escal.point-soft.fr/wc/staging
           npm run package:wc -- "$WC_VERSION"
 
-      # Déposé à la racine de /wc/ : Apache l'applique à tous les sous-dossiers.
-      # Chemin de fichier explicite, car le glob `*` des étapes suivantes ignore
-      # les fichiers commençant par un point.
-      - name: Deploy .htaccess via SFTP
+      # L'action SFTP crée les sous-dossiers manquants (constaté : calcul/fonts/
+      # est apparu au déploiement) mais pas la racine de `remote_path`. Comme
+      # ~/wc/ n'existe pas au premier passage, on téléverse depuis la racine du
+      # compte, où `wc/` devient un simple sous-dossier à créer.
+      - name: Assemble l'arborescence /wc
+        working-directory: modul-escal
+        run: |
+          rm -rf dist/publish
+          mkdir -p dist/publish/wc
+          cp -R dist/release/staging "dist/publish/wc/staging"
+          cp -R "dist/release/$WC_VERSION" "dist/publish/wc/$WC_VERSION"
+          find dist/publish -maxdepth 3 -type d
+
+      - name: Deploy /wc via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          server:    ${{ secrets.FTP_SERVER }}
+          username:  ${{ secrets.FTP_USERNAME }}
+          password:  ${{ secrets.FTP_PASSWORD }}
+          port:      22
+          local_path: './modul-escal/dist/publish/*'
+          remote_path: '.'
+          sftp_only: true
+
+      # Étape séparée avec un chemin de fichier explicite : le glob `*` ignore
+      # les fichiers commençant par un point. `wc/` existe après l'étape
+      # précédente.
+      - name: Deploy /wc/.htaccess via SFTP
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
           server:    ${{ secrets.FTP_SERVER }}
@@ -129,27 +153,38 @@ jobs:
           remote_path: 'wc'
           sftp_only: true
 
-      - name: Deploy staging via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server:    ${{ secrets.FTP_SERVER }}
-          username:  ${{ secrets.FTP_USERNAME }}
-          password:  ${{ secrets.FTP_PASSWORD }}
-          port:      22
-          local_path: './modul-escal/dist/release/staging/*'
-          remote_path: 'wc/staging'
-          sftp_only: true
+      # Sans ce contrôle, un échec d'upload est silencieux : le job passe au vert
+      # et le 404 n'est découvert qu'en testant à la main.
+      - name: Vérifier la publication
+        run: |
+          base=https://escal.point-soft.fr/wc
+          for path in \
+            "staging/kre-configurateur.js" \
+            "staging/fonts/geist-variable.woff2" \
+            "staging/decor/chene-naturel.webp" \
+            "$WC_VERSION/kre-configurateur.js"
+          do
+            for attempt in 1 2 3 4 5 6; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$base/$path" || echo 000)
+              [ "$code" = "200" ] && break
+              sleep 10
+            done
+            if [ "$code" != "200" ]; then
+              echo "::error::$base/$path répond $code"
+              exit 1
+            fi
+            echo "OK $path"
+          done
 
-      - name: Deploy version via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server:    ${{ secrets.FTP_SERVER }}
-          username:  ${{ secrets.FTP_USERNAME }}
-          password:  ${{ secrets.FTP_PASSWORD }}
-          port:      22
-          local_path: './modul-escal/dist/release/${{ env.WC_VERSION }}/*'
-          remote_path: 'wc/${{ env.WC_VERSION }}'
-          sftp_only: true
+          cors=$(curl -sI --max-time 15 \
+            -H 'Origin: https://kitrenovationescalier.knewledge.com' \
+            "$base/staging/kre-configurateur.js" \
+            | grep -i 'access-control-allow-origin' || true)
+          if [ -z "$cors" ]; then
+            echo "::warning::Pas d'en-tête CORS sur le bundle : AllowOverride est probablement désactivé, le .htaccess est ignoré. L'intégration WordPress échouera."
+          else
+            echo "CORS OK : $cors"
+          fi
 
   # ────────────────────────────────────────────────────────────────
   api:
