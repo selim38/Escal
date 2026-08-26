@@ -12,3 +12,17 @@ SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 <FilesMatch "^(config\.php|config\.sample\.php|schema\.sql|bootstrap\.php)$">
   Require all denied
 </FilesMatch>
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Défense par extension, en complément de la liste nominative ci-dessus : tout
+# fichier non exécutable déposé dans ce dossier est servi tel quel par Apache.
+<FilesMatch "\.(sql|md|log|json|lock|ini|bak|old|orig|swp)$">
+  Require all denied
+</FilesMatch>
+
+# Fichiers commençant par un point (.env, .git*, .htpasswd…).
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+
+Options -Indexes
