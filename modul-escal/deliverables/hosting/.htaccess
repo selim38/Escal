@@ -1,12 +1,13 @@
 # ---------------------------------------------------------------------------
-# À déposer dans le dossier /wc/ de escal.point-soft.fr, qui héberge le bundle
-# du Web Component. Couvre les exigences de performance du cahier des charges
-# (§6.1) : compression et chargement rapide.
+# Copié automatiquement par `npm run package:wc` à la racine de chaque dossier
+# de version, donc uploadé avec lui. Couvre les exigences de performance du
+# cahier des charges (§6.1) : compression et chargement rapide.
 #
-# Arborescence visée :
+# Arborescence visée sur escal.point-soft.fr :
+#   /wc/v1.0.0/.htaccess              ← ce fichier
 #   /wc/v1.0.0/kre-configurateur.js   ← immuable, cache 1 an
-#   /wc/v1.0.0/<assets webp, fonts>
-#   /wc/staging/kre-configurateur.js  ← recette Knewledge
+#   /wc/v1.0.0/<CM, decor, dimensions, escalier, etape, fonts>
+#   /wc/staging/…                     ← recette Knewledge, cache court
 #
 # Note : Ionos mutualisé fournit mod_deflate (gzip). mod_brotli n'est pas
 # garanti — le bloc correspondant est conditionnel et sans effet s'il manque.
