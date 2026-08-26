@@ -144,6 +144,19 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
         run: |
           sudo apt-get install -y -qq lftp
+
+          # `rm -f wc` nettoie une séquelle d'un déploiement raté : un FICHIER
+          # nommé wc avait été créé à la racine, d'où l'erreur
+          # « mirror: Access failed: Not a directory (/wc) ».
+          # En SFTP, rm ne supprime pas un dossier : quand wc est le bon dossier,
+          # la commande échoue sans effet — d'où fail-exit désactivé le temps de
+          # cette seule commande.
+          #
+          # `mkdir -p` sans -f : un échec de création doit rester visible. C'est
+          # le -f qui avait masqué la vraie cause au run précédent.
+          #
+          # Les commentaires restent hors de la chaîne lftp : `#` n'y est pas
+          # interprété de façon fiable et deviendrait une commande inconnue.
           lftp -c "
             set cmd:fail-exit yes;
             set sftp:auto-confirm yes;
@@ -151,7 +164,10 @@ jobs:
             set net:max-retries 3;
             set xfer:parallel 3;
             open -u \"$FTP_USERNAME\" --env-password sftp://\"$FTP_SERVER\";
-            mkdir -pf wc;
+            set cmd:fail-exit no;
+            rm -f wc;
+            set cmd:fail-exit yes;
+            mkdir -p wc;
             mirror --reverse --verbose --no-symlinks --no-perms \
               dist/publish/wc wc;
             put -O wc deliverables/hosting/.htaccess;
