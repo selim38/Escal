@@ -1,10 +1,10 @@
 # ---------------------------------------------------------------------------
-# Copié automatiquement par `npm run package:wc` à la racine de chaque dossier
-# de version, donc uploadé avec lui. Couvre les exigences de performance du
-# cahier des charges (§6.1) : compression et chargement rapide.
+# Déployé à la RACINE de /wc/ par le job `wc` de .github/workflows/deploy.yml.
+# Apache l'applique à tous les sous-dossiers : un seul fichier couvre toutes les
+# versions. Couvre les exigences de performance du cahier des charges (§6.1).
 #
 # Arborescence visée sur escal.point-soft.fr :
-#   /wc/v1.0.0/.htaccess              ← ce fichier
+#   /wc/.htaccess                     ← ce fichier
 #   /wc/v1.0.0/kre-configurateur.js   ← immuable, cache 1 an
 #   /wc/v1.0.0/<CM, decor, dimensions, escalier, etape, fonts>
 #   /wc/staging/…                     ← recette Knewledge, cache court

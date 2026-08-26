@@ -5,7 +5,11 @@
  *   kre-configurateur.js        le composant (chargé par la balise <script>)
  *   kre-configurateur.js.map    source map, pour que Knewledge puisse débugger
  *   fonts/, CM/, decor/, …      assets résolus via import.meta.url
- *   .htaccess                   compression, cache, CORS (deliverables/hosting)
+ *
+ * Le `.htaccess` n'est PAS inclus : il est déployé une seule fois à la racine
+ * de /wc/, où Apache l'applique à tous les sous-dossiers. Le déposer dans
+ * chaque version le rendrait aussi invisible aux globs `*` des actions SFTP,
+ * qui ignorent les fichiers commençant par un point.
  *
  * La base publique du bundle est injectée par `KRE_PUBLIC_BASE` : elle doit
  * correspondre à l'URL finale du dossier, sinon les chunks éventuels seraient
@@ -59,10 +63,6 @@ async function main() {
   // Le composant résout ses assets relativement à l'URL du script : les images
   // et la police doivent donc vivre à côté du bundle.
   await cp(join(ROOT, "public"), outDir, { recursive: true });
-  await cp(
-    join(ROOT, "deliverables/hosting/.htaccess"),
-    join(outDir, ".htaccess"),
-  );
 
   const bundlePath = join(outDir, "kre-configurateur.js");
   const bundle = await readFile(bundlePath);

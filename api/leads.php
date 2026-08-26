@@ -83,6 +83,33 @@ function list_leads(): never
 }
 
 // ───────────────────────────────────────────────────────────────────────────
+/**
+ * Colonnes réellement présentes sur `leads`.
+ *
+ * Le déploiement est automatique à chaque push, mais la migration
+ * (api/migrate.php) est une action manuelle : il existe donc une fenêtre où ce
+ * fichier est en ligne avant que les colonnes qu'il utilise n'existent. Plutôt
+ * que de renvoyer une 500 sur chaque demande de devis pendant ce temps, on
+ * adapte l'INSERT aux colonnes disponibles.
+ *
+ * Résultat mis en cache pour la durée de la requête.
+ */
+function leads_columns(): array
+{
+    static $columns = null;
+    if ($columns !== null) {
+        return $columns;
+    }
+    try {
+        $columns = db()->query('SHOW COLUMNS FROM leads')->fetchAll(PDO::FETCH_COLUMN, 0);
+    } catch (Throwable $e) {
+        // Base inaccessible : l'INSERT échouera de toute façon juste après, avec
+        // un message d'erreur propre. Ne pas masquer l'échec ici.
+        $columns = [];
+    }
+    return $columns;
+}
+
 function create_lead(): never
 {
     $b = read_json_body();
@@ -137,46 +164,56 @@ function create_lead(): never
         $tracking = $clean !== [] ? json_encode($clean, JSON_UNESCAPED_UNICODE) : null;
     }
 
-    $sql = "INSERT INTO leads (
-        first_name, last_name, email, phone, country,
-        decor, riser_option, step_count,
-        uniform_step_dimensions,
-        width_band, depth_band, step_configs_json,
-        open_sides, intermediate_landing, landing_finish,
-        step_end_cap, open_step_end_side, lateral_end_side,
-        estimated_materials_eur, price_breakdown_json,
-        recipient_email, origin, tracking_json,
-        status, last_snippet, unread_count
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, 1)";
+    $fields = [
+        'first_name'              => $b['firstName'],
+        'last_name'               => $b['lastName'],
+        'email'                   => $b['email'],
+        'phone'                   => $b['phone'],
+        'country'                 => $b['country'] ?? '',
+        'decor'                   => $b['decor'] ?? null,
+        'riser_option'            => $b['riserOption'] ?? null,
+        'step_count'              => $stepCount,
+        'uniform_step_dimensions' => !empty($b['uniformStepDimensions']) ? 1 : 0,
+        'width_band'              => $b['widthBand'] ?? null,
+        'depth_band'              => $b['depthBand'] ?? null,
+        'step_configs_json'       => $stepConfigs,
+        'open_sides'              => !empty($b['openSides']) ? 1 : 0,
+        'intermediate_landing'    => !empty($b['intermediateLanding']) ? 1 : 0,
+        'landing_finish'          => $b['landingFinish'] ?? 'NONE',
+        'step_end_cap'            => $b['stepEndCap'] ?? 'NONE',
+        'open_step_end_side'      => $b['openStepEndSide'] ?? null,
+        'lateral_end_side'        => $b['lateralEndSide'] ?? null,
+        'estimated_materials_eur' => $estimated,
+        'price_breakdown_json'    => $breakdownJson,
+        'status'                  => 'new',
+        'last_snippet'            => $snippet,
+        'unread_count'            => 1,
+    ];
+
+    // Colonnes ajoutées pour l'intégration Web Component : incluses seulement
+    // si la migration a été appliquée (voir leads_columns()).
+    $available = leads_columns();
+    foreach (
+        [
+            'recipient_email' => $recipient,
+            'origin'          => $origin,
+            'tracking_json'   => $tracking,
+        ] as $column => $value
+    ) {
+        if (in_array($column, $available, true)) {
+            $fields[$column] = $value;
+        }
+    }
+
+    $sql = sprintf(
+        'INSERT INTO leads (%s) VALUES (%s)',
+        implode(', ', array_keys($fields)),
+        implode(', ', array_fill(0, count($fields), '?'))
+    );
 
     try {
         $stmt = db()->prepare($sql);
-        $stmt->execute([
-            $b['firstName'],
-            $b['lastName'],
-            $b['email'],
-            $b['phone'],
-            $b['country'] ?? '',
-            $b['decor'] ?? null,
-            $b['riserOption'] ?? null,
-            $stepCount,
-            !empty($b['uniformStepDimensions']) ? 1 : 0,
-            $b['widthBand'] ?? null,
-            $b['depthBand'] ?? null,
-            $stepConfigs,
-            !empty($b['openSides']) ? 1 : 0,
-            !empty($b['intermediateLanding']) ? 1 : 0,
-            $b['landingFinish'] ?? 'NONE',
-            $b['stepEndCap'] ?? 'NONE',
-            $b['openStepEndSide'] ?? null,
-            $b['lateralEndSide'] ?? null,
-            $estimated,
-            $breakdownJson,
-            $recipient,
-            $origin,
-            $tracking,
-            $snippet,
-        ]);
+        $stmt->execute(array_values($fields));
         $id = (int) db()->lastInsertId();
     } catch (Throwable $e) {
         json_error('Erreur lors de la soumission', 500, $e);

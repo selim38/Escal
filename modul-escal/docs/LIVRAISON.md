@@ -1,33 +1,34 @@
 # Livraison du Web Component — checklist de mise en ligne
 
 > Document **interne Point Soft**. Ne pas transmettre à Knewledge.
-> À faire dans l'ordre : les étapes 1 à 3 sont bloquantes, Knewledge ne peut rien
-> tester avant. Version : 1.0.0.
+> Le déploiement est automatique à chaque push sur `main` (SFTP IONOS).
+> Restent les actions qui touchent le serveur ou la base, hors périmètre du CI.
+> Version : 1.0.0.
 
 ---
 
-## Étape 1 — Publier le bundle sur escal.point-soft.fr
+## Étape 1 — Publier le bundle (automatique)
 
-Construire les deux paquets :
+Le job `wc` de [`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml)
+s'exécute à chaque push sur `main` et publie :
 
-```bash
-cd modul-escal
-npm run package:wc -- staging --base https://escal.point-soft.fr/wc/staging
-npm run package:wc -- v1.0.0
-```
+| Cible distante | Contenu | Cache |
+|---|---|---|
+| `~/wc/.htaccess` | compression, cache, CORS | — |
+| `~/wc/staging/` | bundle de recette, republié à chaque push | 5 min |
+| `~/wc/$WC_VERSION/` | version figée pour la production | 1 an, immuable |
 
-Chaque commande produit un dossier **autonome** (bundle + images WebP + police +
-`.htaccess`) dans `dist/release/`. Uploader par FTP, en conservant l'arborescence :
+**Rien à faire manuellement.** Deux points d'attention en revanche :
 
-| Local | Distant |
-|---|---|
-| `dist/release/staging/` | `escal.point-soft.fr/wc/staging/` |
-| `dist/release/v1.0.0/` | `escal.point-soft.fr/wc/v1.0.0/` |
+- **`WC_VERSION` est un bump manuel**, dans l'`env` du job. Un dossier de version
+  déjà publié ne doit jamais être écrasé : les pages WordPress pointent une URL
+  versionnée figée, et le cache d'un an la rend impossible à corriger côté
+  visiteur. Pour livrer une évolution : incrémenter `WC_VERSION`, pousser, puis
+  communiquer la nouvelle URL à Knewledge.
+- **Le dossier `~/wc/` doit exister** sur le serveur au premier déploiement.
+  Si le job échoue sur l'upload, le créer une fois à la main en SFTP.
 
-Le `.htaccess` est **inclus dans chaque dossier** : ne pas l'oublier (les clients
-FTP masquent les fichiers commençant par un point par défaut).
-
-Contrôle après upload — les quatre doivent répondre `200` :
+Contrôle après le premier passage du workflow — les quatre doivent répondre `200` :
 
 ```bash
 curl -sI https://escal.point-soft.fr/wc/staging/kre-configurateur.js | head -1
@@ -36,19 +37,18 @@ curl -sI https://escal.point-soft.fr/wc/staging/decor/chene-naturel.webp | head 
 curl -sI https://escal.point-soft.fr/wc/v1.0.0/kre-configurateur.js | head -1
 ```
 
-Vérifier aussi les en-têtes que le `.htaccess` doit poser (sans eux, le module ES
-et la police sont refusés en cross-origin depuis WordPress) :
+Puis les en-têtes que le `.htaccess` doit poser — sans eux, le module ES et la
+police sont refusés en cross-origin depuis WordPress :
 
 ```bash
 curl -sI -H 'Origin: https://kitrenovationescalier.knewledge.com' \
   https://escal.point-soft.fr/wc/staging/kre-configurateur.js \
-  | grep -iE 'content-type|content-encoding|access-control-allow-origin|cache-control'
+  | grep -iE 'content-type|access-control-allow-origin|cache-control'
 ```
 
-Attendu : `Content-Type: application/javascript`,
-`Access-Control-Allow-Origin: *`, et `Content-Encoding: gzip` si le client
-annonce `Accept-Encoding`. **Si `Access-Control-Allow-Origin` est absent**, le
-`.htaccess` n'est pas pris en compte (`AllowOverride` désactivé) : voir §Dépannage.
+Attendu : `Content-Type: application/javascript` et
+`Access-Control-Allow-Origin: *`. **Si l'en-tête CORS est absent**, `AllowOverride`
+est désactivé pour ce répertoire et le `.htaccess` est ignoré : voir §Dépannage.
 
 ---
 
@@ -95,8 +95,14 @@ Attendu : `204`, `Access-Control-Allow-Origin` renvoyant l'origine demandée, et
 ## Étape 3 — Migrer la base
 
 Trois colonnes ont été ajoutées à `leads` : `recipient_email`, `origin`,
-`tracking_json`. Sans elles, **toute soumission échoue en erreur 500** (l'INSERT
-référence des colonnes inexistantes).
+`tracking_json`.
+
+`create_lead()` s'adapte aux colonnes réellement présentes (voir
+`leads_columns()` dans `api/leads.php`) : tant que la migration n'est pas
+appliquée, les leads sont enregistrés **sans** ces trois champs plutôt que de
+partir en erreur. Le déploiement automatique ne casse donc pas la prise de
+leads — mais la provenance et le destinataire sont perdus jusqu'à la migration.
+À faire dès que possible.
 
 ```
 https://escal.point-soft.fr/api/migrate.php?token=LE_TOKEN
@@ -200,8 +206,9 @@ L'arborescence n'a pas été conservée à l'upload : les dossiers `CM/`, `decor
 défaut de pouvoir l'activer, servir le bundle depuis un dossier où il l'est, ou
 ajouter les en-têtes dans la configuration du vhost.
 
-**Erreur 500 à la soumission.**
-La migration de l'étape 3 n'a pas été appliquée.
+**Les leads arrivent sans `origin` ni provenance UTM.**
+La migration de l'étape 3 n'a pas été appliquée. La soumission fonctionne, mais
+les trois colonnes sont ignorées.
 
 **Erreur CORS à la soumission uniquement.**
 L'origine WordPress manque dans `cors_allowed_origins` (étape 2). Le message de
