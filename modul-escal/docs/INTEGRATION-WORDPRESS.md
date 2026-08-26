@@ -70,6 +70,54 @@ define('KRE_API_ENDPOINT', 'https://escal.point-soft.fr/api');
 
 Les attributs du shortcode sont documentés dans le `readme.txt` du plugin.
 
+### 2.2 Où poser le shortcode, et comment y amener le trafic
+
+Le schéma prévu est **une page dédiée** de votre WordPress portant le shortcode,
+vers laquelle pointent les CTA du reste du site (accueil, pages de service,
+articles). Le visiteur ne quitte jamais votre domaine.
+
+```
+[ Accueil / page de service ]  ── CTA ──▶  [ /devis/ · shortcode ]
+     contenu et SEO                          configurateur intégré
+```
+
+C'est le montage recommandé, pour trois raisons :
+
+- **Le tracking fonctionne sans rien faire.** Le composant vit dans votre page,
+  donc votre conteneur GTM voit tout l'entonnoir (§5). Un CTA qui sortirait du
+  site vers un domaine tiers ferait perdre la mesure du taux d'abandon par
+  étape — précisément l'indicateur demandé au §5 du cahier des charges.
+- **Le SEO reste chez vous.** Le contenu indexable et le maillage interne vivent
+  dans WordPress ; le configurateur est un outil transactionnel en bout de
+  parcours, pas une cible de référencement.
+- **Le script n'est chargé que là.** Les autres pages ne paient rien.
+
+Les CTA sont de simples liens internes, sans rien de particulier :
+
+```html
+<a href="/devis/" class="btn-devis">Calculer mon devis</a>
+```
+
+Deux variantes possibles selon la maquette :
+
+- **Configurateur sur la même page que le contenu** — poser le shortcode dans un
+  bloc en bas de page et faire pointer les CTA sur une ancre :
+  `<a href="#configurateur">`. Entourez le shortcode d'un conteneur portant
+  l'`id` correspondant, le composant n'en pose pas lui-même.
+- **Plusieurs points d'entrée** — le shortcode peut être posé sur plusieurs
+  pages sans précaution particulière. Chaque instance est indépendante (§7) et
+  émet son propre `devis_start`.
+
+Si vous voulez distinguer dans GA4 quel CTA a amené le visiteur, ajoutez des
+paramètres UTM à vos liens internes : le composant les lit dans l'URL et les
+joint à tous ses événements ainsi qu'au lead enregistré (§5).
+
+```html
+<a href="/devis/?utm_source=site&utm_medium=cta&utm_content=home-hero">
+  Calculer mon devis
+</a>
+```
+
 ---
 
 ## 3. Attributs du composant
@@ -369,9 +417,11 @@ Cible ES2020, sans dépendance à une API récente en dehors des replis ci-dessu
    publier le thème définitif (§4.3).
 2. **Spécification tracking** — votre convention d'événements et de nommage UTM
    définitive, ainsi que l'identifiant GTM / GA4 (§5).
-3. **Domaines** — confirmez la liste des origines qui hébergeront le composant,
-   y compris les éventuels domaines de préproduction, pour l'allowlist CORS
-   (§3.1).
+3. **Domaines** — `kitrenovationescalier.knewledge.com` est déjà autorisé, ainsi
+   que `kitrenovationescalier.fr` et sa variante `www.`. Confirmez le domaine de
+   production définitif, et signalez-nous tout autre domaine ou sous-domaine
+   (préproduction, recette client) depuis lequel le composant sera chargé :
+   sans ajout à l'allowlist, la soumission du lead échoue en CORS (§3.1).
 4. **`recipient-email`** — adresses à autoriser côté serveur, et souhaitez-vous
    une notification par e-mail en plus de l'enregistrement CRM ? (§3.2)
 5. **CTA échantillon** — le `mailto:` suffit-il, ou attendez-vous un vrai flux
