@@ -25,7 +25,7 @@ export function StepStepCount() {
       {/* Photo d'exemple */}
       <figure className="mx-auto w-full max-w-[240px]">
         <div className="relative overflow-hidden rounded-xl border border-border">
-          <span className="absolute left-2 top-2 z-10 rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-white shadow-sm">
+          <span className="absolute left-2 top-2 z-10 rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-on-primary shadow-sm">
             {m.steps.stepCount.exampleBadge}
           </span>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -71,7 +71,7 @@ export function StepStepCount() {
       {error ? (
         <p
           id="kre-stepCount-error"
-          className="text-center text-sm text-red-600"
+          className="text-center text-sm text-error"
           role="alert"
         >
           {error}

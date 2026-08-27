@@ -26,7 +26,7 @@ export function M2AdviceModal({
       <div className="mb-4 flex items-start justify-between gap-3">
         <div
           aria-hidden
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xl"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-warning-tint text-xl"
         >
           💡
         </div>
@@ -50,7 +50,7 @@ export function M2AdviceModal({
       <button
         type="button"
         onClick={onClose}
-        className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         {m.common.understood}
       </button>

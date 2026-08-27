@@ -4,7 +4,7 @@ import "./globals.css";
 /**
  * `next/font` a été retiré : c'est une fonctionnalité build-time de Next, absente
  * du build Vite, et un `@font-face` déclaré dans un shadow root est ignoré par les
- * navigateurs. La police Geist est désormais auto-hébergée dans `public/fonts/`
+ * navigateurs. La police Archivo est auto-hébergée dans `public/fonts/`
  * et déclarée par `wc/fonts.ts` (Web Component) ou par `app/globals.css` (Next),
  * avec une pile système en repli — voir `--kre-font-sans` dans `lib/theme.css`.
  */
@@ -31,7 +31,7 @@ export default function RootLayout({
       <head>
         <link
           rel="preload"
-          href="/calcul/fonts/geist-variable.woff2"
+          href="/calcul/fonts/archivo-variable.woff2"
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"

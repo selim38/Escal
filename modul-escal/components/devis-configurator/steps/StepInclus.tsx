@@ -21,7 +21,7 @@ const MATERIAL_EMOJIS = ["📏", "✏️", "📐", "🔲", "⬜", "🔩", "🪝"
 
 function Badge({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+    <span className="inline-flex items-center gap-1 rounded-full bg-success-tint px-2 py-0.5 text-xs font-semibold text-success">
       <CheckCircle2 className="size-3 shrink-0" aria-hidden />
       {children}
     </span>

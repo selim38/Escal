@@ -76,7 +76,7 @@ export function DimensionsBandsFields() {
                 ))}
               </select>
               {wErr && (
-                <p className="text-sm text-red-600" role="alert">
+                <p className="text-sm text-error" role="alert">
                   {wErr}
                 </p>
               )}
@@ -105,7 +105,7 @@ export function DimensionsBandsFields() {
                 ))}
               </select>
               {dErr && (
-                <p className="text-sm text-red-600" role="alert">
+                <p className="text-sm text-error" role="alert">
                   {dErr}
                 </p>
               )}

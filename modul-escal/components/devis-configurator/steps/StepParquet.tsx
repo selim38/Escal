@@ -41,7 +41,7 @@ export function StepParquet() {
             <button
               type="button"
               onClick={() => setShowM2Modal(true)}
-              className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 hover:bg-amber-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="flex items-center gap-1 rounded-full bg-warning-tint px-2 py-0.5 text-xs font-medium text-brand hover:bg-warning-tint focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               <Info className="size-3" aria-hidden />
               {m.steps.parquet.plus20}
@@ -61,7 +61,7 @@ export function StepParquet() {
               {m.steps.parquet.areaUnit}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-emerald-700">
+          <div className="flex items-center gap-1.5 text-xs text-success">
             <CheckCircle2 className="size-3.5 shrink-0" aria-hidden />
             <span className="font-medium">
               {m.steps.parquet.underlayIncluded}
@@ -110,7 +110,7 @@ export function StepParquet() {
                 >
                   {m.steps.parquet.plinthesLabel}
                 </label>
-                <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+                <span className="rounded-full bg-warning-tint px-2 py-0.5 text-xs font-medium text-brand">
                   {m.steps.parquet.plus20}
                 </span>
               </div>

@@ -63,7 +63,7 @@ export function StepDecor() {
                   />
                 )}
                 {selected ? (
-                  <span className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
+                  <span className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-success text-white shadow-sm">
                     <Check className="size-4 stroke-[3]" aria-hidden />
                   </span>
                 ) : null}
@@ -81,7 +81,7 @@ export function StepDecor() {
       <SampleCta decorLabel={value ? m.catalog.decor[value] : undefined} />
 
       {error ? (
-        <p className="text-center text-sm text-red-600" role="alert">
+        <p className="text-center text-sm text-error" role="alert">
           {error}
         </p>
       ) : null}

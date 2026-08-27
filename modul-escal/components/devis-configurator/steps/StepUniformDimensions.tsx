@@ -66,7 +66,7 @@ export function StepUniformDimensions() {
               }`}
             >
               {selected ? (
-                <span className="absolute right-3 top-3 flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white">
+                <span className="absolute right-3 top-3 flex size-6 items-center justify-center rounded-full bg-success text-white">
                   <Check className="size-3.5 stroke-[3]" aria-hidden />
                 </span>
               ) : null}
@@ -82,7 +82,7 @@ export function StepUniformDimensions() {
       </fieldset>
 
       {error ? (
-        <p className="text-center text-sm text-red-600" role="alert">
+        <p className="text-center text-sm text-error" role="alert">
           {error}
         </p>
       ) : null}

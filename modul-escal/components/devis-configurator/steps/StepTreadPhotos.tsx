@@ -44,7 +44,7 @@ export function StepTreadPhotos({ layout, activeField }: Props) {
             />
             <p
               className={`py-1.5 text-center text-xs font-medium ${
-                active ? "bg-primary text-white" : "bg-muted-bg text-muted"
+                active ? "bg-primary text-on-primary" : "bg-muted-bg text-muted"
               }`}
             >
               {label}

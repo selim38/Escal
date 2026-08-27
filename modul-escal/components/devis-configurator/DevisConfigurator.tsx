@@ -237,7 +237,7 @@ function WizardBody() {
         <div className="flex justify-center">
           <span
             aria-hidden
-            className="flex size-16 items-center justify-center rounded-full bg-green-100 text-4xl"
+            className="flex size-16 items-center justify-center rounded-full bg-success-tint text-4xl"
           >
             ✅
           </span>
@@ -297,7 +297,7 @@ function WizardBody() {
 
       {submitState.status === "error" && (
         <p
-          className="mt-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-700"
+          className="mt-4 rounded-lg bg-error-tint px-4 py-2.5 text-sm text-error"
           role="alert"
         >
           {submitState.message}

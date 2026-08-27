@@ -92,7 +92,7 @@ export function StepStaircaseType() {
               }`}
             >
               {selected && (
-                <span className="absolute right-3 top-3 z-10 flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
+                <span className="absolute right-3 top-3 z-10 flex size-6 items-center justify-center rounded-full bg-success text-white shadow-sm">
                   <Check className="size-3.5 stroke-[3]" aria-hidden />
                 </span>
               )}
@@ -111,20 +111,20 @@ export function StepStaircaseType() {
       {/* Cas spécifique : escalier ouvert → information uniquement */}
       {value === "OPEN" && (
         <div
-          className="mx-auto max-w-2xl rounded-xl border border-amber-300 bg-amber-50 p-4"
+          className="mx-auto max-w-2xl rounded-xl border border-warning bg-warning-tint p-4"
           role="status"
         >
-          <p className="text-sm font-semibold text-amber-800">
+          <p className="text-sm font-semibold text-brand">
             {m.steps.staircaseType.openWarningTitle}
           </p>
-          <p className="mt-1 text-sm text-amber-800">
+          <p className="mt-1 text-sm text-brand">
             {m.steps.staircaseType.openWarningBody}
           </p>
         </div>
       )}
 
       {error && value !== "OPEN" && (
-        <p className="text-center text-sm text-red-600" role="alert">
+        <p className="text-center text-sm text-error" role="alert">
           {error}
         </p>
       )}

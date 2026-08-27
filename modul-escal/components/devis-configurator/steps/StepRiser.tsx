@@ -77,7 +77,7 @@ export function StepRiser() {
               }`}
             >
               {selected && (
-                <span className="absolute right-3 top-3 z-10 flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white">
+                <span className="absolute right-3 top-3 z-10 flex size-6 items-center justify-center rounded-full bg-success text-white">
                   <Check className="size-3.5 stroke-[3]" aria-hidden />
                 </span>
               )}
@@ -97,7 +97,7 @@ export function StepRiser() {
       </fieldset>
 
       {error && (
-        <p className="text-center text-sm text-red-600" role="alert">
+        <p className="text-center text-sm text-error" role="alert">
           {error}
         </p>
       )}
@@ -136,7 +136,7 @@ export function StepRiser() {
         {heightError && (
           <p
             id="kre-riserHeightMm-error"
-            className="text-sm text-red-600"
+            className="text-sm text-error"
             role="alert"
           >
             {heightError}

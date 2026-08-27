@@ -79,7 +79,7 @@ export function StepLanding() {
               }`}
             >
               {isActive && (
-                <span className="absolute right-3 top-3 flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white">
+                <span className="absolute right-3 top-3 flex size-6 items-center justify-center rounded-full bg-success text-white">
                   <Check className="size-3.5 stroke-[3]" aria-hidden />
                 </span>
               )}
@@ -98,7 +98,7 @@ export function StepLanding() {
       </fieldset>
 
       {finishError && (
-        <p className="text-center text-sm text-red-600" role="alert">
+        <p className="text-center text-sm text-error" role="alert">
           {finishError}
         </p>
       )}
@@ -132,7 +132,7 @@ export function StepLanding() {
                   {m.catalog.seuilColor[id]}
                   {active && (
                     <Check
-                      className="ml-1 size-3.5 stroke-[3] text-emerald-500"
+                      className="ml-1 size-3.5 stroke-[3] text-success"
                       aria-hidden
                     />
                   )}
@@ -141,7 +141,7 @@ export function StepLanding() {
             })}
           </div>
           {seuilError && (
-            <p className="text-sm text-red-600" role="alert">
+            <p className="text-sm text-error" role="alert">
               {seuilError}
             </p>
           )}

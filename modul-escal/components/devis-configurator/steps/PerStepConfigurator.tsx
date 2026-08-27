@@ -97,9 +97,9 @@ export function PerStepConfigurator() {
               }}
               className={`flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:size-9 ${
                 isActive
-                  ? "bg-primary text-white shadow-sm"
+                  ? "bg-primary text-on-primary shadow-sm"
                   : complete
-                    ? "border-2 border-emerald-500/60 bg-emerald-50 text-emerald-700"
+                    ? "border-2 border-success/60 bg-success-tint text-success"
                     : "border border-border bg-surface text-muted hover:border-brand-medium/40"
               }`}
               aria-label={t(m.steps.perStep.stepAria, { index: i + 1 })}
@@ -235,7 +235,7 @@ export function PerStepConfigurator() {
       </div>
 
       {rootError ? (
-        <p className="text-center text-sm text-red-600" role="alert">
+        <p className="text-center text-sm text-error" role="alert">
           {rootError}
         </p>
       ) : null}

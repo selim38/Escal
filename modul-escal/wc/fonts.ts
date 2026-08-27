@@ -1,5 +1,5 @@
 /**
- * Enregistrement de la police Geist.
+ * Enregistrement de la police Archivo.
  *
  * Un `@font-face` déclaré à l'intérieur d'un shadow root est **ignoré** par les
  * navigateurs : les polices ne peuvent être enregistrées qu'au niveau du document.
@@ -7,8 +7,11 @@
  * idempotente, limitée à un unique `<style>` identifiable, et documentée dans le
  * livrable d'intégration.
  *
- * Une seule police variable (69 Ko) couvre les graisses 100→900 : un fichier au
- * lieu de cinq statiques.
+ * Une seule police variable (35 Ko) couvre les graisses 100→900.
+ *
+ * Archivo est la substitution libre (OFL) de Proxima Nova, police de la charte
+ * imprimée mais commerciale — c'est le choix fait par Knewledge dans son propre
+ * design system. Voir lib/theme.css pour le détail.
  *
  * Si l'injection échoue (CSP stricte côté WordPress), la pile de repli déclarée
  * dans `--kre-font-sans` (system-ui, -apple-system, …) prend le relais : le
@@ -17,7 +20,7 @@
 
 const STYLE_ID = "kre-configurateur-fonts";
 
-export const FONT_FILE = "/fonts/geist-variable.woff2";
+export const FONT_FILE = "/fonts/archivo-variable.woff2";
 
 export function ensureFonts(assetsBase: string): void {
   if (typeof document === "undefined") return;
@@ -26,7 +29,7 @@ export function ensureFonts(assetsBase: string): void {
   const href = `${assetsBase.replace(/\/+$/, "")}${FONT_FILE}`;
   const style = document.createElement("style");
   style.id = STYLE_ID;
-  style.textContent = `@font-face{font-family:"Geist";src:url("${href}") format("woff2");font-weight:100 900;font-style:normal;font-display:swap;}`;
+  style.textContent = `@font-face{font-family:"Archivo";src:url("${href}") format("woff2");font-weight:100 900;font-style:normal;font-display:swap;}`;
 
   try {
     document.head.appendChild(style);

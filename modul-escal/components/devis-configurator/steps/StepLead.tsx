@@ -101,7 +101,7 @@ export function StepLead() {
               {...register("lastName")}
             />
             {lastNameError && (
-              <p className="text-sm text-red-600" role="alert">
+              <p className="text-sm text-error" role="alert">
                 {lastNameError}
               </p>
             )}
@@ -122,7 +122,7 @@ export function StepLead() {
               {...register("firstName")}
             />
             {firstNameError && (
-              <p className="text-sm text-red-600" role="alert">
+              <p className="text-sm text-error" role="alert">
                 {firstNameError}
               </p>
             )}
@@ -148,7 +148,7 @@ export function StepLead() {
             />
           </div>
           {emailError && (
-            <p className="text-sm text-red-600" role="alert">
+            <p className="text-sm text-error" role="alert">
               {emailError}
             </p>
           )}
@@ -167,7 +167,7 @@ export function StepLead() {
             {...register("phone")}
           />
           {phoneError && (
-            <p className="text-sm text-red-600" role="alert">
+            <p className="text-sm text-error" role="alert">
               {phoneError}
             </p>
           )}
@@ -204,7 +204,7 @@ export function StepLead() {
             </optgroup>
           </select>
           {countryError && (
-            <p className="text-sm text-red-600" role="alert">
+            <p className="text-sm text-error" role="alert">
               {countryError}
             </p>
           )}

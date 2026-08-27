@@ -1,40 +1,103 @@
 /**
- * Tokens de la charte Kit Rénovation Escalier — source unique.
+ * Charte graphique Kit Rénovation Escalier — source unique des tokens.
  *
  * Importé à la fois par `app/globals.css` (build Next) et par `wc/styles.css`
  * (build Web Component). Le sélecteur `:root, :host` couvre les deux contextes.
  *
- * Les échelles d'espacement et de typographie sont volontairement exprimées en
+ * ─── Sources ───────────────────────────────────────────────────────────────
+ * 1. « Charte graphique KRE.pdf » (Knewledge, 2026) — les 7 couleurs officielles
+ *    avec leurs références Pantone. C'est la référence normative.
+ * 2. « Kre Design System.html » (Knewledge) — la charte étendue pour l'écran :
+ *    nuances dérivées, échelles, rayons. Une charte de 7 couleurs ne suffit pas
+ *    à habiller une interface ; ces extensions viennent de Knewledge, pas de nous.
+ *
+ * ─── Deux écarts assumés par rapport au design system ───────────────────────
+ * • `--text-muted: #A8927C` du design system n'est PAS reprise : 2,97:1 sur
+ *   blanc, sous le seuil WCAG AA de 4,5:1 pour du texte courant. On utilise sa
+ *   propre valeur `--text-body: #3A2415` (14,55:1) pour le texte secondaire.
+ * • La police de la charte est Proxima Nova, commerciale et non redistribuable.
+ *   Archivo est la substitution retenue par Knewledge dans son propre design
+ *   system : même classe géométrique-humaniste, licence OFL. Basculer sur
+ *   Proxima Nova ne demande que de remplacer le woff2 et ce nom, si Knewledge
+ *   fournit la licence webfont.
+ *
+ * Les échelles d'espacement, de typographie et de largeur sont exprimées en
  * **px** et non en `rem` : dans une page WordPress, `rem` se résout contre le
- * `font-size` du `<html>` du thème hôte (un `html { font-size: 62.5% }` réduirait
- * tout le configurateur de 37,5 %). Le px garantit un rendu identique partout.
+ * `font-size` du `<html>` du thème hôte (un `html { font-size: 62.5% }`
+ * réduirait tout le configurateur de 37,5 %). Le px garantit un rendu identique.
  */
 
 /**
  * Palette — thème « kre » par défaut.
  *
- * Le sélecteur couvre les deux modes de consommation : `:root` correspond au
- * `<html>` du build Next, `:host` à l'élément `<kre-configurateur>`. Les custom
- * properties héritent à travers la frontière du Shadow DOM, mais on les déclare
- * sur `:host` pour que le composant reste autonome dans n'importe quelle page.
- *
- * Préfixe `--kre-` : évite toute collision avec les variables d'un thème WordPress.
- * Un thème supplémentaire = un bloc `:host([theme="…"])` ci-dessous.
+ * `:root` correspond au `<html>` du build Next, `:host` à l'élément
+ * `<kre-configurateur>`. Préfixe `--kre-` : évite toute collision avec les
+ * variables d'un thème WordPress. Un thème supplémentaire = un bloc
+ * `:host([theme="…"])` ci-dessous.
  */
 :root,
 :host {
-  --kre-background: #f5f0eb;
-  --kre-foreground: #1a1a1a;
+  /* ─── Les 7 couleurs officielles (Charte graphique KRE.pdf) ───────────── */
+  /* ORANGE VIF — Pantone 158 C */
   --kre-primary: #ff6d1b;
+  /* BRUN CHOCOLAT — Pantone 477 C */
   --kre-brand: #6b3010;
+  /* BRUN MOYEN — Pantone 1615 C */
   --kre-brand-medium: #7a3b10;
-  --kre-heading: #1e2a4a;
+  /* BLANC CHAUD — Pantone 7527 C */
+  --kre-background: #f5f0eb;
+  /* BLANC PUR */
   --kre-surface: #ffffff;
-  --kre-muted: #5c4a3a;
+  /* GRIS CHAUD — Pantone 4085 C */
   --kre-border: #d4c5b5;
-  --kre-muted-bg: #ebe4dc;
+  /* NOIR — Pantone Black C */
+  --kre-foreground: #1a1a1a;
 
-  --kre-font-sans: "Geist", system-ui, -apple-system, "Segoe UI", Roboto,
+  /* ─── Nuances dérivées (Kre Design System) ────────────────────────────── */
+  /* --text-strong : titres d'étape. Remplace le bleu marine #1e2a4a hérité du
+     prototype, qui n'existait dans aucune des deux sources. */
+  --kre-heading: #4a1f08;
+  /* --text-body : texte secondaire. Voir l'écart documenté en en-tête. */
+  --kre-muted: #3a2415;
+  /* --surface-sunken : fonds de zones et survols. */
+  --kre-muted-bg: #e7decf;
+  /* --surface-tint : fonds de badges et d'états informatifs. */
+  --kre-tint: #ffe6d5;
+  /* --brand-primary-hover / -press : états du CTA. */
+  --kre-primary-hover: #ff7f38;
+  --kre-primary-press: #d8540b;
+
+  /*
+   * Texte posé sur l'orange vif.
+   *
+   * ⚠ Le blanc est le choix de la charte (Button variant « primary » du design
+   * system : background --brand-primary, color --text-inverse). Il ne donne que
+   * **2,82:1**, sous le seuil WCAG AA de 4,5:1 — et aucune nuance d'orange de la
+   * charte ne permet d'atteindre 4,5 avec du blanc (l'orange-700 plafonne à 4,04).
+   *
+   * Le noir de la charte donnerait **6,18:1**, donc conforme, en n'utilisant que
+   * des couleurs officielles. Basculer ce seul token suffit :
+   *     --kre-on-primary: var(--kre-foreground);
+   *
+   * Décision laissée au client : c'est l'aspect du CTA principal, donc un choix
+   * de marque, pas un choix technique.
+   */
+  --kre-on-primary: #ffffff;
+
+  /* ─── États (Kre Design System, --status-*) ───────────────────────────── */
+  /* Les teintes sont dérivées à 8–10 % sur blanc, choisies pour que le texte
+     d'état reste au-dessus de 4,5:1 (4,75 pour l'erreur, 4,55 pour le succès). */
+  --kre-error: #c23a22;
+  --kre-error-tint: #faefed;
+  --kre-success: #4f7a2e;
+  --kre-success-tint: #f1f4ee;
+  /* L'ambre du design system ne sert QU'aux bordures, icônes et fonds pleins :
+     en texte il plafonne à 2,4:1 sur blanc. Le texte d'avertissement utilise
+     donc le brun chocolat de la charte (9,43:1 sur la teinte). */
+  --kre-warning: #e0991f;
+  --kre-warning-tint: #fcf5e9;
+
+  --kre-font-sans: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   --kre-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
@@ -44,11 +107,14 @@
   --color-foreground: var(--kre-foreground);
   /* Orange vif — CTA, liens d’action */
   --color-primary: var(--kre-primary);
+  --color-primary-hover: var(--kre-primary-hover);
+  --color-primary-press: var(--kre-primary-press);
+  --color-on-primary: var(--kre-on-primary);
   /* Brun chocolat — titres, accents forts */
   --color-brand: var(--kre-brand);
   /* Brun moyen — accents secondaires */
   --color-brand-medium: var(--kre-brand-medium);
-  /* Bleu nuit — titres d'étape */
+  /* Brun 900 — titres d'étape */
   --color-heading: var(--kre-heading);
   /* Surfaces cartes */
   --color-surface: var(--kre-surface);
@@ -58,6 +124,15 @@
   --color-border: var(--kre-border);
   /* Fond légèrement plus marqué (hover, zones) */
   --color-muted-bg: var(--kre-muted-bg);
+  /* Teinte orangée très claire — badges */
+  --color-tint: var(--kre-tint);
+  /* États */
+  --color-error: var(--kre-error);
+  --color-error-tint: var(--kre-error-tint);
+  --color-success: var(--kre-success);
+  --color-success-tint: var(--kre-success-tint);
+  --color-warning: var(--kre-warning);
+  --color-warning-tint: var(--kre-warning-tint);
 
   --font-sans: var(--kre-font-sans);
   --font-mono: var(--kre-font-mono);
@@ -105,11 +180,20 @@
   --container-6xl: 1152px;
   --container-7xl: 1280px;
 
-  --radius-sm: 2px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-  --radius-2xl: 16px;
-  --radius-3xl: 24px;
-  --radius-full: 9999px;
+  /*
+   * Rayons à zéro — le design system fixe les six `--radius-*` à 0, y compris
+   * `--radius-pill`. Le langage visuel de la marque est entièrement anguleux.
+   *
+   * Passer par les tokens plutôt que par les classes : les `rounded-lg`,
+   * `rounded-xl` et `rounded-2xl` déjà posés dans les composants deviennent
+   * carrés sans y toucher, et revenir en arrière ne demande qu'une seule
+   * modification ici.
+   */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-full: 0;
 }
