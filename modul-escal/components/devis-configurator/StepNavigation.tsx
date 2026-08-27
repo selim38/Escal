@@ -23,8 +23,18 @@ export function StepNavigation({
 }: StepNavigationProps) {
   const { m } = useT();
 
+  /*
+   * Navigation collante en pied de panneau : sur les étapes riches en images
+   * (décor, contremarches), le bouton de validation tombait sous la ligne de
+   * flottaison et obligeait à faire défiler la page pour valider.
+   *
+   * `sticky` et non `fixed` : le bouton reste dans le flux du panneau, donc il
+   * ne recouvre jamais le contenu de la page hôte au-dessus ou en dessous du
+   * composant. Le fond opaque et le filet supérieur évitent que le contenu
+   * défile visiblement derrière.
+   */
   return (
-    <div className="mt-8 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+    <div className="sticky bottom-0 -mx-6 mt-8 flex flex-col gap-3 border-t border-border bg-surface px-6 pb-1 pt-6 sm:-mx-9 sm:flex-row sm:items-center sm:justify-between sm:px-9">
       <button
         type="button"
         onClick={onPrev}

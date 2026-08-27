@@ -16,14 +16,13 @@ import {
   type QuoteFormDraft,
 } from "@/lib/quote-schema";
 
-import { useAsset } from "@/lib/asset";
 import { calculatePrice } from "@/lib/calculatePrice";
 import { KreConfigProvider, usePendingPhotos, useKreConfig, type KreConfig } from "@/lib/config";
 import { useT } from "@/lib/i18n/useT";
 import { useWizardTracking } from "@/lib/useWizardTracking";
 
 import { Eyebrow } from "./ui/Typography";
-import { ProgressBar } from "./ProgressBar";
+import { ConfiguratorBar } from "./ConfiguratorBar";
 import { StepNavigation } from "./StepNavigation";
 import { StepStaircaseType } from "./steps/StepStaircaseType";
 import { StepDecor } from "./steps/StepDecor";
@@ -90,6 +89,7 @@ function WizardBody() {
     useFormContext<QuoteFormDraft>();
   const values = watch();
   const config = useKreConfig();
+  const { showHeader } = config;
   const pendingPhotos = usePendingPhotos();
   const { m, t } = useT();
   const stepHeadingRef = useRef<HTMLDivElement>(null);
@@ -231,11 +231,17 @@ function WizardBody() {
 
   if (submitState.status === "success") {
     return (
-      <div
-        className="py-6 text-center space-y-4"
-        role="status"
-        aria-live="polite"
-      >
+      <>
+        <ConfiguratorBar
+          currentStep={QUOTE_STEP_COUNT - 1}
+          totalSteps={QUOTE_STEP_COUNT}
+          showLogo={showHeader}
+        />
+        <div
+          className="rounded-lg border border-border-subtle bg-surface p-6 py-10 text-center shadow-md space-y-4 sm:p-9"
+          role="status"
+          aria-live="polite"
+        >
         <div className="flex justify-center">
           <span
             aria-hidden
@@ -257,18 +263,26 @@ function WizardBody() {
             {submitState.estimatedMaterialsEuro} €
           </strong>
         </p>
-        <p className="text-sm text-muted">{m.success.followUp}</p>
-      </div>
+          <p className="text-sm text-muted">{m.success.followUp}</p>
+        </div>
+      </>
     );
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(onFinal)}
-      className=""
-      noValidate
-    >
-      <ProgressBar currentStep={currentStep} totalSteps={QUOTE_STEP_COUNT} />
+    <>
+      <ConfiguratorBar
+        currentStep={currentStep}
+        totalSteps={QUOTE_STEP_COUNT}
+        showLogo={showHeader}
+      />
+
+      <form
+        onSubmit={handleSubmit(onFinal)}
+        className="rounded-lg border border-border-subtle bg-surface p-6 shadow-md sm:p-9"
+        noValidate
+      >
+        {showHeader && currentStep === 0 ? <ConfiguratorIntro /> : null}
 
       {/* Annonce le changement d'étape et reçoit le focus à chaque transition. */}
       <div
@@ -284,7 +298,7 @@ function WizardBody() {
         })}
       </div>
 
-      <div className="mt-8 min-h-[280px]">
+      <div className="min-h-[280px]">
         {currentStep === 0 ? <StepStaircaseType /> : null}
         {currentStep === 1 ? <StepDecor /> : null}
         {currentStep === 2 ? <StepRiser /> : null}
@@ -306,15 +320,16 @@ function WizardBody() {
         </p>
       )}
 
-      <StepNavigation
-        isFirstStep={isFirstStep}
-        isLastStep={isLastStep}
-        canGoNext={canGoNext && submitState.status !== "loading"}
-        onPrev={goPrev}
-        onNext={goNext}
-        isSubmitting={submitState.status === "loading"}
-      />
-    </form>
+        <StepNavigation
+          isFirstStep={isFirstStep}
+          isLastStep={isLastStep}
+          canGoNext={canGoNext && submitState.status !== "loading"}
+          onPrev={goPrev}
+          onNext={goNext}
+          isSubmitting={submitState.status === "loading"}
+        />
+      </form>
+    </>
   );
 }
 
@@ -345,89 +360,49 @@ function redirectToConfirmation(
  * il porte déjà ce nom, le répéter serait une redondance à l'écran comme au
  * lecteur d'écran. Le nom de marque vit donc dans l'`alt`.
  */
-function ConfiguratorHeader() {
+/**
+ * Bloc de présentation — affiché uniquement à la première étape.
+ *
+ * Titre, accroche et réassurance informent une fois, au moment où l'internaute
+ * décide de se lancer. Les répéter aux neuf étapes suivantes n'apportait rien et
+ * repoussait le bouton de validation sous la ligne de flottaison.
+ */
+function ConfiguratorIntro() {
   const { m } = useT();
-  const asset = useAsset();
   const icons = [Zap, ShieldCheck, Clock];
 
   return (
-    <header className="mb-7">
-      {/*
-        Bandeau du logo, calqué sur la nav du site de Knewledge : fond blanc
-        chaud, hauteur 72 px, filet --border-subtle en bas. Les marges négatives
-        le font affleurer les bords du panneau ; sans elles le logo flottait
-        seul dans le blanc, détaché du bloc de titre.
-      */}
-      {/* `border-x-transparent` compense la bordure de 1 px du panneau du
-          tunnel : sans elle le contenu de l'en-tête tombait à 82 px et celui du
-          formulaire à 83. */}
-      <div className="mb-7 flex h-[72px] items-center border-x border-b border-x-transparent border-b-border-subtle px-6 sm:px-9">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={asset("/brand/logo-kre.webp")}
-          alt={m.app.logoAlt}
-          width={480}
-          height={140}
-          /* Hauteur fixe, largeur automatique : le ratio du logo (3,43) est
-             conservé quelle que soit la largeur du conteneur hôte. */
-          className="h-9 w-auto sm:h-10"
-        />
-      </div>
-
-      {/*
-        Même padding horizontal que le panneau du tunnel : c'est ce qui garde
-        l'en-tête et le formulaire sur un axe gauche unique malgré la séparation
-        en deux blocs.
-      */}
-      <div className="border-x border-transparent px-6 sm:px-9">
-        <Eyebrow>{m.app.eyebrow}</Eyebrow>
-        <h2 className="text-3xl font-black leading-tight tracking-tight text-heading sm:text-4xl">
-          {m.app.title}
-        </h2>
-        <p className="mt-3 max-w-[54ch] text-base text-muted">{m.app.intro}</p>
+    <div className="mb-8 border-b border-border-subtle pb-8">
+      <Eyebrow>{m.app.eyebrow}</Eyebrow>
+      <h2 className="text-2xl font-black leading-tight tracking-tight text-heading sm:text-3xl">
+        {m.app.title}
+      </h2>
+      <p className="mt-3 max-w-[54ch] text-base text-muted">{m.app.intro}</p>
 
       {/*
         Rangée de réassurance, reprise de la bande « Simplicité · Sur mesure ·
-        Outils inclus » du site : même principe d'icônes orange fines suivies
-        d'un libellé court.
+        Outils inclus » du site : icônes orange fines et libellés courts.
       */}
-        <ul className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2">
-          {m.app.reassurance.map((label, i) => {
-            const Icon = icons[i] ?? Zap;
-            return (
-              <li
-                key={label}
-                className="flex items-center gap-2 text-[13px] font-semibold text-brand"
-              >
-                <Icon className="size-4 shrink-0 text-primary" aria-hidden />
-                {label}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </header>
+      <ul className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2">
+        {m.app.reassurance.map((label, i) => {
+          const Icon = icons[i] ?? Zap;
+          return (
+            <li
+              key={label}
+              className="flex items-center gap-2 text-[13px] font-semibold text-brand"
+            >
+              <Icon className="size-4 shrink-0 text-primary" aria-hidden />
+              {label}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
-/**
- * En-tête et tunnel sont deux blocs distincts, comme la nav et le contenu du
- * site de Knewledge — et non un en-tête enfermé dans la carte du formulaire.
- *
- * Ils partagent en revanche le même padding horizontal (`px-6 sm:px-9`), ce qui
- * maintient un axe gauche unique : c'était la cause des trois axes divergents
- * (53, 86 et 147 px) relevés précédemment.
- */
 function ConfiguratorShell() {
-  const { showHeader } = useKreConfig();
-  return (
-    <>
-      {showHeader ? <ConfiguratorHeader /> : null}
-      <div className="rounded-lg border border-border-subtle bg-surface p-6 shadow-md sm:p-9">
-        <WizardBody />
-      </div>
-    </>
-  );
+  return <WizardBody />;
 }
 
 export function DevisConfigurator({
