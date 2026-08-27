@@ -126,37 +126,55 @@ SHOW COLUMNS FROM leads LIKE 'tracking_json';
 
 ## Étape 4 — Recette interne avant d'ouvrir à Knewledge
 
-Une fois les étapes 1 à 3 faites, tester **soi-même** depuis une origine tierce,
-sinon on fait porter à Knewledge le débogage de notre propre déploiement.
+Tester **soi-même depuis une autre origine**, sinon on fait porter à Knewledge le
+débogage de notre propre déploiement.
 
-Le plus simple : ouvrir n'importe quelle page d'un autre domaine, puis dans la
-console du navigateur :
+`demo/recette-prod.html` est là pour ça : la page charge le bundle **réellement
+publié** sur `escal.point-soft.fr/wc/staging/`, servie depuis `localhost` — donc
+une origine tierce, exactement la situation de WordPress. C'est la seule façon de
+vérifier ce que le serveur de dev ne peut pas montrer : résolution des assets via
+`import.meta.url`, en-têtes CORS, compression, absence de StrictMode.
 
-```js
-const s = document.createElement("script");
-s.type = "module";
-s.src = "https://escal.point-soft.fr/wc/staging/kre-configurateur.js";
-document.head.appendChild(s);
-document.body.insertAdjacentHTML(
-  "afterbegin",
-  '<kre-configurateur lang="fr" theme="kre"></kre-configurateur>',
-);
+```bash
+npm run dev:wc
+# puis http://localhost:5174/demo/recette-prod.html
 ```
 
-À vérifier :
+La page charge aussi `demo/probe.js`, qui fournit dans la console :
 
-- [ ] le configurateur s'affiche, images et police chargées (onglet Réseau :
-      tout doit venir de `escal.point-soft.fr/wc/staging/`, rien du domaine hôte) ;
-- [ ] parcours complet des 10 étapes ;
-- [ ] la soumission renvoie une référence de lead (et non une erreur CORS) ;
-- [ ] le lead apparaît dans le dashboard admin, avec `origin` renseigné ;
-- [ ] `window.dataLayer` contient `devis_start`, les paires
-      `devis_step_view` / `devis_step_complete`, puis `devis_submit`.
+- `kreWalkToDimensions()` — avance jusqu'à l'étape 5 (la plus riche en mise en page) ;
+- `kreWalkToSubmit()` — déroule les 10 étapes et renvoie `{ success, events }` ;
+- `kreFingerprint()` — empreinte de rendu, pour comparer deux contextes.
 
-Pour tester sans polluer le CRM, ajouter l'attribut `demo` : la soumission est
-simulée, aucun appel réseau.
+### Vérifié le 2026-08-26 sur le bundle en ligne
 
----
+- [x] aucune erreur console ;
+- [x] `import.meta.url` résout les assets sur `escal.point-soft.fr/wc/staging/`
+      et non sur le domaine de la page hôte ;
+- [x] en-tête CORS effectif sur les images — vérifié en lisant les pixels dans un
+      canvas non contaminé, ce qui n'est possible qu'avec `Access-Control-Allow-Origin` ;
+- [x] police et propriétés CSS enregistrées injectées dans `document.head` ;
+- [x] rendu conforme à la charte (le découpage des `@property` tient en production) ;
+- [x] parcours complet des 10 étapes, entonnoir `dataLayer` complet :
+      `devis_start`, 8 paires `devis_step_view`/`devis_step_complete`
+      (l'étape parquet est sautée sans raccord parquet), puis `devis_submit`.
+
+### Reste à valider manuellement
+
+**La soumission d'un vrai lead.** `api/leads.php` déclenche une **alerte SMS aux
+commerciaux** (Primotexto) à chaque création : un test envoie un vrai SMS à une
+vraie personne. Prévenir l'équipe, ou commenter temporairement l'appel, puis
+retirer l'attribut `demo` de la balise dans `demo/recette-prod.html`.
+
+À contrôler ensuite dans le dashboard : le lead présent, avec `origin` renseigné
+(ce qui confirme aussi que la migration de l'étape 3 est passée).
+
+**Le clavier et iOS.** `Entrée`, `Espace` et `Échap` ne sont pas testables par
+automatisation ici — le harnais délivre les touches avec un `key` vide, donc
+l'action par défaut du navigateur ne se déclenche jamais. `Tab` et l'anneau de
+focus sont vérifiés. Prévoir une passe manuelle de deux minutes, et un essai sur
+iOS Safari 15 si l'appareil est disponible (le repli sans `<dialog>` ne se voit
+que là).
 
 ## Étape 5 — Ce qu'on envoie à Knewledge
 

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recette — bundle en ligne</title>
+    <!--
+      Recette de l'étape 4 de docs/LIVRAISON.md.
+
+      Charge le bundle RÉELLEMENT PUBLIÉ sur escal.point-soft.fr, depuis une
+      autre origine (localhost) : c'est la seule façon de vérifier ce que le
+      serveur de dev ne peut pas montrer — résolution des assets via
+      import.meta.url, en-têtes CORS, compression, absence de StrictMode.
+
+      L'attribut `demo` est posé par défaut : la soumission est simulée. Le
+      retirer déclenche un VRAI lead en base et une alerte SMS aux commerciaux.
+    -->
+    <style>
+      body { margin: 0; font-family: system-ui, sans-serif; background: #fff; }
+      .page { width: min(880px, 100%); margin: 0 auto; padding: 24px 12px; }
+      .note {
+        font: 13px/1.6 monospace; background: #f7f2ec; color: #5c4a3a;
+        padding: 10px 14px; border-left: 3px solid #ff6d1b; margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <p class="note">
+        Bundle chargé depuis <code>escal.point-soft.fr/wc/staging/</code>.
+        Mode démo : aucune écriture en base.
+      </p>
+      <kre-configurateur lang="fr" theme="kre" demo></kre-configurateur>
+    </div>
+
+    <script src="/demo/probe.js"></script>
+    <script
+      src="https://escal.point-soft.fr/wc/staging/kre-configurateur.js"
+      type="module"
+      defer
+    ></script>
+  </body>
+</html>
