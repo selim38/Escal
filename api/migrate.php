@@ -1,20 +1,44 @@
 <?php
 /**
- * /api/migrate.php?token=XXXX
- *
  * Applique schema.sql (CREATE IF NOT EXISTS + ALTER). Les erreurs attendues
  * sur base déjà à jour (« duplicate column », « table exists ») sont ignorées.
- * À lancer UNE fois après un changement de schéma, puis À SUPPRIMER.
+ * À lancer après chaque changement de schéma.
  *
- *   https://escal.point-soft.fr/api/migrate.php?token=LE_TOKEN
+ * En ligne de commande, sur le serveur — voie recommandée :
+ *
+ *   php api/migrate.php LE_TOKEN
+ *
+ * L'accès HTTP est refusé par api/.htaccess. C'est plus sûr que de supprimer le
+ * fichier après usage comme le prévoyait la version précédente : le dossier
+ * api/ étant redéployé depuis le dépôt à chaque push, la suppression ne tenait
+ * que jusqu'au déploiement suivant.
  */
 
 declare(strict_types=1);
-header('Content-Type: text/plain; charset=utf-8');
+
+/*
+ * L'hébergement expose PHP en SAPI CGI, pas CLI : tester `PHP_SAPI === 'cli'`
+ * ne suffit pas. Le vrai critère est l'absence de requête HTTP en cours.
+ */
+$isCli = PHP_SAPI === 'cli' || !isset($_SERVER['REQUEST_METHOD']);
+if (!$isCli) {
+    header('Content-Type: text/plain; charset=utf-8');
+}
 
 $CONFIG = require __DIR__ . '/config.php';
-if (($_GET['token'] ?? '') !== ($CONFIG['install_token'] ?? '_')) {
-    http_response_code(403);
+
+/*
+ * Hors requête HTTP, le token vient du premier argument. `$argv` n'existe que
+ * si `register_argc_argv` est actif — ce n'est pas garanti en CGI, d'où le
+ * repli sur la variable d'environnement KRE_INSTALL_TOKEN.
+ */
+$token = $isCli
+    ? ($argv[1] ?? getenv('KRE_INSTALL_TOKEN') ?: '')
+    : ($_GET['token'] ?? '');
+if ($token !== ($CONFIG['install_token'] ?? '_')) {
+    if (!$isCli) {
+        http_response_code(403);
+    }
     exit("Accès refusé.\n");
 }
 
@@ -56,4 +80,6 @@ foreach ($statements as $stmt) {
 }
 
 echo "\n--- $ok appliqué(s), $skip déjà présent(s). ---\n";
-echo "\n⚠️  SUPPRIME migrate.php du serveur après usage.\n";
+if (!$isCli) {
+    echo "\n⚠️  Accès HTTP : préférez `php api/migrate.php LE_TOKEN` en ligne de commande.\n";
+}

@@ -8,8 +8,12 @@
 # Variante CGI/FastCGI
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 
-# Empêche l'accès direct aux fichiers sensibles
-<FilesMatch "^(config\.php|config\.sample\.php|schema\.sql|bootstrap\.php)$">
+# Empêche l'accès direct aux fichiers sensibles.
+# migrate.php est inclus : il s'exécute désormais en ligne de commande
+# (`php api/migrate.php LE_TOKEN`), donc il n'a aucune raison d'être joignable
+# par HTTP. Le bloquer ici vaut mieux que de le supprimer après usage — api/
+# étant redéployé depuis le dépôt, la suppression ne survivait pas au push suivant.
+<FilesMatch "^(config\.php|config\.sample\.php|schema\.sql|bootstrap\.php|migrate\.php)$">
   Require all denied
 </FilesMatch>
 

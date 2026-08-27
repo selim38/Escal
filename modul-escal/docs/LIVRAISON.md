@@ -104,12 +104,14 @@ partir en erreur. Le déploiement automatique ne casse donc pas la prise de
 leads — mais la provenance et le destinataire sont perdus jusqu'à la migration.
 À faire dès que possible.
 
-```
-https://escal.point-soft.fr/api/migrate.php?token=LE_TOKEN
+En ligne de commande sur le serveur — l'accès HTTP est bloqué par `api/.htaccess` :
+
+```bash
+php ~/kitrenovation/api/migrate.php "$(grep -o "'install_token' => '[^']*'" ~/kitrenovation/api/config.php | cut -d"'" -f4)"
 ```
 
-Le token est `install_token` dans `config.php`. Les erreurs « duplicate column »
-sur les ALTER déjà appliqués sont normales et ignorées par le script.
+Ajuster le chemin si `api/` n'est pas sous `~/kitrenovation`. Les erreurs
+« duplicate column » sur les ALTER déjà appliqués sont normales et ignorées.
 
 Contrôle :
 
@@ -119,8 +121,10 @@ SHOW COLUMNS FROM leads LIKE 'origin';
 SHOW COLUMNS FROM leads LIKE 'tracking_json';
 ```
 
-> Rappel : `migrate.php` est un point d'entrée protégé par un simple token.
-> Le supprimer du serveur après usage, comme indiqué dans son en-tête.
+> `migrate.php` n'est plus à supprimer après usage : il n'est plus joignable par
+> HTTP (`api/.htaccess`) et ne s'exécute qu'en ligne de commande. La suppression
+> était de toute façon illusoire — `api/` est redéployé depuis le dépôt à chaque
+> push, donc le fichier revenait au déploiement suivant.
 
 ---
 
