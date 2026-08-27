@@ -15,6 +15,7 @@ import {
   type QuoteFormDraft,
 } from "@/lib/quote-schema";
 
+import { useAsset } from "@/lib/asset";
 import { calculatePrice } from "@/lib/calculatePrice";
 import { KreConfigProvider, usePendingPhotos, useKreConfig, type KreConfig } from "@/lib/config";
 import { useT } from "@/lib/i18n/useT";
@@ -335,14 +336,28 @@ function redirectToConfirmation(
   }
 }
 
-/** En-tête interne, rendu quand le composant n'est pas encadré par la page hôte. */
+/**
+ * En-tête interne, rendu quand le composant n'est pas encadré par la page hôte.
+ *
+ * Le logo remplace l'ancienne accroche textuelle « Kit Rénovation Escalier » :
+ * il porte déjà ce nom, le répéter serait une redondance à l'écran comme au
+ * lecteur d'écran. Le nom de marque vit donc dans l'`alt`.
+ */
 function ConfiguratorHeader() {
   const { m } = useT();
+  const asset = useAsset();
   return (
-    <header className="mb-8 flex flex-col gap-1">
-      <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-        {m.app.eyebrow}
-      </p>
+    <header className="mb-8 flex flex-col gap-3">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={asset("/brand/logo-kre.webp")}
+        alt={m.app.logoAlt}
+        width={480}
+        height={140}
+        /* Hauteur fixe, largeur automatique : le ratio du logo (3,43) est
+           conservé quelle que soit la largeur du conteneur hôte. */
+        className="h-10 w-auto self-start sm:h-12"
+      />
       <h2 className="text-2xl font-bold tracking-tight text-brand sm:text-3xl">
         {m.app.title}
       </h2>

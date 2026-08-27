@@ -44,6 +44,7 @@ next-env.d.ts
 /dist
 
 # WebP générés depuis assets-src/ (npm run assets:webp)
+/public/brand
 /public/CM
 /public/decor
 /public/dimensions

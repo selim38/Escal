@@ -39,6 +39,11 @@ const SOURCE_EXT = new Set([".jpg", ".jpeg", ".png"]);
  * 800 px, elles passent sous 100 Ko sans perte visible à la taille d'affichage.
  */
 const OPTIONS_BY_DIR = {
+  //           logo en aplats à bords nets, avec canal alpha : le sans-perte est
+  //           à la fois plus fidèle et plus léger que le lossy (6,9 Ko contre
+  //           9,5 Ko à q90). Rendu ≈ 160 px de large, plafond à 3× pour les
+  //           écrans à haute densité.
+  brand: { lossless: true, maxWidth: 480 },
   //           rendu ≈ 400 px (grille 2 colonnes dans max-w-2xl)
   dimensions: { quality: 82, maxWidth: 800 },
   //           rendu ≈ 400 px (aspect-video, grille 2 colonnes)
@@ -64,10 +69,13 @@ async function* walk(dir) {
 
 function cwebpArgs(path) {
   const segment = path.slice(SOURCE_DIR.length).split("/")[0];
-  const { quality, maxWidth } = OPTIONS_BY_DIR[segment] ?? OPTIONS_BY_DIR.default;
+  const opts = OPTIONS_BY_DIR[segment] ?? OPTIONS_BY_DIR.default;
   // `-resize <w> 0` conserve le ratio ; cwebp n'agrandit jamais une image plus
   // petite que le plafond.
-  return ["-q", String(quality), "-m", "6", "-resize", String(maxWidth), "0"];
+  const resize = ["-resize", String(opts.maxWidth), "0"];
+  return opts.lossless
+    ? ["-lossless", "-z", "9", ...resize]
+    : ["-q", String(opts.quality), "-m", "6", ...resize];
 }
 
 async function isUpToDate(source, target) {
