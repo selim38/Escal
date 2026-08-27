@@ -145,15 +145,15 @@ jobs:
         run: |
           sudo apt-get install -y -qq lftp
 
-          # `rm -f wc` nettoie une séquelle d'un déploiement raté : un FICHIER
-          # nommé wc avait été créé à la racine, d'où l'erreur
-          # « mirror: Access failed: Not a directory (/wc) ».
-          # En SFTP, rm ne supprime pas un dossier : quand wc est le bon dossier,
-          # la commande échoue sans effet — d'où fail-exit désactivé le temps de
-          # cette seule commande.
+          # `mkdir -p wc` est volontairement dans un bloc tolérant : en SFTP,
+          # créer un dossier qui existe déjà remonte une erreur, et avec
+          # `cmd:fail-exit yes` cela avortait tout le script AVANT le premier
+          # transfert — le dossier existant étant le cas normal dès le second
+          # déploiement.
           #
-          # `mkdir -p` sans -f : un échec de création doit rester visible. C'est
-          # le -f qui avait masqué la vraie cause au run précédent.
+          # Masquer cette erreur ne masque rien d'utile : si le dossier est
+          # réellement inaccessible, le `mirror` qui suit échoue avec le message
+          # du serveur, et l'étape de vérification finale reste le garde-fou.
           #
           # Les commentaires restent hors de la chaîne lftp : `#` n'y est pas
           # interprété de façon fiable et deviendrait une commande inconnue.
@@ -165,9 +165,8 @@ jobs:
             set xfer:parallel 3;
             open -u \"$FTP_USERNAME\" --env-password sftp://\"$FTP_SERVER\";
             set cmd:fail-exit no;
-            rm -f wc;
-            set cmd:fail-exit yes;
             mkdir -p wc;
+            set cmd:fail-exit yes;
             mirror --reverse --verbose --no-symlinks --no-perms \
               dist/publish/wc wc;
             put -O wc deliverables/hosting/.htaccess;
@@ -181,17 +180,24 @@ jobs:
           base=https://escal.point-soft.fr/wc
           for path in \
             "staging/kre-configurateur.js" \
-            "staging/fonts/geist-variable.woff2" \
             "staging/decor/chene-naturel.webp" \
-            "$WC_VERSION/kre-configurateur.js"
+            "staging/brand/logo-kre.webp" \
+            "staging/fonts/archivo-variable.woff2" \
+            "$WC_VERSION/kre-configurateur.js" \
+            "$WC_VERSION/brand/logo-kre.webp"
           do
             for attempt in 1 2 3 4 5 6; do
+              # Pas de -L : mod_speling est actif sur cet hébergement et redirige
+              # en 301 un chemin absent vers le plus proche existant. Suivre la
+              # redirection ferait passer une publication ratée pour un succès —
+              # c'est exactement ce qui s'est produit sur /wc/v1.1.0, redirigé
+              # vers /wc/v1.0.0. Seul un 200 direct est accepté.
               code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$base/$path" || echo 000)
               [ "$code" = "200" ] && break
               sleep 10
             done
             if [ "$code" != "200" ]; then
-              echo "::error::$base/$path répond $code"
+              echo "::error::$base/$path répond $code (301 = chemin absent, redirigé par mod_speling)"
               exit 1
             fi
             echo "OK $path"
