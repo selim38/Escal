@@ -351,14 +351,17 @@ function ConfiguratorHeader() {
   const icons = [Zap, ShieldCheck, Clock];
 
   return (
-    <header className="mb-9 border-b border-border-subtle pb-8">
+    <header className="mb-7">
       {/*
         Bandeau du logo, calqué sur la nav du site de Knewledge : fond blanc
         chaud, hauteur 72 px, filet --border-subtle en bas. Les marges négatives
         le font affleurer les bords du panneau ; sans elles le logo flottait
         seul dans le blanc, détaché du bloc de titre.
       */}
-      <div className="-mx-6 -mt-6 mb-7 flex h-[72px] items-center border-b border-border-subtle bg-background px-6 sm:-mx-9 sm:-mt-9 sm:px-9">
+      {/* `border-x-transparent` compense la bordure de 1 px du panneau du
+          tunnel : sans elle le contenu de l'en-tête tombait à 82 px et celui du
+          formulaire à 83. */}
+      <div className="mb-7 flex h-[72px] items-center border-x border-b border-x-transparent border-b-border-subtle px-6 sm:px-9">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={asset("/brand/logo-kre.webp")}
@@ -371,42 +374,59 @@ function ConfiguratorHeader() {
         />
       </div>
 
-      <Eyebrow>{m.app.eyebrow}</Eyebrow>
-      <h2 className="text-3xl font-black leading-tight tracking-tight text-heading sm:text-4xl">
-        {m.app.title}
-      </h2>
-      <p className="mt-3 max-w-[54ch] text-base text-muted">{m.app.intro}</p>
+      {/*
+        Même padding horizontal que le panneau du tunnel : c'est ce qui garde
+        l'en-tête et le formulaire sur un axe gauche unique malgré la séparation
+        en deux blocs.
+      */}
+      <div className="border-x border-transparent px-6 sm:px-9">
+        <Eyebrow>{m.app.eyebrow}</Eyebrow>
+        <h2 className="text-3xl font-black leading-tight tracking-tight text-heading sm:text-4xl">
+          {m.app.title}
+        </h2>
+        <p className="mt-3 max-w-[54ch] text-base text-muted">{m.app.intro}</p>
 
       {/*
         Rangée de réassurance, reprise de la bande « Simplicité · Sur mesure ·
         Outils inclus » du site : même principe d'icônes orange fines suivies
         d'un libellé court.
       */}
-      <ul className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2">
-        {m.app.reassurance.map((label, i) => {
-          const Icon = icons[i] ?? Zap;
-          return (
-            <li
-              key={label}
-              className="flex items-center gap-2 text-[13px] font-semibold text-brand"
-            >
-              <Icon className="size-4 shrink-0 text-primary" aria-hidden />
-              {label}
-            </li>
-          );
-        })}
-      </ul>
+        <ul className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2">
+          {m.app.reassurance.map((label, i) => {
+            const Icon = icons[i] ?? Zap;
+            return (
+              <li
+                key={label}
+                className="flex items-center gap-2 text-[13px] font-semibold text-brand"
+              >
+                <Icon className="size-4 shrink-0 text-primary" aria-hidden />
+                {label}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </header>
   );
 }
 
+/**
+ * En-tête et tunnel sont deux blocs distincts, comme la nav et le contenu du
+ * site de Knewledge — et non un en-tête enfermé dans la carte du formulaire.
+ *
+ * Ils partagent en revanche le même padding horizontal (`px-6 sm:px-9`), ce qui
+ * maintient un axe gauche unique : c'était la cause des trois axes divergents
+ * (53, 86 et 147 px) relevés précédemment.
+ */
 function ConfiguratorShell() {
   const { showHeader } = useKreConfig();
   return (
-    <div className="rounded-lg border border-border-subtle bg-surface p-6 shadow-md sm:p-9">
+    <>
       {showHeader ? <ConfiguratorHeader /> : null}
-      <WizardBody />
-    </div>
+      <div className="rounded-lg border border-border-subtle bg-surface p-6 shadow-md sm:p-9">
+        <WizardBody />
+      </div>
+    </>
   );
 }
 
