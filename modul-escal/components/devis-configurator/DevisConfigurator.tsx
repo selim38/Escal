@@ -1,5 +1,6 @@
 "use client";
 
+import { Clock, ShieldCheck, Zap } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FieldPath, UseFormSetError } from "react-hook-form";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -347,34 +348,58 @@ function redirectToConfirmation(
 function ConfiguratorHeader() {
   const { m } = useT();
   const asset = useAsset();
+  const icons = [Zap, ShieldCheck, Clock];
+
   return (
-    <header className="mb-8 border-b border-border-subtle pb-8">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={asset("/brand/logo-kre.webp")}
-        alt={m.app.logoAlt}
-        width={480}
-        height={140}
-        /* Hauteur fixe, largeur automatique : le ratio du logo (3,43) est
-           conservé quelle que soit la largeur du conteneur hôte. */
-        className="mb-6 h-10 w-auto sm:h-11"
-      />
+    <header className="mb-9 border-b border-border-subtle pb-8">
+      {/*
+        Bandeau du logo, calqué sur la nav du site de Knewledge : fond blanc
+        chaud, hauteur 72 px, filet --border-subtle en bas. Les marges négatives
+        le font affleurer les bords du panneau ; sans elles le logo flottait
+        seul dans le blanc, détaché du bloc de titre.
+      */}
+      <div className="-mx-6 -mt-6 mb-7 flex h-[72px] items-center border-b border-border-subtle bg-background px-6 sm:-mx-9 sm:-mt-9 sm:px-9">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={asset("/brand/logo-kre.webp")}
+          alt={m.app.logoAlt}
+          width={480}
+          height={140}
+          /* Hauteur fixe, largeur automatique : le ratio du logo (3,43) est
+             conservé quelle que soit la largeur du conteneur hôte. */
+          className="h-9 w-auto sm:h-10"
+        />
+      </div>
+
       <Eyebrow>{m.app.eyebrow}</Eyebrow>
       <h2 className="text-3xl font-black leading-tight tracking-tight text-heading sm:text-4xl">
         {m.app.title}
       </h2>
-      <p className="mt-3 max-w-[52ch] text-base text-muted">{m.app.intro}</p>
+      <p className="mt-3 max-w-[54ch] text-base text-muted">{m.app.intro}</p>
+
+      {/*
+        Rangée de réassurance, reprise de la bande « Simplicité · Sur mesure ·
+        Outils inclus » du site : même principe d'icônes orange fines suivies
+        d'un libellé court.
+      */}
+      <ul className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2">
+        {m.app.reassurance.map((label, i) => {
+          const Icon = icons[i] ?? Zap;
+          return (
+            <li
+              key={label}
+              className="flex items-center gap-2 text-[13px] font-semibold text-brand"
+            >
+              <Icon className="size-4 shrink-0 text-primary" aria-hidden />
+              {label}
+            </li>
+          );
+        })}
+      </ul>
     </header>
   );
 }
 
-/**
- * Panneau unique du configurateur.
- *
- * L'en-tête et le formulaire partagent le même conteneur, donc le même padding
- * horizontal : sans cela le logo, le titre d'étape et la grille de choix
- * s'alignaient sur trois axes gauches différents (53, 86 et 147 px mesurés).
- */
 function ConfiguratorShell() {
   const { showHeader } = useKreConfig();
   return (
