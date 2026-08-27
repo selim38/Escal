@@ -69,12 +69,12 @@ export function StepStaircaseType() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2 text-center">
-        <StepTitle>{m.steps.staircaseType.title}</StepTitle>
+      <div className="space-y-2">
+        <StepTitle align="left">{m.steps.staircaseType.title}</StepTitle>
         <p className="text-sm text-muted">{m.steps.staircaseType.subtitle}</p>
       </div>
 
-      <fieldset className="mx-auto grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+      <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
         <legend className="sr-only">{m.steps.staircaseType.subtitle}</legend>
         {choices.map((choice) => {
           const selected = value === choice.value;
@@ -110,7 +110,7 @@ export function StepStaircaseType() {
       {/* Cas spécifique : escalier ouvert → information uniquement */}
       {value === "OPEN" && (
         <div
-          className="mx-auto max-w-2xl rounded-xl border border-warning bg-warning-tint p-4"
+          className="rounded-lg border border-warning bg-warning-tint p-4"
           role="status"
         >
           <p className="text-sm font-semibold text-brand">

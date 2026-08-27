@@ -50,14 +50,14 @@ export function StepRiser() {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-2 text-center">
-        <StepTitle>{m.steps.riser.title}</StepTitle>
+      <div className="space-y-2">
+        <StepTitle align="left">{m.steps.riser.title}</StepTitle>
         <p className="text-sm font-medium text-heading">
           {m.steps.riser.subtitle}
         </p>
       </div>
 
-      <fieldset className="mx-auto grid max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
+      <fieldset className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
         <legend className="sr-only">{m.steps.riser.subtitle}</legend>
         {WITH_RISER_OPTIONS.map((option) => {
           const selected = value === option.id;

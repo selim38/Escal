@@ -27,10 +27,13 @@ export function Eyebrow({ children }: { children: ReactNode }) {
  */
 export function StepTitle({
   children,
-  align = "center",
+  align = "left",
 }: {
   children: ReactNode;
-  /** Les étapes sont centrées, l'en-tête du composant est aligné à gauche. */
+  /**
+   * Aligné à gauche par défaut, sur le même axe que l'en-tête. Le mélange
+   * centré/gauche était une des sources d'incohérence visuelle relevées.
+   */
   align?: "center" | "left";
 }) {
   return (

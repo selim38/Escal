@@ -198,15 +198,6 @@
   --container-7xl: 1280px;
 
   /*
-   * Rayons à zéro — le design system fixe les six `--radius-*` à 0, y compris
-   * `--radius-pill`. Le langage visuel de la marque est entièrement anguleux.
-   *
-   * Passer par les tokens plutôt que par les classes : les `rounded-lg`,
-   * `rounded-xl` et `rounded-2xl` déjà posés dans les composants deviennent
-   * carrés sans y toucher, et revenir en arrière ne demande qu'une seule
-   * modification ici.
-   */
-  /*
    * Ombres teintées du brun de la marque (jamais du noir pur), et halo orange
    * du CTA. Reprises telles quelles du design system.
    */
@@ -230,11 +221,27 @@
   --tracking-wider: 0.14em;
   --tracking-widest: 0.14em;
 
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
-  --radius-xl: 0;
-  --radius-2xl: 0;
-  --radius-3xl: 0;
-  --radius-full: 0;
+  /*
+   * Rayons — ÉCART ASSUMÉ au design system, à la demande du client.
+   *
+   * Le design system fixe les six `--radius-*` à 0. Appliqué tel quel, le rendu
+   * a été jugé trop dur : l'accumulation d'angles vifs, de bordures fines et
+   * d'aplats donne un aspect tableur plutôt que produit. Le site de Knewledge
+   * compense par de grandes photos et des sections sombres, ce qu'un composant
+   * de formulaire n'a pas.
+   *
+   * Compromis : les boutons restent carrés (leur site le montre clairement,
+   * via `rounded-none` posé explicitement dans StepNavigation), les surfaces
+   * reçoivent un rayon léger — assez pour adoucir, trop peu pour trahir le
+   * langage anguleux de la marque.
+   *
+   * Un seul endroit à toucher pour revenir à 0 si Knewledge tranche autrement.
+   */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+  --radius-2xl: 8px;
+  --radius-3xl: 8px;
+  --radius-full: 9999px;
 }

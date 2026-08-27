@@ -16,8 +16,8 @@ export function StepStepCount() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2 text-center">
-        <StepTitle>{m.steps.stepCount.title}</StepTitle>
+      <div className="space-y-2">
+        <StepTitle align="left">{m.steps.stepCount.title}</StepTitle>
         <p className="text-sm text-muted">{m.steps.stepCount.subtitle}</p>
       </div>
 

@@ -56,8 +56,8 @@ export function StepLanding() {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-2 text-center">
-        <StepTitle>{m.steps.landing.title}</StepTitle>
+      <div className="space-y-2">
+        <StepTitle align="left">{m.steps.landing.title}</StepTitle>
         <p className="text-sm text-muted">{m.steps.landing.subtitle}</p>
       </div>
 

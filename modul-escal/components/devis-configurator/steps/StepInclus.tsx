@@ -102,8 +102,8 @@ export function StepInclus() {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-2 text-center">
-        <StepTitle>{m.steps.included.title}</StepTitle>
+      <div className="space-y-2">
+        <StepTitle align="left">{m.steps.included.title}</StepTitle>
         <p className="text-sm text-muted">{m.steps.included.subtitle}</p>
       </div>
 

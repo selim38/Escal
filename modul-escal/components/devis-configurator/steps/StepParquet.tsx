@@ -23,8 +23,8 @@ export function StepParquet() {
 
       <div className="space-y-8">
         {/* ── Titre ─────────────────────────────────────────────── */}
-        <div className="space-y-2 text-center">
-          <StepTitle>{m.steps.parquet.title}</StepTitle>
+        <div className="space-y-2">
+          <StepTitle align="left">{m.steps.parquet.title}</StepTitle>
           <p className="text-sm text-muted">{m.steps.parquet.subtitle}</p>
         </div>
 

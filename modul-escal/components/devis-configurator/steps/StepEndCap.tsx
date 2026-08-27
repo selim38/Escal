@@ -90,8 +90,8 @@ export function StepEndCap() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2 text-center">
-        <StepTitle>{m.steps.endCap.title}</StepTitle>
+      <div className="space-y-2">
+        <StepTitle align="left">{m.steps.endCap.title}</StepTitle>
         <p className="text-sm text-muted">{m.steps.endCap.subtitle}</p>
       </div>
 

@@ -25,7 +25,7 @@ export function StepDecor() {
 
   return (
     <div className="space-y-8">
-      <StepTitle>{m.steps.decor.title}</StepTitle>
+      <StepTitle align="left">{m.steps.decor.title}</StepTitle>
 
       <fieldset className="flex flex-wrap justify-center gap-3 sm:gap-5">
         <legend className="sr-only">{m.steps.decor.title}</legend>

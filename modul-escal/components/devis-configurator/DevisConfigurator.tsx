@@ -231,7 +231,7 @@ function WizardBody() {
   if (submitState.status === "success") {
     return (
       <div
-        className="rounded-2xl border border-border bg-surface p-8 text-center shadow-lg shadow-brand/10 space-y-4"
+        className="py-6 text-center space-y-4"
         role="status"
         aria-live="polite"
       >
@@ -264,7 +264,7 @@ function WizardBody() {
   return (
     <form
       onSubmit={handleSubmit(onFinal)}
-      className="rounded-2xl border border-border bg-surface p-6 shadow-lg shadow-brand/10 sm:p-8"
+      className=""
       noValidate
     >
       <ProgressBar currentStep={currentStep} totalSteps={QUOTE_STEP_COUNT} />
@@ -348,7 +348,7 @@ function ConfiguratorHeader() {
   const { m } = useT();
   const asset = useAsset();
   return (
-    <header className="mb-8">
+    <header className="mb-8 border-b border-border-subtle pb-8">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={asset("/brand/logo-kre.webp")}
@@ -357,26 +357,31 @@ function ConfiguratorHeader() {
         height={140}
         /* Hauteur fixe, largeur automatique : le ratio du logo (3,43) est
            conservé quelle que soit la largeur du conteneur hôte. */
-        className="mb-6 h-10 w-auto sm:h-12"
+        className="mb-6 h-10 w-auto sm:h-11"
       />
       <Eyebrow>{m.app.eyebrow}</Eyebrow>
       <h2 className="text-3xl font-black leading-tight tracking-tight text-heading sm:text-4xl">
         {m.app.title}
       </h2>
-      <p className="mt-3 max-w-2xl text-base text-muted sm:text-lg">
-        {m.app.intro}
-      </p>
+      <p className="mt-3 max-w-[52ch] text-base text-muted">{m.app.intro}</p>
     </header>
   );
 }
 
+/**
+ * Panneau unique du configurateur.
+ *
+ * L'en-tête et le formulaire partagent le même conteneur, donc le même padding
+ * horizontal : sans cela le logo, le titre d'étape et la grille de choix
+ * s'alignaient sur trois axes gauches différents (53, 86 et 147 px mesurés).
+ */
 function ConfiguratorShell() {
   const { showHeader } = useKreConfig();
   return (
-    <>
+    <div className="rounded-lg border border-border-subtle bg-surface p-6 shadow-md sm:p-9">
       {showHeader ? <ConfiguratorHeader /> : null}
       <WizardBody />
-    </>
+    </div>
   );
 }
 

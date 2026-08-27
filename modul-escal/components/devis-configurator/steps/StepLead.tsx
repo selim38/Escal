@@ -70,8 +70,8 @@ export function StepLead() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <div className="space-y-2 text-center">
-        <StepTitle>{m.steps.lead.title}</StepTitle>
+      <div className="space-y-2">
+        <StepTitle align="left">{m.steps.lead.title}</StepTitle>
         <p className="text-sm text-muted">{m.steps.lead.subtitle}</p>
       </div>
 

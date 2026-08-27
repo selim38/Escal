@@ -43,12 +43,12 @@ export function StepUniformDimensions() {
 
   return (
     <div className="space-y-8">
-      <StepTitle>{m.steps.dimensions.title}</StepTitle>
-      <p className="text-center text-sm text-muted">
+      <StepTitle align="left">{m.steps.dimensions.title}</StepTitle>
+      <p className="text-sm text-muted">
         {m.steps.dimensions.question}
       </p>
 
-      <fieldset className="mx-auto grid w-full max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
+      <fieldset className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
         <legend className="sr-only">{m.steps.dimensions.question}</legend>
         {choices.map((choice) => {
           const selected = uniform === choice.value;
