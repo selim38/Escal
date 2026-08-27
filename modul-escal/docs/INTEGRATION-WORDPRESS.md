@@ -15,7 +15,7 @@
 
 | Livrable | Emplacement |
 |---|---|
-| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.2.0/kre-configurateur.js` |
+| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.3.0/kre-configurateur.js` |
 | Bundle JS — staging | `https://escal.point-soft.fr/wc/staging/kre-configurateur.js` |
 | Balise d'intégration | §2 |
 | Liste des attributs | §3 |
@@ -23,9 +23,15 @@
 | Plugin WordPress (optionnel) | `deliverables/kre-configurateur-wp/` |
 
 Les URLs de production sont **versionnées et immuables** : une nouvelle version
-est publiée sous un nouveau chemin (`/wc/v1.2.0/`…), jamais en écrasant la
+est publiée sous un nouveau chemin (`/wc/v1.3.0/`…), jamais en écrasant la
 précédente. Vous maîtrisez donc la date de bascule. `staging` est republié à
 chaque itération de recette.
+
+**v1.3.0** — ergonomie du tunnel : l'en-tête devient un bandeau horizontal
+compact de 72 px (logo + avancement + jauge), et le bloc de présentation ne
+s'affiche plus qu'à la première étape. Le contenu remonte de 236 px sur les
+étapes 2 à 10. La navigation « Précédent / Suivant » colle en pied de panneau,
+pour que le bouton de validation reste atteignable sans faire défiler la page.
 
 **v1.2.0** — habillage aligné sur les composants de votre design system :
 accroche en capitales espacées, titres en graisse 900 à interlettrage serré,
@@ -41,7 +47,7 @@ officielles. Voir §4.3 pour les trois écarts de contraste assumés.
 ## 2. Intégration
 
 ```html
-<script src="https://escal.point-soft.fr/wc/v1.2.0/kre-configurateur.js"
+<script src="https://escal.point-soft.fr/wc/v1.3.0/kre-configurateur.js"
         type="module" defer></script>
 
 <kre-configurateur lang="fr" theme="kre"></kre-configurateur>
