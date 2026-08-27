@@ -12,6 +12,8 @@ export const fr = {
   app: {
     /** Texte alternatif du logo — porte le nom de marque pour les lecteurs d'écran. */
     logoAlt: "Kit Rénovation Escalier",
+    /** Accroche en capitales au-dessus du titre — composant Eyebrow. */
+    eyebrow: "Devis en ligne",
     title: "Configurateur de devis",
     intro:
       "Estimation matériaux pour la rénovation de votre escalier. Aucun paiement en ligne — votre demande est transmise à un commercial.",

@@ -92,7 +92,7 @@ jobs:
     env:
       # Bump manuel à chaque livraison. Un dossier déjà publié ne doit JAMAIS
       # être écrasé : les pages WordPress pointent une URL versionnée figée.
-      WC_VERSION: v1.1.0
+      WC_VERSION: v1.2.0
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

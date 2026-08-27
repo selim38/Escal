@@ -78,7 +78,7 @@ export function PerStepConfigurator() {
   return (
     <div className="space-y-6 border-t border-border pt-8">
       <div className="text-center">
-        <p className="text-sm font-medium text-brand">{m.steps.perStep.intro}</p>
+        <p className="text-[13px] font-bold tracking-[0.01em] text-heading">{m.steps.perStep.intro}</p>
         <p className="mt-1 text-xs text-muted">{m.steps.perStep.hint}</p>
       </div>
 
@@ -145,7 +145,7 @@ export function PerStepConfigurator() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="space-y-4">
           <fieldset className="space-y-4">
-            <legend className="text-sm font-medium text-brand">
+            <legend className="text-[13px] font-bold tracking-[0.01em] text-heading">
               {m.steps.perStep.layoutLabel}
             </legend>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -174,7 +174,7 @@ export function PerStepConfigurator() {
             <div className="space-y-1.5">
               <label
                 htmlFor={`kre-step-${activeIndex}-width`}
-                className="text-sm font-medium text-brand"
+                className="text-[13px] font-bold tracking-[0.01em] text-heading"
               >
                 {widthLabel}
               </label>
@@ -203,7 +203,7 @@ export function PerStepConfigurator() {
             <div className="space-y-1.5">
               <label
                 htmlFor={`kre-step-${activeIndex}-depth`}
-                className="text-sm font-medium text-brand"
+                className="text-[13px] font-bold tracking-[0.01em] text-heading"
               >
                 {depthLabel}
               </label>

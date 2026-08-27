@@ -10,6 +10,7 @@ import type {
   LandingFinish,
   SeuilColor,
 } from "@/lib/quote-schema";
+import { StepTitle } from "../ui/Typography";
 
 /** Pastilles de couleur du seuil — données, libellés dans `catalog.seuilColor`. */
 const SEUIL_COLOR_HEX: Record<SeuilColor, string> = {
@@ -56,9 +57,7 @@ export function StepLanding() {
   return (
     <div className="space-y-8">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold tracking-tight text-heading sm:text-2xl">
-          {m.steps.landing.title}
-        </h2>
+        <StepTitle>{m.steps.landing.title}</StepTitle>
         <p className="text-sm text-muted">{m.steps.landing.subtitle}</p>
       </div>
 
@@ -75,7 +74,7 @@ export function StepLanding() {
               className={`relative w-full rounded-xl border-2 p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                 isActive
                   ? "border-primary bg-primary/5 ring-2 ring-primary/25"
-                  : "border-border bg-surface hover:border-primary/30"
+                  : "border-border bg-surface shadow-sm hover:-translate-y-[3px] hover:border-primary/30 hover:shadow-lg"
               }`}
             >
               {isActive && (
@@ -106,7 +105,7 @@ export function StepLanding() {
       {/* Choix couleur seuil — uniquement pour NEZ_SEUIL */}
       {landingFinish === "NEZ_SEUIL" && (
         <fieldset className="space-y-3">
-          <legend className="text-sm font-medium text-brand">
+          <legend className="text-[13px] font-bold tracking-[0.01em] text-heading">
             {m.steps.landing.seuilColorLabel}
           </legend>
           <div className="flex flex-wrap gap-3">

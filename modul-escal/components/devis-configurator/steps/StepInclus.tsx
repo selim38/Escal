@@ -15,6 +15,7 @@ import type { Messages } from "@/lib/i18n";
 import { useT } from "@/lib/i18n/useT";
 import type { Translator } from "@/lib/i18n/useT";
 import { quotePricingPreviewSchema, type QuoteFormDraft } from "@/lib/quote-schema";
+import { StepTitle } from "../ui/Typography";
 
 /** Emojis du matériel inclus — même ordre que `steps.included.materials`. */
 const MATERIAL_EMOJIS = ["📏", "✏️", "📐", "🔲", "⬜", "🔩", "🪝", "📦"];
@@ -102,9 +103,7 @@ export function StepInclus() {
   return (
     <div className="space-y-8">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold tracking-tight text-heading sm:text-2xl">
-          {m.steps.included.title}
-        </h2>
+        <StepTitle>{m.steps.included.title}</StepTitle>
         <p className="text-sm text-muted">{m.steps.included.subtitle}</p>
       </div>
 

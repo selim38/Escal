@@ -43,7 +43,7 @@ export function DimensionsBandsFields() {
 
       <div className="space-y-6 border-t border-border pt-8">
         <div className="space-y-1">
-          <p className="text-sm font-medium text-brand">
+          <p className="text-[13px] font-bold tracking-[0.01em] text-heading">
             {m.steps.dimensions.bandsIntro}
           </p>
           <p className="text-xs text-muted">
@@ -57,7 +57,7 @@ export function DimensionsBandsFields() {
             <div className="space-y-2">
               <label
                 htmlFor="kre-widthBand"
-                className="text-sm font-medium text-brand"
+                className="text-[13px] font-bold tracking-[0.01em] text-heading"
               >
                 {m.steps.dimensions.lengthLabel}
               </label>
@@ -86,7 +86,7 @@ export function DimensionsBandsFields() {
             <div className="space-y-2">
               <label
                 htmlFor="kre-depthBand"
-                className="text-sm font-medium text-brand"
+                className="text-[13px] font-bold tracking-[0.01em] text-heading"
               >
                 {m.steps.dimensions.depthLabel}
               </label>
@@ -115,7 +115,7 @@ export function DimensionsBandsFields() {
             <div className="space-y-2 sm:col-span-2">
               <label
                 htmlFor="kre-exactDepth"
-                className="text-sm font-medium text-brand"
+                className="text-[13px] font-bold tracking-[0.01em] text-heading"
               >
                 {m.steps.dimensions.exactDepthLabel}{" "}
                 <span className="font-normal text-muted">

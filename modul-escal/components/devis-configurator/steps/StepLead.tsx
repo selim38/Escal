@@ -10,6 +10,7 @@ import { useFieldError } from "@/lib/useFieldError";
 import { type QuoteFormDraft } from "@/lib/quote-schema";
 
 import { SampleCta } from "../ui/SampleCta";
+import { StepTitle } from "../ui/Typography";
 
 const PHOTO_SLOT_KEYS = ["bas", "milieu", "haut"] as const;
 type PhotoSlotKey = (typeof PHOTO_SLOT_KEYS)[number];
@@ -70,9 +71,7 @@ export function StepLead() {
   return (
     <div className="space-y-6 sm:space-y-8">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold tracking-tight text-heading sm:text-2xl">
-          {m.steps.lead.title}
-        </h2>
+        <StepTitle>{m.steps.lead.title}</StepTitle>
         <p className="text-sm text-muted">{m.steps.lead.subtitle}</p>
       </div>
 
@@ -89,7 +88,7 @@ export function StepLead() {
           <div className="space-y-1.5">
             <label
               htmlFor="kre-lastName"
-              className="text-sm font-medium text-brand"
+              className="text-[13px] font-bold tracking-[0.01em] text-heading"
             >
               {m.steps.lead.lastName}
             </label>
@@ -110,7 +109,7 @@ export function StepLead() {
           <div className="space-y-1.5">
             <label
               htmlFor="kre-firstName"
-              className="text-sm font-medium text-brand"
+              className="text-[13px] font-bold tracking-[0.01em] text-heading"
             >
               {m.steps.lead.firstName}
             </label>
@@ -130,7 +129,7 @@ export function StepLead() {
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="kre-email" className="text-sm font-medium text-brand">
+          <label htmlFor="kre-email" className="text-[13px] font-bold tracking-[0.01em] text-heading">
             {m.steps.lead.email}
           </label>
           <div className="relative">
@@ -155,7 +154,7 @@ export function StepLead() {
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="kre-phone" className="text-sm font-medium text-brand">
+          <label htmlFor="kre-phone" className="text-[13px] font-bold tracking-[0.01em] text-heading">
             {m.steps.lead.phone}
           </label>
           <input
@@ -176,7 +175,7 @@ export function StepLead() {
         <div className="space-y-1.5">
           <label
             htmlFor="kre-country"
-            className="text-sm font-medium text-brand"
+            className="text-[13px] font-bold tracking-[0.01em] text-heading"
           >
             {m.steps.lead.country}
           </label>

@@ -8,6 +8,7 @@ import { useT } from "@/lib/i18n/useT";
 import type { QuoteFormDraft } from "@/lib/quote-schema";
 
 import { M2AdviceModal } from "../ui/M2AdviceModal";
+import { StepTitle } from "../ui/Typography";
 
 export function StepParquet() {
   const { watch, setValue, register } = useFormContext<QuoteFormDraft>();
@@ -23,9 +24,7 @@ export function StepParquet() {
       <div className="space-y-8">
         {/* ── Titre ─────────────────────────────────────────────── */}
         <div className="space-y-2 text-center">
-          <h2 className="text-xl font-bold tracking-tight text-heading sm:text-2xl">
-            {m.steps.parquet.title}
-          </h2>
+          <StepTitle>{m.steps.parquet.title}</StepTitle>
           <p className="text-sm text-muted">{m.steps.parquet.subtitle}</p>
         </div>
 
@@ -106,7 +105,7 @@ export function StepParquet() {
               <div className="flex flex-wrap items-center gap-2">
                 <label
                   htmlFor="kre-plinthesML"
-                  className="text-sm font-medium text-brand"
+                  className="text-[13px] font-bold tracking-[0.01em] text-heading"
                 >
                   {m.steps.parquet.plinthesLabel}
                 </label>

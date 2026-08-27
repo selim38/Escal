@@ -10,6 +10,7 @@ import { useAsset } from "@/lib/asset";
 import { useT } from "@/lib/i18n/useT";
 import { useFieldError } from "@/lib/useFieldError";
 import type { QuoteFormDraft, RiserOption } from "@/lib/quote-schema";
+import { StepTitle } from "../ui/Typography";
 
 const WITH_RISER_OPTIONS = RISER_OPTIONS.filter((o) => o.id !== "NONE");
 
@@ -50,9 +51,7 @@ export function StepRiser() {
   return (
     <div className="space-y-8">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold tracking-tight text-heading sm:text-2xl">
-          {m.steps.riser.title}
-        </h2>
+        <StepTitle>{m.steps.riser.title}</StepTitle>
         <p className="text-sm font-medium text-heading">
           {m.steps.riser.subtitle}
         </p>
@@ -73,7 +72,7 @@ export function StepRiser() {
               className={`relative rounded-xl border-2 p-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:p-4 ${
                 selected
                   ? "border-primary bg-primary/5 ring-2 ring-primary/25"
-                  : "border-border bg-surface hover:border-brand-medium/35"
+                  : "border-border bg-surface shadow-sm transition-shadow hover:-translate-y-[3px] hover:border-brand-medium/35 hover:shadow-lg"
               }`}
             >
               {selected && (
@@ -105,7 +104,7 @@ export function StepRiser() {
       <div className="mx-auto w-full max-w-xs space-y-2 text-center">
         <label
           htmlFor="kre-riserHeightMm"
-          className="block text-sm font-medium text-brand"
+          className="block text-[13px] font-bold tracking-[0.01em] text-heading"
         >
           {m.steps.riser.heightLabel}{" "}
           <span className="font-normal text-muted">

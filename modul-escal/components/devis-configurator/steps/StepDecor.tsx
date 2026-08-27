@@ -10,6 +10,7 @@ import { useFieldError } from "@/lib/useFieldError";
 import type { Decor, QuoteFormDraft } from "@/lib/quote-schema";
 
 import { SampleCta } from "../ui/SampleCta";
+import { StepTitle } from "../ui/Typography";
 
 export function StepDecor() {
   const { watch, setValue } = useFormContext<QuoteFormDraft>();
@@ -24,9 +25,7 @@ export function StepDecor() {
 
   return (
     <div className="space-y-8">
-      <h2 className="text-center text-xl font-bold tracking-tight text-heading sm:text-2xl">
-        {m.steps.decor.title}
-      </h2>
+      <StepTitle>{m.steps.decor.title}</StepTitle>
 
       <fieldset className="flex flex-wrap justify-center gap-3 sm:gap-5">
         <legend className="sr-only">{m.steps.decor.title}</legend>

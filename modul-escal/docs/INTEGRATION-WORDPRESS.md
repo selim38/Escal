@@ -15,7 +15,7 @@
 
 | Livrable | Emplacement |
 |---|---|
-| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.1.0/kre-configurateur.js` |
+| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.2.0/kre-configurateur.js` |
 | Bundle JS — staging | `https://escal.point-soft.fr/wc/staging/kre-configurateur.js` |
 | Balise d'intégration | §2 |
 | Liste des attributs | §3 |
@@ -27,16 +27,21 @@ est publiée sous un nouveau chemin (`/wc/v1.2.0/`…), jamais en écrasant la
 précédente. Vous maîtrisez donc la date de bascule. `staging` est republié à
 chaque itération de recette.
 
-**v1.1.0** — logo KitRenovationEscalier.fr dans l'en-tête, et alignement complet
-sur la charte graphique : angles droits, police Archivo, titres en brun, couleurs
-d'état officielles. Voir §4.3 pour les trois écarts de contraste assumés.
+**v1.2.0** — habillage aligné sur les composants de votre design system :
+accroche en capitales espacées, titres en graisse 900 à interlettrage serré,
+cartes à relief et soulèvement au survol, champs et boutons à 46 px, halo orange
+du CTA principal.
+
+**v1.1.0** — logo KitRenovationEscalier.fr dans l'en-tête, et alignement de la
+charte : angles droits, police Archivo, titres en brun, couleurs d'état
+officielles. Voir §4.3 pour les trois écarts de contraste assumés.
 
 ---
 
 ## 2. Intégration
 
 ```html
-<script src="https://escal.point-soft.fr/wc/v1.1.0/kre-configurateur.js"
+<script src="https://escal.point-soft.fr/wc/v1.2.0/kre-configurateur.js"
         type="module" defer></script>
 
 <kre-configurateur lang="fr" theme="kre"></kre-configurateur>

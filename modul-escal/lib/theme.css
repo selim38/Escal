@@ -84,6 +84,19 @@
    */
   --kre-on-primary: #ffffff;
 
+  /* ─── Bordures, accents et ombres (Kre Design System) ─────────────────── */
+  /* --border-subtle : contour des cartes, plus discret que --border-default. */
+  --kre-border-subtle: #e7decf;
+  /* --text-accent : accroches et texte de badge. */
+  --kre-accent: #d8540b;
+  /* --shadow-* : toutes teintées du brun 900 de la marque, jamais du noir. */
+  --kre-shadow-xs: 0 1px 2px rgb(74 31 8 / 0.08);
+  --kre-shadow-sm: 0 2px 6px rgb(74 31 8 / 0.1);
+  --kre-shadow-md: 0 6px 18px rgb(74 31 8 / 0.12);
+  --kre-shadow-lg: 0 16px 40px rgb(74 31 8 / 0.16);
+  /* --shadow-accent : halo orange du CTA principal. */
+  --kre-shadow-accent: 0 8px 24px rgb(255 109 27 / 0.3);
+
   /* ─── États (Kre Design System, --status-*) ───────────────────────────── */
   /* Les teintes sont dérivées à 8–10 % sur blanc, choisies pour que le texte
      d'état reste au-dessus de 4,5:1 (4,75 pour l'erreur, 4,55 pour le succès). */
@@ -126,6 +139,10 @@
   --color-muted-bg: var(--kre-muted-bg);
   /* Teinte orangée très claire — badges */
   --color-tint: var(--kre-tint);
+  /* Contour discret des cartes */
+  --color-border-subtle: var(--kre-border-subtle);
+  /* Accroches et texte de badge */
+  --color-accent: var(--kre-accent);
   /* États */
   --color-error: var(--kre-error);
   --color-error-tint: var(--kre-error-tint);
@@ -189,6 +206,30 @@
    * carrés sans y toucher, et revenir en arrière ne demande qu'une seule
    * modification ici.
    */
+  /*
+   * Ombres teintées du brun de la marque (jamais du noir pur), et halo orange
+   * du CTA. Reprises telles quelles du design system.
+   */
+  --shadow-2xs: var(--kre-shadow-xs);
+  --shadow-xs: var(--kre-shadow-xs);
+  --shadow-sm: var(--kre-shadow-sm);
+  --shadow-md: var(--kre-shadow-md);
+  --shadow-lg: var(--kre-shadow-lg);
+  --shadow-xl: var(--kre-shadow-lg);
+  --shadow-accent: var(--kre-shadow-accent);
+
+  /*
+   * Interlettrage : `--ls-tight` sur les titres, `--ls-overline` sur les
+   * accroches en capitales. C'est ce contraste serré/écarté qui donne au site
+   * de Knewledge son caractère ; sans lui la typographie paraît plate.
+   */
+  --tracking-tighter: -0.02em;
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.04em;
+  --tracking-wider: 0.14em;
+  --tracking-widest: 0.14em;
+
   --radius-sm: 0;
   --radius-md: 0;
   --radius-lg: 0;

@@ -10,6 +10,7 @@ import type {
   StepEndCapConfig,
   EndSide,
 } from "@/lib/quote-schema";
+import { StepTitle } from "../ui/Typography";
 
 type SubStep = "between2Walls" | "capType" | "side";
 
@@ -90,9 +91,7 @@ export function StepEndCap() {
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold tracking-tight text-heading sm:text-2xl">
-          {m.steps.endCap.title}
-        </h2>
+        <StepTitle>{m.steps.endCap.title}</StepTitle>
         <p className="text-sm text-muted">{m.steps.endCap.subtitle}</p>
       </div>
 

@@ -21,6 +21,7 @@ import { KreConfigProvider, usePendingPhotos, useKreConfig, type KreConfig } fro
 import { useT } from "@/lib/i18n/useT";
 import { useWizardTracking } from "@/lib/useWizardTracking";
 
+import { Eyebrow } from "./ui/Typography";
 import { ProgressBar } from "./ProgressBar";
 import { StepNavigation } from "./StepNavigation";
 import { StepStaircaseType } from "./steps/StepStaircaseType";
@@ -347,7 +348,7 @@ function ConfiguratorHeader() {
   const { m } = useT();
   const asset = useAsset();
   return (
-    <header className="mb-8 flex flex-col gap-3">
+    <header className="mb-8">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={asset("/brand/logo-kre.webp")}
@@ -356,12 +357,15 @@ function ConfiguratorHeader() {
         height={140}
         /* Hauteur fixe, largeur automatique : le ratio du logo (3,43) est
            conservé quelle que soit la largeur du conteneur hôte. */
-        className="h-10 w-auto self-start sm:h-12"
+        className="mb-6 h-10 w-auto sm:h-12"
       />
-      <h2 className="text-2xl font-bold tracking-tight text-brand sm:text-3xl">
+      <Eyebrow>{m.app.eyebrow}</Eyebrow>
+      <h2 className="text-3xl font-black leading-tight tracking-tight text-heading sm:text-4xl">
         {m.app.title}
       </h2>
-      <p className="text-sm text-muted sm:text-base">{m.app.intro}</p>
+      <p className="mt-3 max-w-2xl text-base text-muted sm:text-lg">
+        {m.app.intro}
+      </p>
     </header>
   );
 }

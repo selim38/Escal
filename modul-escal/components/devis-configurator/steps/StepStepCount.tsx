@@ -6,6 +6,7 @@ import { useAsset } from "@/lib/asset";
 import { useT } from "@/lib/i18n/useT";
 import { useFieldError } from "@/lib/useFieldError";
 import type { QuoteFormDraft } from "@/lib/quote-schema";
+import { StepTitle } from "../ui/Typography";
 
 export function StepStepCount() {
   const { register } = useFormContext<QuoteFormDraft>();
@@ -16,9 +17,7 @@ export function StepStepCount() {
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold tracking-tight text-heading sm:text-2xl">
-          {m.steps.stepCount.title}
-        </h2>
+        <StepTitle>{m.steps.stepCount.title}</StepTitle>
         <p className="text-sm text-muted">{m.steps.stepCount.subtitle}</p>
       </div>
 

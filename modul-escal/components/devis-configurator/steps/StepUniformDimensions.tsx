@@ -11,6 +11,7 @@ import { ensureStepConfigs } from "@/lib/step-config";
 
 import { DimensionsBandsFields } from "./DimensionsBandsFields";
 import { PerStepConfigurator } from "./PerStepConfigurator";
+import { StepTitle } from "../ui/Typography";
 
 export function StepUniformDimensions() {
   const { watch, setValue } = useFormContext<QuoteFormDraft>();
@@ -42,9 +43,7 @@ export function StepUniformDimensions() {
 
   return (
     <div className="space-y-8">
-      <h2 className="text-center text-xl font-bold tracking-tight text-heading sm:text-2xl">
-        {m.steps.dimensions.title}
-      </h2>
+      <StepTitle>{m.steps.dimensions.title}</StepTitle>
       <p className="text-center text-sm text-muted">
         {m.steps.dimensions.question}
       </p>
@@ -62,7 +61,7 @@ export function StepUniformDimensions() {
               className={`relative rounded-xl border-2 p-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:p-4 ${
                 selected
                   ? "border-primary bg-primary/5 ring-2 ring-primary/25"
-                  : "border-border bg-surface hover:border-brand-medium/35"
+                  : "border-border bg-surface shadow-sm transition-shadow hover:-translate-y-[3px] hover:border-brand-medium/35 hover:shadow-lg"
               }`}
             >
               {selected ? (
