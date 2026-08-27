@@ -3,7 +3,7 @@
  * Plugin Name:       KRE — Configurateur de devis
  * Plugin URI:        https://escal.point-soft.fr/calcul
  * Description:       Intègre le configurateur de devis Kit Rénovation Escalier dans une page WordPress, via le Web Component <kre-configurateur> (Shadow DOM, sans iframe). Shortcode [kre_configurateur].
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 6.3
  * Requires PHP:      7.4
  * Author:            Point Soft
@@ -30,14 +30,14 @@ if (!defined('ABSPATH')) {
  *   define('KRE_API_ENDPOINT', 'https://escal.point-soft.fr/api');
  */
 if (!defined('KRE_SCRIPT_URL')) {
-    define('KRE_SCRIPT_URL', 'https://escal.point-soft.fr/wc/v1.0.0/kre-configurateur.js');
+    define('KRE_SCRIPT_URL', 'https://escal.point-soft.fr/wc/v1.1.0/kre-configurateur.js');
 }
 if (!defined('KRE_API_ENDPOINT')) {
     define('KRE_API_ENDPOINT', 'https://escal.point-soft.fr/api');
 }
 
 const KRE_HANDLE  = 'kre-configurateur';
-const KRE_VERSION = '1.0.0';
+const KRE_VERSION = '1.1.0';
 
 /**
  * Enregistre le script sans le charger : il ne sera mis en file d'attente que

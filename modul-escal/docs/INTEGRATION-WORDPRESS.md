@@ -15,7 +15,7 @@
 
 | Livrable | Emplacement |
 |---|---|
-| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.0.0/kre-configurateur.js` |
+| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.1.0/kre-configurateur.js` |
 | Bundle JS — staging | `https://escal.point-soft.fr/wc/staging/kre-configurateur.js` |
 | Balise d'intégration | §2 |
 | Liste des attributs | §3 |
@@ -23,16 +23,20 @@
 | Plugin WordPress (optionnel) | `deliverables/kre-configurateur-wp/` |
 
 Les URLs de production sont **versionnées et immuables** : une nouvelle version
-est publiée sous un nouveau chemin (`/wc/v1.1.0/`), jamais en écrasant la
+est publiée sous un nouveau chemin (`/wc/v1.2.0/`…), jamais en écrasant la
 précédente. Vous maîtrisez donc la date de bascule. `staging` est republié à
 chaque itération de recette.
+
+**v1.1.0** — logo KitRenovationEscalier.fr dans l'en-tête, et alignement complet
+sur la charte graphique : angles droits, police Archivo, titres en brun, couleurs
+d'état officielles. Voir §4.3 pour les trois écarts de contraste assumés.
 
 ---
 
 ## 2. Intégration
 
 ```html
-<script src="https://escal.point-soft.fr/wc/v1.0.0/kre-configurateur.js"
+<script src="https://escal.point-soft.fr/wc/v1.1.0/kre-configurateur.js"
         type="module" defer></script>
 
 <kre-configurateur lang="fr" theme="kre"></kre-configurateur>
