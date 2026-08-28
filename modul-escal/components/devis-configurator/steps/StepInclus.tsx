@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
+import { useAsset } from "@/lib/asset";
 import { calculatePrice } from "@/lib/calculatePrice";
 import { useKreConfig } from "@/lib/config";
 import type { Messages } from "@/lib/i18n";
@@ -17,8 +18,30 @@ import type { Translator } from "@/lib/i18n/useT";
 import { quotePricingPreviewSchema, type QuoteFormDraft } from "@/lib/quote-schema";
 import { StepTitle } from "../ui/Typography";
 
-/** Emojis du matériel inclus — même ordre que `steps.included.materials`. */
-const MATERIAL_EMOJIS = ["📏", "✏️", "📐", "🔲", "⬜", "🔩", "🪝", "📦"];
+/**
+ * Photos du matériel inclus, sous `public/materiel/`. Même ordre que
+ * `steps.included.materials` — le libellé et la photo sont appariés par index.
+ */
+const MATERIAL_PHOTOS = [
+  "metre",
+  "regle",
+  "feutre-effacable",
+  "scotch-papier",
+  "scie-sauteuse",
+  "lames-dent-inverse",
+  "lame-acier",
+  "cutter",
+  "cale-a-poncer",
+  "degraissant",
+  "acetone",
+  "colle-polyurethane",
+  "pistolet-cartouche",
+  "silicone",
+  "spatule-silicone",
+  "produit-lissage",
+  "chiffon",
+  "gants",
+];
 
 function Badge({ children }: { children: React.ReactNode }) {
   return (
@@ -89,6 +112,7 @@ export function StepInclus() {
   const values = watch();
   const { m, t } = useT();
   const { locale } = useKreConfig();
+  const asset = useAsset();
 
   const stepCount = values.stepCount ?? 0;
   const glueCount = stepCount > 0 ? Math.ceil(stepCount / 3) : null;
@@ -181,19 +205,25 @@ export function StepInclus() {
           </div>
           <Badge>{m.steps.included.priceIncluded}</Badge>
         </div>
-        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {m.steps.included.materials.map((label, i) => (
             <div
               key={label}
-              className="flex flex-col items-center gap-2 rounded-xl border border-border bg-surface p-3 text-center"
+              className="overflow-hidden rounded-xl border border-border bg-surface text-center"
             >
-              <div
-                aria-hidden
-                className="flex size-10 items-center justify-center rounded-xl bg-background text-xl"
-              >
-                {MATERIAL_EMOJIS[i]}
-              </div>
-              <span className="text-xs font-medium text-brand">{label}</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={asset(`/materiel/${MATERIAL_PHOTOS[i]}.webp`)}
+                alt={t(m.steps.included.materialPhotoAlt, { item: label })}
+                loading="lazy"
+                decoding="async"
+                width={400}
+                height={400}
+                className="block aspect-[4/3] w-full bg-background object-cover"
+              />
+              <span className="block px-2 py-2 text-xs font-medium text-brand">
+                {label}
+              </span>
             </div>
           ))}
         </div>

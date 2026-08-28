@@ -58,6 +58,8 @@ const OPTIONS_BY_DIR = {
   embout: { quality: 80, maxWidth: 640 },
   //           rendu ≈ 200 px (vignette de couleur de seuil, 3 par ligne)
   seuil: { quality: 80, maxWidth: 480 },
+  //           rendu ≈ 140 px (vignette du matériel inclus, 4 par ligne)
+  materiel: { quality: 80, maxWidth: 400 },
   default: { quality: 80, maxWidth: 1000 },
 };
 
