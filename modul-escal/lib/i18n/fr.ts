@@ -132,7 +132,7 @@ export const fr = {
       },
       DECOR: {
         label: "Couleur du décor",
-        description: "Contremarches assorties au décor choisi.",
+        description: "Finition assortie au décor choisi.",
       },
       BLACK_MATTE: {
         label: "Noir mat",
@@ -154,8 +154,8 @@ export const fr = {
         description: "Marche tournante (palier ou retour d'angle).",
       },
       FIVE_SIDED: {
-        label: "Cercueil",
-        description: "Marche en cercueil : longueur max. et profondeur max.",
+        label: "5 côtés",
+        description: "Marche à 5 côtés : longueur max. et profondeur max.",
       },
     },
 
@@ -244,7 +244,7 @@ export const fr = {
     stepCount: {
       title: "Nombre de marches",
       subtitle:
-        "Comptez les marches de bas en haut, marche terminale de palier incluse.",
+        "Comptez les marches de bas en haut, marche terminale du palier incluse.",
       exampleBadge: "Exemple",
       exampleAlt:
         "Exemple : marches numérotées de bas en haut, marche de palier incluse",
