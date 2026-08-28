@@ -15,7 +15,7 @@
 
 | Livrable | Emplacement |
 |---|---|
-| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.3.0/kre-configurateur.js` |
+| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.4.0/kre-configurateur.js` |
 | Bundle JS — staging | `https://escal.point-soft.fr/wc/staging/kre-configurateur.js` |
 | Balise d'intégration | §2 |
 | Liste des attributs | §3 |
@@ -23,9 +23,18 @@
 | Plugin WordPress (optionnel) | `deliverables/kre-configurateur-wp/` |
 
 Les URLs de production sont **versionnées et immuables** : une nouvelle version
-est publiée sous un nouveau chemin (`/wc/v1.3.0/`…), jamais en écrasant la
+est publiée sous un nouveau chemin (`/wc/v1.4.0/`…), jamais en écrasant la
 précédente. Vous maîtrisez donc la date de bascule. `staging` est republié à
 chaque itération de recette.
+
+**v1.4.0** — le tunnel passe de 10 à **9 étapes** : la finition « nez de
+raccord parquet » et l'écran « parquet du palier » qu'elle ouvrait sont retirés.
+Les étapes gagnent des photos : mesure des marches droites (dont la profondeur,
+à vérifier sur toute la largeur), options d'embout (entre deux limons, marche
+débordante, ouverte sur le côté), couleurs de seuil et matériel inclus. Une
+marche tournante ou à 5 côtés rappelle de retenir la plus grande mesure. Enfin
+les 3 photos de l'escalier deviennent obligatoires pour envoyer la demande, et
+peuvent être prises à l'appareil photo ou choisies dans la galerie.
 
 **v1.3.0** — ergonomie du tunnel : l'en-tête devient un bandeau horizontal
 compact de 72 px (logo + avancement + jauge), et le bloc de présentation ne
@@ -47,7 +56,7 @@ officielles. Voir §4.3 pour les trois écarts de contraste assumés.
 ## 2. Intégration
 
 ```html
-<script src="https://escal.point-soft.fr/wc/v1.3.0/kre-configurateur.js"
+<script src="https://escal.point-soft.fr/wc/v1.4.0/kre-configurateur.js"
         type="module" defer></script>
 
 <kre-configurateur lang="fr" theme="kre"></kre-configurateur>
