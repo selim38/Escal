@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Mail, MessageCircle, Trash2, User } from "lucide-react";
+import { Camera, ImageUp, Mail, MessageCircle, Trash2, User } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -35,7 +35,10 @@ export function StepLead() {
     milieu: null,
     haut: null,
   });
-  const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  // Deux champs par emplacement : `capture` ouvre l'appareil photo, sans lui le
+  // navigateur propose la galerie. Un seul champ ne peut pas offrir les deux.
+  const cameraRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const libraryRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Synchronise le magasin de photos porté par l'instance
   useEffect(() => {
@@ -303,9 +306,9 @@ export function StepLead() {
                 ) : (
                   <>
                     <input
-                      id={inputId}
+                      id={`${inputId}-camera`}
                       ref={(el) => {
-                        fileRefs.current[key] = el;
+                        cameraRefs.current[key] = el;
                       }}
                       type="file"
                       accept="image/*"
@@ -315,15 +318,48 @@ export function StepLead() {
                         setSlotFile(key, e.target.files?.[0] ?? null)
                       }
                     />
-                    <button
-                      type="button"
-                      onClick={() => fileRefs.current[key]?.click()}
-                      aria-label={`${slot.label} — ${m.steps.lead.addPhoto}`}
-                      className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface text-muted transition hover:border-primary/40 hover:text-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                    >
+                    <input
+                      id={inputId}
+                      ref={(el) => {
+                        libraryRefs.current[key] = el;
+                      }}
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={(e) =>
+                        setSlotFile(key, e.target.files?.[0] ?? null)
+                      }
+                    />
+                    <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface p-2 text-muted">
                       <Camera className="size-6" aria-hidden />
-                      <span className="text-xs">{m.steps.lead.addPhoto}</span>
-                    </button>
+                      {/* Bouton appareil photo réservé au tactile : sur un
+                          ordinateur, `capture` est ignoré et les deux boutons
+                          ouvriraient le même sélecteur de fichiers. */}
+                      <button
+                        type="button"
+                        onClick={() => cameraRefs.current[key]?.click()}
+                        aria-label={`${slot.label} — ${m.steps.lead.takePhoto}`}
+                        className="hidden w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-2 py-2 text-xs font-semibold text-on-primary transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary pointer-coarse:flex"
+                      >
+                        <Camera className="size-3.5" aria-hidden />
+                        {m.steps.lead.takePhoto}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => libraryRefs.current[key]?.click()}
+                        aria-label={`${slot.label} — ${m.steps.lead.addPhoto}`}
+                        className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-border px-2 py-2 text-xs font-medium text-brand transition hover:border-primary/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                      >
+                        <ImageUp className="size-3.5" aria-hidden />
+                        {/* « Galerie » n'a de sens que sur mobile. */}
+                        <span className="pointer-coarse:hidden">
+                          {m.steps.lead.chooseFile}
+                        </span>
+                        <span className="hidden pointer-coarse:inline">
+                          {m.steps.lead.choosePhoto}
+                        </span>
+                      </button>
+                    </div>
                   </>
                 )}
               </div>

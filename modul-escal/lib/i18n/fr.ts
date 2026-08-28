@@ -407,9 +407,11 @@ export const fr = {
       photosTitle: "Photos de votre escalier",
       photosIntro:
         "3 photos sont nécessaires pour que notre technicien puisse affiner votre devis.",
-      photosNote:
-        "Les photos sont facultatives mais fortement recommandées pour obtenir un devis précis.",
+      photosNote: "Les photos sont obligatoires pour une validation de dossier.",
       addPhoto: "Ajouter une photo",
+      takePhoto: "Prendre une photo",
+      choosePhoto: "Depuis la galerie",
+      chooseFile: "Choisir un fichier",
       removePhoto: "Supprimer {label}",
       photoSlots: {
         bas: {
