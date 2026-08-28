@@ -17,7 +17,14 @@ type PhotoSlotKey = (typeof PHOTO_SLOT_KEYS)[number];
 
 type SlotPhoto = { file: File; preview: string } | null;
 
-export function StepLead() {
+export function StepLead({
+  requiredPhotoCount,
+  onPhotoCountChange,
+}: {
+  requiredPhotoCount: number;
+  /** Remonte le nombre de photos jointes : l'envoi en dépend. */
+  onPhotoCountChange: (count: number) => void;
+}) {
   const { register, watch, setValue } = useFormContext<QuoteFormDraft>();
   const contactPreference = watch("contactPreference");
   const decor = watch("decor");
@@ -40,6 +47,11 @@ export function StepLead() {
   const cameraRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const libraryRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
+  const files = Object.values(slotPhotos).filter(
+    (s): s is NonNullable<SlotPhoto> => s !== null,
+  );
+  const missingPhotos = requiredPhotoCount - files.length;
+
   // Synchronise le magasin de photos porté par l'instance
   useEffect(() => {
     pendingPhotos.set(
@@ -48,6 +60,18 @@ export function StepLead() {
         .map((s) => s.file),
     );
   }, [slotPhotos, pendingPhotos]);
+
+  useEffect(() => {
+    onPhotoCountChange(
+      Object.values(slotPhotos).filter((s) => s !== null).length,
+    );
+  }, [slotPhotos, onPhotoCountChange]);
+
+  // L'étape est démontée dès qu'on revient en arrière : sans cela, le compte
+  // resterait acquis alors que les aperçus, eux, sont perdus.
+  useEffect(() => {
+    return () => onPhotoCountChange(0);
+  }, [onPhotoCountChange]);
 
   // Libère les URLs d'aperçu au démontage (le composant peut être retiré de la
   // page hôte à tout moment).
@@ -367,6 +391,15 @@ export function StepLead() {
           })}
         </div>
         <p className="text-xs text-muted">{m.steps.lead.photosNote}</p>
+        {missingPhotos > 0 ? (
+          <p className="text-xs font-medium text-error" role="status">
+            {t(m.steps.lead.photosMissing, {
+              count: missingPhotos,
+              plural: missingPhotos > 1 ? "s" : "",
+              total: requiredPhotoCount,
+            })}
+          </p>
+        ) : null}
       </div>
 
       <SampleCta decorLabel={decor ? m.catalog.decor[decor] : undefined} />

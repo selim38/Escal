@@ -408,6 +408,8 @@ export const fr = {
       photosIntro:
         "3 photos sont nécessaires pour que notre technicien puisse affiner votre devis.",
       photosNote: "Les photos sont obligatoires pour une validation de dossier.",
+      photosMissing:
+        "Il manque {count} photo{plural} sur {total} pour envoyer votre demande.",
       addPhoto: "Ajouter une photo",
       takePhoto: "Prendre une photo",
       choosePhoto: "Depuis la galerie",

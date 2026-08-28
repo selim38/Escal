@@ -77,8 +77,14 @@ type SubmitState =
   | { status: "success"; leadId: string; estimatedMaterialsEuro: number }
   | { status: "error"; message: string };
 
+/** Nombre de photos exigées à l'étape Coordonnées avant l'envoi du dossier. */
+const REQUIRED_PHOTO_COUNT = 3;
+
 function WizardBody() {
   const [currentStep, setCurrentStep] = useState(0);
+  // Les photos vivent hors du formulaire (des `File`, pas des valeurs de
+  // champ) : leur compte remonte ici pour conditionner le bouton d'envoi.
+  const [photoCount, setPhotoCount] = useState(0);
   const [submitState, setSubmitState] = useState<SubmitState>({ status: "idle" });
   const { watch, getValues, setError, clearErrors, handleSubmit } =
     useFormContext<QuoteFormDraft>();
@@ -92,8 +98,12 @@ function WizardBody() {
   const tracking = useWizardTracking(currentStep, isFinished);
 
   const canGoNext = useMemo(() => {
-    return validateWizardStep(currentStep, values);
-  }, [currentStep, values]);
+    if (!validateWizardStep(currentStep, values)) return false;
+    if (currentStep === QUOTE_STEP_COUNT - 1) {
+      return photoCount >= REQUIRED_PHOTO_COUNT;
+    }
+    return true;
+  }, [currentStep, photoCount, values]);
 
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === QUOTE_STEP_COUNT - 1;
@@ -147,6 +157,20 @@ function WizardBody() {
     const res = quoteFormSchema.safeParse(data);
     if (!res.success) {
       applyZodIssues(setError, res.error.issues);
+      return;
+    }
+    // Garde-fou : le bouton d'envoi est désactivé sans les photos, mais un
+    // « Entrée » dans un champ texte soumettrait le formulaire malgré tout.
+    if (pendingPhotos.get().length < REQUIRED_PHOTO_COUNT) {
+      setSubmitState({
+        status: "error",
+        message: t(m.steps.lead.photosMissing, {
+          count: REQUIRED_PHOTO_COUNT - pendingPhotos.get().length,
+          plural:
+            REQUIRED_PHOTO_COUNT - pendingPhotos.get().length > 1 ? "s" : "",
+          total: REQUIRED_PHOTO_COUNT,
+        }),
+      });
       return;
     }
     setSubmitState({ status: "loading" });
@@ -288,7 +312,12 @@ function WizardBody() {
         {currentStep === 5 ? <StepEndCap /> : null}
         {currentStep === 6 ? <StepLanding /> : null}
         {currentStep === 7 ? <StepInclus /> : null}
-        {currentStep === 8 ? <StepLead /> : null}
+        {currentStep === 8 ? (
+          <StepLead
+            requiredPhotoCount={REQUIRED_PHOTO_COUNT}
+            onPhotoCountChange={setPhotoCount}
+          />
+        ) : null}
       </div>
 
       {submitState.status === "error" && (
