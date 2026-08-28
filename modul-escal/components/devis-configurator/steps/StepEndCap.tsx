@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, ChevronLeft } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
+import { useAsset } from "@/lib/asset";
 import { useT } from "@/lib/i18n/useT";
 import type {
   QuoteFormDraft,
@@ -18,11 +19,45 @@ function btn() {
   return "flex-1 rounded-xl border-2 border-border bg-surface px-4 py-4 text-sm font-semibold text-brand transition hover:border-brand-medium/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 }
 
+/** Option d'embout illustrée : la photo porte l'explication, le texte la nomme. */
+function PhotoChoice({
+  src,
+  alt,
+  label,
+  onClick,
+}: {
+  src: string;
+  alt: string;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex items-center gap-3 rounded-xl border-2 border-border bg-surface p-2.5 text-left text-sm font-semibold text-brand transition hover:border-brand-medium/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        width={640}
+        height={853}
+        className="aspect-[3/4] w-24 shrink-0 rounded-lg object-cover"
+      />
+      <span>{label}</span>
+    </button>
+  );
+}
+
 export function StepEndCap() {
   const { watch, setValue } = useFormContext<QuoteFormDraft>();
   const stepCount = watch("stepCount") ?? 0;
   const configs: StepEndCapConfig[] = watch("stepEndCapConfigs") ?? [];
   const { m, t } = useT();
+  const asset = useAsset();
 
   // Sous-étape en cours pour la marche actuellement configurée
   const [subStep, setSubStep] = useState<SubStep>("between2Walls");
@@ -56,6 +91,10 @@ export function StepEndCap() {
     }
   }
 
+  function handleBetween2Stringers() {
+    saveConfig({ between2Walls: false, between2Stringers: true, cap: "NONE" });
+  }
+
   function handleSide(side: EndSide) {
     saveConfig({ between2Walls: false, cap: "OPEN_STEP", side });
   }
@@ -79,6 +118,7 @@ export function StepEndCap() {
 
   function capLabel(c: StepEndCapConfig) {
     if (c.between2Walls) return m.steps.endCap.summaryBetween2Walls;
+    if (c.between2Stringers) return m.steps.endCap.summaryBetween2Stringers;
     if (c.cap === "OVERHANGING") return m.steps.endCap.summaryOverhanging;
     if (c.cap === "OPEN_STEP") {
       return c.side === "LEFT"
@@ -183,6 +223,12 @@ export function StepEndCap() {
                 {m.steps.endCap.askCapType}
               </p>
               <div className="flex flex-col gap-3">
+                <PhotoChoice
+                  src={asset("/embout/limons.webp")}
+                  alt={m.steps.endCap.photoAltBetween2Stringers}
+                  label={m.steps.endCap.capBetween2Stringers}
+                  onClick={handleBetween2Stringers}
+                />
                 <button
                   type="button"
                   onClick={() => handleCapType("OVERHANGING")}
@@ -190,13 +236,12 @@ export function StepEndCap() {
                 >
                   {m.steps.endCap.capOverhanging}
                 </button>
-                <button
-                  type="button"
+                <PhotoChoice
+                  src={asset("/embout/ouvert-cote.webp")}
+                  alt={m.steps.endCap.photoAltOpenStep}
+                  label={m.steps.endCap.capOpenStep}
                   onClick={() => handleCapType("OPEN_STEP")}
-                  className={btn()}
-                >
-                  {m.steps.endCap.capOpenStep}
-                </button>
+                />
               </div>
             </div>
           )}

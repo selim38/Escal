@@ -106,6 +106,13 @@ export const fr = {
     body2: "Exemple : pour un palier de 2 m², commandez 2,4 m².",
   },
 
+  measureHintModal: {
+    title: "Comment mesurer cette marche",
+    widthBody: "Prenez la longueur la plus longue de la marche.",
+    depthBody: "Prenez la profondeur la plus longue de la marche.",
+    help: "Les photos à côté du formulaire indiquent la mesure attendue.",
+  },
+
   // ─────────────────────────── Catalogues ───────────────────────────
   // Libellés indexés par identifiant métier. Les fichiers `lib/*-catalog.ts`
   // ne portent plus que les données (prix, chemins d'images, slugs).
@@ -303,11 +310,16 @@ export const fr = {
       askBetween2Walls:
         "Votre marche {index} est-elle prise entre 2 murs ?",
       askCapType: "Comment est cette marche côté ouvert ?",
+      capBetween2Stringers: "Prise entre deux limons",
       capOverhanging: "Marche débordante",
       capOpenStep: "Ouverte sur le côté",
+      photoAltBetween2Stringers:
+        "Escalier dont les marches sont prises entre deux limons",
+      photoAltOpenStep: "Marche ouverte sur le côté",
       askSide: "De quel côté est-elle ouverte ?",
       askSideHint: "(vu du bas de l'escalier)",
       summaryBetween2Walls: "Entre 2 murs",
+      summaryBetween2Stringers: "Entre 2 limons",
       summaryOverhanging: "Débordante",
       summaryOpenLeft: "Ouverte — gauche",
       summaryOpenRight: "Ouverte — droite",

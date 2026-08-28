@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import {
@@ -16,7 +16,11 @@ import { DEPTH_BAND_VALUES, WIDTH_BAND_VALUES } from "@/lib/quote-schema";
 import { useT } from "@/lib/i18n/useT";
 import { useFieldError } from "@/lib/useFieldError";
 
+import { MeasureHintModal } from "../ui/MeasureHintModal";
 import { StepTreadPhotos } from "./StepTreadPhotos";
+
+/** Marches dont les côtés sont inégaux : la mesure à retenir doit être rappelée. */
+const UNEVEN_LAYOUTS: StairLayout[] = ["BALANCED", "FIVE_SIDED"];
 
 /**
  * Repli stable pour `watch("stepConfigs")`. Un `?? []` littéral créerait un
@@ -31,7 +35,14 @@ export function PerStepConfigurator() {
   const stepConfigs = watch("stepConfigs") ?? NO_STEP_CONFIGS;
   const [requestedIndex, setActiveIndex] = useState(0);
   const [focusedField, setFocusedField] = useState<DimensionField | null>(null);
+  const [hintField, setHintField] = useState<DimensionField | null>(null);
   const { m, t } = useT();
+
+  // Le rappel de mesure ne s'affiche qu'une fois par marche et par champ : le
+  // client corrige souvent sa saisie, une modale à chaque clic serait pénible.
+  const seenHints = useRef<Set<string>>(new Set());
+  const widthRef = useRef<HTMLSelectElement>(null);
+  const depthRef = useRef<HTMLSelectElement>(null);
 
   const rootError = useFieldError("stepConfigs");
 
@@ -63,6 +74,31 @@ export function PerStepConfigurator() {
     setFocusedField(null);
   };
 
+  /**
+   * Intercepte l'ouverture du menu pour montrer le rappel : le `<select>` natif
+   * ne peut pas être rouvert par script, l'utilisateur reclique donc après
+   * fermeture — on lui rend le focus.
+   */
+  const guardOpen = (
+    field: DimensionField,
+    e: React.PointerEvent<HTMLSelectElement>,
+  ) => {
+    if (!UNEVEN_LAYOUTS.includes(layout)) return;
+    const key = `${activeIndex}:${layout}:${field}`;
+    if (seenHints.current.has(key)) return;
+    e.preventDefault();
+    seenHints.current.add(key);
+    setFocusedField(field);
+    setHintField(field);
+  };
+
+  const closeHint = useCallback(() => {
+    const field = hintField;
+    setHintField(null);
+    const el = field === "depthBand" ? depthRef.current : widthRef.current;
+    el?.focus();
+  }, [hintField]);
+
   const widthLabel =
     layout === "BALANCED"
       ? m.steps.perStep.lengthBalanced
@@ -77,6 +113,8 @@ export function PerStepConfigurator() {
 
   return (
     <div className="space-y-6 border-t border-border pt-8">
+      <MeasureHintModal field={hintField} onClose={closeHint} />
+
       <div className="text-center">
         <p className="text-[13px] font-bold tracking-[0.01em] text-heading">{m.steps.perStep.intro}</p>
         <p className="mt-1 text-xs text-muted">{m.steps.perStep.hint}</p>
@@ -180,7 +218,9 @@ export function PerStepConfigurator() {
               </label>
               <select
                 id={`kre-step-${activeIndex}-width`}
+                ref={widthRef}
                 value={current.widthBand ?? ""}
+                onPointerDown={(e) => guardOpen("widthBand", e)}
                 onFocus={() => setFocusedField("widthBand")}
                 onBlur={() => setFocusedField(null)}
                 onChange={(e) => {
@@ -209,7 +249,9 @@ export function PerStepConfigurator() {
               </label>
               <select
                 id={`kre-step-${activeIndex}-depth`}
+                ref={depthRef}
                 value={current.depthBand ?? ""}
+                onPointerDown={(e) => guardOpen("depthBand", e)}
                 onFocus={() => setFocusedField("depthBand")}
                 onBlur={() => setFocusedField(null)}
                 onChange={(e) => {

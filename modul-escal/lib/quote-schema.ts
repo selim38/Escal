@@ -80,6 +80,12 @@ export type EndSide = (typeof END_SIDE_VALUES)[number];
 
 export const stepEndCapConfigSchema = z.object({
   between2Walls: z.boolean(),
+  /**
+   * Marche encadrée par deux limons : côtés déjà habillés, donc aucun embout,
+   * exactement comme entre 2 murs. Un drapeau plutôt qu'une valeur d'embout
+   * supplémentaire — l'énumération `step_end_cap` est aussi celle de la base.
+   */
+  between2Stringers: z.boolean().optional(),
   cap: z.enum(STEP_END_CAP_VALUES),
   side: z.enum(END_SIDE_VALUES).optional(),
 });
@@ -376,7 +382,7 @@ function validateStepEndCapStep(values: QuoteFormDraft): boolean {
   const configs = values.stepEndCapConfigs;
   if (!configs || configs.length !== count) return false;
   return configs.every((c) => {
-    if (c.between2Walls) return c.cap === "NONE";
+    if (c.between2Walls || c.between2Stringers) return c.cap === "NONE";
     if (!c.cap || c.cap === "NONE") return false;
     if (c.cap === "OPEN_STEP") return Boolean(c.side);
     return true;

@@ -54,6 +54,8 @@ const OPTIONS_BY_DIR = {
   CM: { quality: 80, maxWidth: 480 },
   //           rendu ≈ 240 px (figure d'exemple)
   etape: { quality: 80, maxWidth: 560 },
+  //           rendu ≈ 320 px (illustration d'une option d'embout)
+  embout: { quality: 80, maxWidth: 640 },
   default: { quality: 80, maxWidth: 1000 },
 };
 
