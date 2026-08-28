@@ -56,6 +56,8 @@ const OPTIONS_BY_DIR = {
   etape: { quality: 80, maxWidth: 560 },
   //           rendu ≈ 320 px (illustration d'une option d'embout)
   embout: { quality: 80, maxWidth: 640 },
+  //           rendu ≈ 200 px (vignette de couleur de seuil, 3 par ligne)
+  seuil: { quality: 80, maxWidth: 480 },
   default: { quality: 80, maxWidth: 1000 },
 };
 

@@ -91,11 +91,7 @@ export const stepEndCapConfigSchema = z.object({
 });
 export type StepEndCapConfig = z.infer<typeof stepEndCapConfigSchema>;
 
-export const LANDING_FINISH_VALUES = [
-  "NONE",
-  "NEZ_SEUIL",
-  "NEZ_RACCORD_PARQUET",
-] as const;
+export const LANDING_FINISH_VALUES = ["NONE", "NEZ_SEUIL"] as const;
 export type LandingFinish = (typeof LANDING_FINISH_VALUES)[number];
 
 export const SEUIL_COLOR_VALUES = ["OR", "NOIR", "ALUMINIUM"] as const;
@@ -180,9 +176,6 @@ export const quoteFormBaseSchema = z.object({
   landingFinish: z.enum(LANDING_FINISH_VALUES, {
     error: () => ({ message: V.landingFinishRequired }),
   }),
-  landingAreaM2: z.number().positive().optional(),
-  wantPlinthes: z.boolean().optional(),
-  plinthesML: z.number().positive().optional(),
   stepEndCap: z.enum(STEP_END_CAP_VALUES, {
     error: () => ({ message: V.endCapRequired }),
   }).optional(),
@@ -263,11 +256,7 @@ export type QuoteFormDraft = Partial<
     | "email"
     | "phone"
     | "country"
-  > & {
-    landingAreaM2?: number;
-    wantPlinthes?: boolean;
-    plinthesML?: number;
-  };
+  >;
 
 /** Champs utilisés par `calculatePrice` (hors lead / décor). */
 export type QuotePricingInput = Pick<
@@ -292,8 +281,6 @@ export const quoteStepSchemas = [
     landingFinish: true,
     seuilColor: true,
   }).partial({ seuilColor: true }),
-  // Étape parquet — tous les champs sont optionnels, toujours valide
-  quoteFormBaseSchema.pick({ intermediateLanding: true }).partial(),
   // Étape inclus — purement informative, toujours valide
   quoteFormBaseSchema.pick({ intermediateLanding: true }).partial(),
   quoteFormBaseSchema.pick({
@@ -342,10 +329,8 @@ export function pickQuoteStepValues(
         seuilColor: values.seuilColor,
       };
     case 7:
-      return {}; // étape parquet — optionnelle
-    case 8:
       return {}; // étape inclus — informative
-    case 9:
+    case 8:
       return {
         firstName: values.firstName,
         lastName: values.lastName,
@@ -407,8 +392,7 @@ export function validateWizardStep(step: number, values: QuoteFormDraft): boolea
     return true;
   }
 
-  if (step === 7) return true; // étape parquet — toujours valide
-  if (step === 8) return true; // étape inclus — toujours valide
+  if (step === 7) return true; // étape inclus — toujours valide
 
   const schema = quoteStepSchemas[step];
   if (!schema) return false;

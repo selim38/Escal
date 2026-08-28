@@ -32,11 +32,7 @@ import { StepEndCap } from "./steps/StepEndCap";
 import { StepLead } from "./steps/StepLead";
 import { StepStepCount } from "./steps/StepStepCount";
 import { StepLanding } from "./steps/StepLanding";
-import { StepParquet } from "./steps/StepParquet";
 import { StepInclus } from "./steps/StepInclus";
-
-// Index de l'étape parquet (conditionnelle)
-const STEP_PARQUET = 7;
 
 const STEP_CLEAR_PATHS: (keyof QuoteFormDraft)[][] = [
   ["staircaseType"],
@@ -46,7 +42,6 @@ const STEP_CLEAR_PATHS: (keyof QuoteFormDraft)[][] = [
   ["uniformStepDimensions", "widthBand", "depthBand", "stepConfigs"],
   ["openSides", "stepEndCapConfigs"],
   ["intermediateLanding", "landingFinish", "seuilColor"],
-  ["landingAreaM2", "wantPlinthes", "plinthesML"],
   [], // étape inclus — aucun champ à effacer
   ["firstName", "lastName", "email", "phone"],
 ];
@@ -100,8 +95,6 @@ function WizardBody() {
     return validateWizardStep(currentStep, values);
   }, [currentStep, values]);
 
-  const isParquetStep = (v: QuoteFormDraft) => v.landingFinish === "NEZ_RACCORD_PARQUET";
-
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === QUOTE_STEP_COUNT - 1;
 
@@ -119,13 +112,7 @@ function WizardBody() {
 
   const goPrev = () => {
     if (currentStep === 0) return;
-    // Si on revient depuis inclus (step 7) et que parquet non choisi, sauter step 6
-    const v = getValues();
-    if (currentStep === STEP_PARQUET + 1 && !isParquetStep(v)) {
-      setCurrentStep(STEP_PARQUET - 1);
-    } else {
-      setCurrentStep((s) => s - 1);
-    }
+    setCurrentStep((s) => s - 1);
   };
 
   const goNext = () => {
@@ -153,13 +140,7 @@ function WizardBody() {
     }
 
     tracking.trackStepComplete(currentStep);
-
-    // Depuis l'étape palier (5) : sauter l'étape parquet si non pertinente
-    if (currentStep === STEP_PARQUET - 1 && !isParquetStep(stepValues)) {
-      setCurrentStep(STEP_PARQUET + 1);
-    } else {
-      setCurrentStep((s) => Math.min(s + 1, QUOTE_STEP_COUNT - 1));
-    }
+    setCurrentStep((s) => Math.min(s + 1, QUOTE_STEP_COUNT - 1));
   };
 
   const onFinal = async (data: QuoteFormDraft) => {
@@ -306,9 +287,8 @@ function WizardBody() {
         {currentStep === 4 ? <StepUniformDimensions /> : null}
         {currentStep === 5 ? <StepEndCap /> : null}
         {currentStep === 6 ? <StepLanding /> : null}
-        {currentStep === 7 ? <StepParquet /> : null}
-        {currentStep === 8 ? <StepInclus /> : null}
-        {currentStep === 9 ? <StepLead /> : null}
+        {currentStep === 7 ? <StepInclus /> : null}
+        {currentStep === 8 ? <StepLead /> : null}
       </div>
 
       {submitState.status === "error" && (

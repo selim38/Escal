@@ -50,7 +50,6 @@ export const fr = {
       "Dimensions",
       "Embouts de marche",
       "Palier intermédiaire",
-      "Parquet",
       "Éléments inclus",
       "Coordonnées",
     ],
@@ -99,12 +98,6 @@ export const fr = {
     fix: "Corriger la valeur",
   },
 
-  m2Modal: {
-    title: "Conseil pour les m²",
-    body1:
-      "Nous vous conseillons de prévoir +20 % par rapport à la surface mesurée, afin de couvrir les pertes liées aux coupes et chutes.",
-    body2: "Exemple : pour un palier de 2 m², commandez 2,4 m².",
-  },
 
   measureHintModal: {
     title: "Comment mesurer cette marche",
@@ -199,7 +192,6 @@ export const fr = {
     landingFinish: {
       NONE: "Sans palier",
       NEZ_SEUIL: "Nez + seuil",
-      NEZ_RACCORD_PARQUET: "Nez de raccord parquet",
     },
 
     seuilColor: {
@@ -336,29 +328,10 @@ export const fr = {
         description: "Nez de marche avec seuil décoratif pour finir le palier.",
         note: "À choisir si vous ne prenez pas le parquet chez nous.",
       },
-      nezRaccordParquet: {
-        label: "Nez de raccord parquet",
-        description: "Nez de raccord fourni avec votre commande de parquet.",
-        note: "Inclus automatiquement si vous prenez le parquet chez nous.",
-      },
       seuilColorLabel: "Couleur du seuil",
+      seuilPhotoAlt: "Seuil {color} posé sur une marche palière",
     },
 
-    parquet: {
-      title: "Parquet du palier",
-      subtitle:
-        "Précisez la surface de votre palier. La teinte du parquet sera assortie à votre décor.",
-      areaLabel: "Surface du palier (m²)",
-      areaPlaceholder: "ex. 2.4",
-      areaUnit: "m²",
-      plus20: "+20 % recommandé",
-      underlayIncluded: "Fourni avec sous-couche incluse",
-      plinthesQuestion: "Souhaitez-vous des plinthes 60 mm assorties ?",
-      plinthesHint: "Teinte assortie au décor sélectionné.",
-      plinthesLabel: "Longueur de plinthes (ml)",
-      plinthesPlaceholder: "ex. 6.0",
-      plinthesUnit: "ml",
-    },
 
     included: {
       title: "Récapitulatif de votre offre",

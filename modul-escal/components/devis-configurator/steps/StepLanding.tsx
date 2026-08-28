@@ -3,6 +3,7 @@
 import { Check } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
+import { useAsset } from "@/lib/asset";
 import { useT } from "@/lib/i18n/useT";
 import { useFieldError } from "@/lib/useFieldError";
 import type {
@@ -21,23 +22,28 @@ const SEUIL_COLOR_HEX: Record<SeuilColor, string> = {
 
 const SEUIL_COLORS: SeuilColor[] = ["OR", "NOIR", "ALUMINIUM"];
 
+/** Photo d'un seuil posé, par couleur — sous `public/seuil/`. */
+const SEUIL_PHOTO: Record<SeuilColor, string> = {
+  OR: "/seuil/or.webp",
+  NOIR: "/seuil/noir.webp",
+  ALUMINIUM: "/seuil/aluminium.webp",
+};
+
 export function StepLanding() {
   const { watch, setValue } = useFormContext<QuoteFormDraft>();
   const landingFinish = watch("landingFinish");
   const seuilColor = watch("seuilColor");
   const finishError = useFieldError("landingFinish");
   const seuilError = useFieldError("seuilColor");
-  const { m } = useT();
+  const { m, t } = useT();
+  const asset = useAsset();
 
   const choices: Array<{
     value: LandingFinish;
     label: string;
     description: string;
     note: string;
-  }> = [
-    { value: "NEZ_SEUIL", ...m.steps.landing.nezSeuil },
-    { value: "NEZ_RACCORD_PARQUET", ...m.steps.landing.nezRaccordParquet },
-  ];
+  }> = [{ value: "NEZ_SEUIL", ...m.steps.landing.nezSeuil }];
 
   const setLanding = (next: LandingFinish) => {
     setValue("landingFinish", next, { shouldValidate: true, shouldDirty: true });
@@ -61,7 +67,9 @@ export function StepLanding() {
         <p className="text-sm text-muted">{m.steps.landing.subtitle}</p>
       </div>
 
-      <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <fieldset
+        className={`grid grid-cols-1 gap-3 ${choices.length > 1 ? "sm:grid-cols-2" : ""}`}
+      >
         <legend className="sr-only">{m.steps.landing.subtitle}</legend>
         {choices.map((choice) => {
           const isActive = landingFinish === choice.value;
@@ -108,33 +116,46 @@ export function StepLanding() {
           <legend className="text-[13px] font-bold tracking-[0.01em] text-heading">
             {m.steps.landing.seuilColorLabel}
           </legend>
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {SEUIL_COLORS.map((id) => {
               const active = seuilColor === id;
+              const label = m.catalog.seuilColor[id];
               return (
                 <button
                   key={id}
                   type="button"
                   onClick={() => setSeuilColor(id)}
                   aria-pressed={active}
-                  className={`flex items-center gap-2.5 rounded-xl border-2 px-4 py-2.5 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                  className={`overflow-hidden rounded-xl border-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                     active
                       ? "border-primary bg-primary/5 text-brand ring-2 ring-primary/25"
                       : "border-border bg-surface text-muted hover:border-brand-medium/35"
                   }`}
                 >
-                  <span
-                    className="size-4 shrink-0 rounded-full border border-black/10"
-                    style={{ backgroundColor: SEUIL_COLOR_HEX[id] }}
-                    aria-hidden
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={asset(SEUIL_PHOTO[id])}
+                    alt={t(m.steps.landing.seuilPhotoAlt, { color: label })}
+                    loading="lazy"
+                    decoding="async"
+                    width={480}
+                    height={640}
+                    className="block aspect-[3/4] w-full object-cover"
                   />
-                  {m.catalog.seuilColor[id]}
-                  {active && (
-                    <Check
-                      className="ml-1 size-3.5 stroke-[3] text-success"
+                  <span className="flex items-center justify-center gap-2 px-2 py-2">
+                    <span
+                      className="size-3.5 shrink-0 rounded-full border border-black/10"
+                      style={{ backgroundColor: SEUIL_COLOR_HEX[id] }}
                       aria-hidden
                     />
-                  )}
+                    {label}
+                    {active && (
+                      <Check
+                        className="size-3.5 stroke-[3] text-success"
+                        aria-hidden
+                      />
+                    )}
+                  </span>
                 </button>
               );
             })}

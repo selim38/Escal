@@ -37,7 +37,6 @@ export const STEP_NAMES = [
   "dimensions",
   "end_cap",
   "landing",
-  "parquet",
   "included",
   "contact",
 ] as const;
