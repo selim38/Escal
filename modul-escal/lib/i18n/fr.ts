@@ -326,7 +326,6 @@ export const fr = {
       nezSeuil: {
         label: "Nez + seuil",
         description: "Nez de marche avec seuil décoratif pour finir le palier.",
-        note: "À choisir si vous ne prenez pas le parquet chez nous.",
       },
       seuilColorLabel: "Couleur du seuil",
       seuilPhotoAlt: "Seuil {color} posé sur une marche palière",

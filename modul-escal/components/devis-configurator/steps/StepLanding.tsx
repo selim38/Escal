@@ -42,7 +42,6 @@ export function StepLanding() {
     value: LandingFinish;
     label: string;
     description: string;
-    note: string;
   }> = [{ value: "NEZ_SEUIL", ...m.steps.landing.nezSeuil }];
 
   const setLanding = (next: LandingFinish) => {
@@ -95,9 +94,6 @@ export function StepLanding() {
               </span>
               <span className="mt-1 block text-xs text-muted">
                 {choice.description}
-              </span>
-              <span className="mt-2 block text-xs italic text-primary/80">
-                {choice.note}
               </span>
             </button>
           );
