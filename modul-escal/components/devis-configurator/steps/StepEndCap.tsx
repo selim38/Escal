@@ -229,13 +229,12 @@ export function StepEndCap() {
                   label={m.steps.endCap.capBetween2Stringers}
                   onClick={handleBetween2Stringers}
                 />
-                <button
-                  type="button"
+                <PhotoChoice
+                  src={asset("/embout/debordante.webp")}
+                  alt={m.steps.endCap.photoAltOverhanging}
+                  label={m.steps.endCap.capOverhanging}
                   onClick={() => handleCapType("OVERHANGING")}
-                  className={btn()}
-                >
-                  {m.steps.endCap.capOverhanging}
-                </button>
+                />
                 <PhotoChoice
                   src={asset("/embout/ouvert-cote.webp")}
                   alt={m.steps.endCap.photoAltOpenStep}

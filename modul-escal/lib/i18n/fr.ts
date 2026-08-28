@@ -315,6 +315,7 @@ export const fr = {
       capOpenStep: "Ouverte sur le côté",
       photoAltBetween2Stringers:
         "Escalier dont les marches sont prises entre deux limons",
+      photoAltOverhanging: "Marche débordante en bas d'un escalier",
       photoAltOpenStep: "Marche ouverte sur le côté",
       askSide: "De quel côté est-elle ouverte ?",
       askSideHint: "(vu du bas de l'escalier)",
