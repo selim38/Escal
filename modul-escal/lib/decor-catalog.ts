@@ -1,4 +1,4 @@
-import type { Decor, RiserOption } from "@/lib/quote-schema";
+import type { Decor, RiserOption, SeuilColor } from "@/lib/quote-schema";
 
 /** Slug de fichier correspondant à chaque décor (utilisé pour les photos CM). */
 export const DECOR_SLUG: Record<Decor, string> = {
@@ -30,6 +30,28 @@ export function getCMImagePath(decor: Decor, riserOption: RiserOption): string |
   const suffix = CM_SUFFIX[riserOption];
   if (suffix === undefined || !slug) return null;
   return `/CM/${slug}${suffix}.webp`;
+}
+
+/** Suffixe de fichier de chaque couleur de seuil. */
+const SEUIL_COLOR_SLUG: Record<SeuilColor, string> = {
+  OR:        "or",
+  NOIR:      "noir",
+  ALUMINIUM: "aluminium",
+};
+
+/**
+ * Photo du seuil posé, pour un décor et une couleur donnés : le seuil est
+ * photographié sur la marche du décor choisi, il y a donc une image par
+ * combinaison. Sans décor sélectionné (cas théorique — l'étape 2 le rend
+ * obligatoire), on retombe sur la photo générique de la couleur.
+ */
+export function getSeuilImagePath(
+  color: SeuilColor,
+  decor: Decor | undefined,
+): string {
+  const slug = decor ? DECOR_SLUG[decor] : null;
+  const colorSlug = SEUIL_COLOR_SLUG[color];
+  return slug ? `/seuil/${slug}-${colorSlug}.webp` : `/seuil/${colorSlug}.webp`;
 }
 
 export type DecorCatalogEntry = {

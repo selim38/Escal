@@ -329,6 +329,7 @@ export const fr = {
       },
       seuilColorLabel: "Couleur du seuil",
       seuilPhotoAlt: "Seuil {color} posé sur une marche palière",
+      seuilPhotoAltDecor: "Seuil {color} sur une marche palière {decor}",
     },
 
 

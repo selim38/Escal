@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
 import { useAsset } from "@/lib/asset";
+import { getSeuilImagePath } from "@/lib/decor-catalog";
 import { useT } from "@/lib/i18n/useT";
 import { useFieldError } from "@/lib/useFieldError";
 import type {
@@ -22,17 +23,11 @@ const SEUIL_COLOR_HEX: Record<SeuilColor, string> = {
 
 const SEUIL_COLORS: SeuilColor[] = ["OR", "NOIR", "ALUMINIUM"];
 
-/** Photo d'un seuil posé, par couleur — sous `public/seuil/`. */
-const SEUIL_PHOTO: Record<SeuilColor, string> = {
-  OR: "/seuil/or.webp",
-  NOIR: "/seuil/noir.webp",
-  ALUMINIUM: "/seuil/aluminium.webp",
-};
-
 export function StepLanding() {
   const { watch, setValue } = useFormContext<QuoteFormDraft>();
   const landingFinish = watch("landingFinish");
   const seuilColor = watch("seuilColor");
+  const decor = watch("decor");
   const finishError = useFieldError("landingFinish");
   const seuilError = useFieldError("seuilColor");
   const { m, t } = useT();
@@ -130,8 +125,15 @@ export function StepLanding() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={asset(SEUIL_PHOTO[id])}
-                    alt={t(m.steps.landing.seuilPhotoAlt, { color: label })}
+                    src={asset(getSeuilImagePath(id, decor))}
+                    alt={
+                      decor
+                        ? t(m.steps.landing.seuilPhotoAltDecor, {
+                            color: label,
+                            decor: m.catalog.decor[decor],
+                          })
+                        : t(m.steps.landing.seuilPhotoAlt, { color: label })
+                    }
                     loading="lazy"
                     decoding="async"
                     width={480}
