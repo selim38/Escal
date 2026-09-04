@@ -15,7 +15,7 @@
 
 | Livrable | Emplacement |
 |---|---|
-| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.4.0/kre-configurateur.js` |
+| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.5.0/kre-configurateur.js` |
 | Bundle JS — staging | `https://escal.point-soft.fr/wc/staging/kre-configurateur.js` |
 | Balise d'intégration | §2 |
 | Liste des attributs | §3 |
@@ -23,9 +23,13 @@
 | Plugin WordPress (optionnel) | `deliverables/kre-configurateur-wp/` |
 
 Les URLs de production sont **versionnées et immuables** : une nouvelle version
-est publiée sous un nouveau chemin (`/wc/v1.4.0/`…), jamais en écrasant la
+est publiée sous un nouveau chemin (`/wc/v1.5.0/`…), jamais en écrasant la
 précédente. Vous maîtrisez donc la date de bascule. `staging` est republié à
 chaque itération de recette.
+
+**v1.5.0** — le choix de la couleur du seuil (étape 7) montre désormais le
+seuil photographié sur la marche du décor retenu à l'étape 2 : or, noir et
+aluminium sont illustrés pour chacun des onze décors.
 
 **v1.4.0** — le tunnel passe de 10 à **9 étapes** : la finition « nez de
 raccord parquet » et l'écran « parquet du palier » qu'elle ouvrait sont retirés.
@@ -56,7 +60,7 @@ officielles. Voir §4.3 pour les trois écarts de contraste assumés.
 ## 2. Intégration
 
 ```html
-<script src="https://escal.point-soft.fr/wc/v1.4.0/kre-configurateur.js"
+<script src="https://escal.point-soft.fr/wc/v1.5.0/kre-configurateur.js"
         type="module" defer></script>
 
 <kre-configurateur lang="fr" theme="kre"></kre-configurateur>

@@ -3,7 +3,7 @@
 > Document **interne Point Soft**. Ne pas transmettre à Knewledge.
 > Le déploiement est automatique à chaque push sur `main` (SFTP IONOS).
 > Restent les actions qui touchent le serveur ou la base, hors périmètre du CI.
-> Version : 1.4.0.
+> Version : 1.5.0.
 
 ---
 
@@ -32,9 +32,9 @@ Contrôle après le premier passage du workflow — les quatre doivent répondre
 
 ```bash
 curl -sI https://escal.point-soft.fr/wc/staging/kre-configurateur.js | head -1
-curl -sI https://escal.point-soft.fr/wc/staging/fonts/geist-variable.woff2 | head -1
+curl -sI https://escal.point-soft.fr/wc/staging/fonts/archivo-variable.woff2 | head -1
 curl -sI https://escal.point-soft.fr/wc/staging/decor/chene-naturel.webp | head -1
-curl -sI https://escal.point-soft.fr/wc/v1.4.0/kre-configurateur.js | head -1
+curl -sI https://escal.point-soft.fr/wc/v1.5.0/kre-configurateur.js | head -1
 ```
 
 Puis les en-têtes que le `.htaccess` doit poser — sans eux, le module ES et la
@@ -185,9 +185,9 @@ que là).
 | Livrable | Où |
 |---|---|
 | Document d'intégration v2.0 | `docs/INTEGRATION-WORDPRESS.md` |
-| Plugin WordPress | `deliverables/kre-configurateur-wp-1.4.0.zip` |
+| Plugin WordPress | `deliverables/kre-configurateur-wp-1.5.0.zip` |
 | URL staging | `https://escal.point-soft.fr/wc/staging/kre-configurateur.js` |
-| URL production | `https://escal.point-soft.fr/wc/v1.4.0/kre-configurateur.js` |
+| URL production | `https://escal.point-soft.fr/wc/v1.5.0/kre-configurateur.js` |
 
 Le document couvre déjà la balise, les attributs, les événements dataLayer, la
 compatibilité navigateurs et les points en attente : pas besoin d'y ajouter
