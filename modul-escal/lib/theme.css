@@ -7,19 +7,17 @@
  * ─── Sources ───────────────────────────────────────────────────────────────
  * 1. « Charte graphique KRE.pdf » (Knewledge, 2026) — les 7 couleurs officielles
  *    avec leurs références Pantone. C'est la référence normative.
- * 2. « Kre Design System.html » (Knewledge) — la charte étendue pour l'écran :
- *    nuances dérivées, échelles, rayons. Une charte de 7 couleurs ne suffit pas
- *    à habiller une interface ; ces extensions viennent de Knewledge, pas de nous.
+ * 2. « Design System » du site (Knewledge, septembre 2026) — la déclinaison
+ *    écran : Hanken Grotesk, beiges de surface, bruns de texte, filets
+ *    translucides, angles droits partout, aucune ombre portée.
+ * 3. « Module de commande : nos recommandations » (Knewledge) et la maquette
+ *    `configurateur.html` qui l'accompagne — états de sélection, boutons,
+ *    barre de progression.
  *
- * ─── Deux écarts assumés par rapport au design system ───────────────────────
- * • `--text-muted: #A8927C` du design system n'est PAS reprise : 2,97:1 sur
- *   blanc, sous le seuil WCAG AA de 4,5:1 pour du texte courant. On utilise sa
- *   propre valeur `--text-body: #3A2415` (14,55:1) pour le texte secondaire.
- * • La police de la charte est Proxima Nova, commerciale et non redistribuable.
- *   Archivo est la substitution retenue par Knewledge dans son propre design
- *   system : même classe géométrique-humaniste, licence OFL. Basculer sur
- *   Proxima Nova ne demande que de remplacer le woff2 et ce nom, si Knewledge
- *   fournit la licence webfont.
+ * ─── Un écart assumé par rapport au design system ──────────────────────────
+ * Le « brun clair » #8A7561 des légendes donne 4,37:1 sur blanc, juste sous le
+ * seuil WCAG AA de 4,5:1. `--kre-subtle` le fonce d'un cran (#87725E, 4,56:1) :
+ * l'écart est imperceptible à l'œil, la conformité est acquise.
  *
  * Les échelles d'espacement, de typographie et de largeur sont exprimées en
  * **px** et non en `rem` : dans une page WordPress, `rem` se résout contre le
@@ -48,32 +46,50 @@
   --kre-background: #f5f0eb;
   /* BLANC PUR */
   --kre-surface: #ffffff;
-  /* GRIS CHAUD — Pantone 4085 C */
-  --kre-border: #d4c5b5;
   /* NOIR — Pantone Black C */
   --kre-foreground: #1a1a1a;
 
-  /* ─── Nuances dérivées (Kre Design System) ────────────────────────────── */
-  /* --text-strong : titres d'étape. Remplace le bleu marine #1e2a4a hérité du
-     prototype, qui n'existait dans aucune des deux sources. */
+  /* ─── Texte (Design System) ───────────────────────────────────────────── */
+  /* Titres, libellés, valeurs saisies. */
   --kre-heading: #4a1f08;
-  /* --text-body : texte secondaire. Voir l'écart documenté en en-tête. */
-  --kre-muted: #3a2415;
-  /* --surface-sunken : fonds de zones et survols. */
-  --kre-muted-bg: #e7decf;
-  /* --surface-tint : fonds de badges et d'états informatifs. */
-  --kre-tint: #ffe6d5;
-  /* --brand-primary-hover / -press : états du CTA. */
+  /* « Brun texte » : paragraphes courants (8,75:1 sur blanc). */
+  --kre-muted: #5c4733;
+  /* « Brun clair » : légendes et aides. Voir l'écart documenté en en-tête. */
+  --kre-subtle: #87725e;
+
+  /* ─── Surfaces (Design System) ────────────────────────────────────────── */
+  /* « Beige clair » : marches configurées, étiquettes, encadrés d'information. */
+  --kre-tint: #fdf3ea;
+  /* « Beige soutenu » : encadré à halo (prix estimé). */
+  --kre-tint-strong: #fdeadb;
+  /* Fond d'une option sélectionnée (maquette Knewledge). */
+  --kre-selected: #fff6ef;
+  /* Piste de la barre de progression. */
+  --kre-track: #f3e9df;
+  /* Fonds de zones neutres (emplacement photo vide, image en chargement). */
+  --kre-muted-bg: #fdfaf7;
+
+  /* ─── Filets : brun moyen translucide, jamais de gris froid ───────────── */
+  /* Contour de la carte du configurateur et séparateurs. */
+  --kre-border-subtle: rgb(122 59 16 / 0.12);
+  /* Contour des options sélectionnables au repos. */
+  --kre-border-option: rgb(122 59 16 / 0.16);
+  /* Contour des champs de saisie. */
+  --kre-border: rgb(122 59 16 / 0.2);
+  /* Contour du bouton secondaire. */
+  --kre-border-strong: rgb(122 59 16 / 0.34);
+
+  /* Orange vif sur fond clair : survols et accroches. */
   --kre-primary-hover: #ff7f38;
   --kre-primary-press: #d8540b;
+  --kre-accent: #d8540b;
 
   /*
    * Texte posé sur l'orange vif.
    *
-   * ⚠ Le blanc est le choix de la charte (Button variant « primary » du design
-   * system : background --brand-primary, color --text-inverse). Il ne donne que
-   * **2,82:1**, sous le seuil WCAG AA de 4,5:1 — et aucune nuance d'orange de la
-   * charte ne permet d'atteindre 4,5 avec du blanc (l'orange-700 plafonne à 4,04).
+   * ⚠ Le blanc est le choix de la charte (CTA principal du design system). Il
+   * ne donne que **2,82:1**, sous le seuil WCAG AA de 4,5:1 — et aucune nuance
+   * d'orange de la charte ne permet d'atteindre 4,5 avec du blanc.
    *
    * Le noir de la charte donnerait **6,18:1**, donc conforme, en n'utilisant que
    * des couleurs officielles. Basculer ce seul token suffit :
@@ -84,64 +100,61 @@
    */
   --kre-on-primary: #ffffff;
 
-  /* ─── Bordures, accents et ombres (Kre Design System) ─────────────────── */
-  /* --border-subtle : contour des cartes, plus discret que --border-default. */
-  --kre-border-subtle: #e7decf;
-  /* --text-accent : accroches et texte de badge. */
-  --kre-accent: #d8540b;
-  /* --shadow-* : toutes teintées du brun 900 de la marque, jamais du noir. */
-  --kre-shadow-xs: 0 1px 2px rgb(74 31 8 / 0.08);
-  --kre-shadow-sm: 0 2px 6px rgb(74 31 8 / 0.1);
-  --kre-shadow-md: 0 6px 18px rgb(74 31 8 / 0.12);
-  --kre-shadow-lg: 0 16px 40px rgb(74 31 8 / 0.16);
-  /* --shadow-accent : halo orange du CTA principal. */
-  --kre-shadow-accent: 0 8px 24px rgb(255 109 27 / 0.3);
-
-  /* ─── États (Kre Design System, --status-*) ───────────────────────────── */
+  /* ─── États ───────────────────────────────────────────────────────────── */
   /* Les teintes sont dérivées à 8–10 % sur blanc, choisies pour que le texte
      d'état reste au-dessus de 4,5:1 (4,75 pour l'erreur, 4,55 pour le succès). */
   --kre-error: #c23a22;
   --kre-error-tint: #faefed;
   --kre-success: #4f7a2e;
   --kre-success-tint: #f1f4ee;
-  /* L'ambre du design system ne sert QU'aux bordures, icônes et fonds pleins :
-     en texte il plafonne à 2,4:1 sur blanc. Le texte d'avertissement utilise
-     donc le brun chocolat de la charte (9,43:1 sur la teinte). */
   --kre-warning: #e0991f;
   --kre-warning-tint: #fcf5e9;
 
-  --kre-font-sans: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  /* ─── Mouvement (Design System, « Animations ») ───────────────────────── */
+  /* Apparitions. */
+  --kre-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Remplissages de bouton. */
+  --kre-ease-fill: cubic-bezier(0.65, 0, 0.35, 1);
+  /* Décalage de la flèche au survol, avec un léger rebond. */
+  --kre-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /*
+   * Hanken Grotesk : la famille unique du design system, déclinée du 300 au
+   * 800. Licence OFL, auto-hébergée (voir wc/fonts.ts). Remplace Archivo, qui
+   * n'était qu'une substitution provisoire en attendant la police du site.
+   */
+  --kre-font-sans: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
   --kre-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 @theme inline {
   --color-background: var(--kre-background);
   --color-foreground: var(--kre-foreground);
-  /* Orange vif — CTA, liens d’action */
+  /* Orange vif — CTA, sélection, icônes */
   --color-primary: var(--kre-primary);
   --color-primary-hover: var(--kre-primary-hover);
   --color-primary-press: var(--kre-primary-press);
   --color-on-primary: var(--kre-on-primary);
-  /* Brun chocolat — titres, accents forts */
+  /* Brun chocolat de la charte */
   --color-brand: var(--kre-brand);
-  /* Brun moyen — accents secondaires */
   --color-brand-medium: var(--kre-brand-medium);
-  /* Brun 900 — titres d'étape */
+  /* Textes */
   --color-heading: var(--kre-heading);
-  /* Surfaces cartes */
-  --color-surface: var(--kre-surface);
-  /* Texte secondaire */
   --color-muted: var(--kre-muted);
-  /* Gris chaud — bordures, pistes */
-  --color-border: var(--kre-border);
-  /* Fond légèrement plus marqué (hover, zones) */
+  --color-subtle: var(--kre-subtle);
+  /* Surfaces */
+  --color-surface: var(--kre-surface);
   --color-muted-bg: var(--kre-muted-bg);
-  /* Teinte orangée très claire — badges */
   --color-tint: var(--kre-tint);
-  /* Contour discret des cartes */
+  --color-tint-strong: var(--kre-tint-strong);
+  --color-selected: var(--kre-selected);
+  --color-track: var(--kre-track);
+  /* Filets */
+  --color-border: var(--kre-border);
   --color-border-subtle: var(--kre-border-subtle);
-  /* Accroches et texte de badge */
+  --color-border-option: var(--kre-border-option);
+  --color-border-strong: var(--kre-border-strong);
   --color-accent: var(--kre-accent);
   /* États */
   --color-error: var(--kre-error);
@@ -153,6 +166,10 @@
 
   --font-sans: var(--kre-font-sans);
   --font-mono: var(--kre-font-mono);
+
+  --ease-out: var(--kre-ease-out);
+  --ease-fill: var(--kre-ease-fill);
+  --ease-bounce: var(--kre-ease-bounce);
 
   /* Échelle d'espacement en px — voir commentaire d'en-tête. */
   --spacing: 4px;
@@ -198,50 +215,46 @@
   --container-7xl: 1280px;
 
   /*
-   * Ombres teintées du brun de la marque (jamais du noir pur), et halo orange
-   * du CTA. Reprises telles quelles du design system.
+   * Ombres — neutralisées. Recommandation Knewledge : « on évite les jeux
+   * d'ombres ». La hiérarchie passe par les filets et les aplats beiges.
+   * Une valeur nulle plutôt que `none` : les utilitaires `shadow-*` composent
+   * cette valeur avec les anneaux de focus dans une même déclaration, où
+   * `none` invaliderait l'ensemble.
    */
-  --shadow-2xs: var(--kre-shadow-xs);
-  --shadow-xs: var(--kre-shadow-xs);
-  --shadow-sm: var(--kre-shadow-sm);
-  --shadow-md: var(--kre-shadow-md);
-  --shadow-lg: var(--kre-shadow-lg);
-  --shadow-xl: var(--kre-shadow-lg);
-  --shadow-accent: var(--kre-shadow-accent);
+  --shadow-2xs: 0 0 #0000;
+  --shadow-xs: 0 0 #0000;
+  --shadow-sm: 0 0 #0000;
+  --shadow-md: 0 0 #0000;
+  --shadow-lg: 0 0 #0000;
+  --shadow-xl: 0 0 #0000;
+  --shadow-2xl: 0 0 #0000;
 
   /*
-   * Interlettrage : `--ls-tight` sur les titres, `--ls-overline` sur les
-   * accroches en capitales. C'est ce contraste serré/écarté qui donne au site
-   * de Knewledge son caractère ; sans lui la typographie paraît plate.
+   * Interlettrage : serré sur les titres, écarté sur les sur-titres en
+   * capitales (0,12em dans le design system).
    */
   --tracking-tighter: -0.02em;
-  --tracking-tight: -0.02em;
+  --tracking-tight: -0.01em;
   --tracking-normal: 0;
   --tracking-wide: 0.04em;
-  --tracking-wider: 0.14em;
-  --tracking-widest: 0.14em;
+  --tracking-wider: 0.12em;
+  --tracking-widest: 0.12em;
 
   /*
-   * Rayons — ÉCART ASSUMÉ au design system, à la demande du client.
+   * Rayons — tous à zéro. Le design system l'impose (« angles droits
+   * partout ») et les recommandations Knewledge le confirment : on évite les
+   * coins arrondis, les cercles et les courbes.
    *
-   * Le design system fixe les six `--radius-*` à 0. Appliqué tel quel, le rendu
-   * a été jugé trop dur : l'accumulation d'angles vifs, de bordures fines et
-   * d'aplats donne un aspect tableur plutôt que produit. Le site de Knewledge
-   * compense par de grandes photos et des sections sombres, ce qu'un composant
-   * de formulaire n'a pas.
-   *
-   * Compromis : les boutons restent carrés (leur site le montre clairement,
-   * via `rounded-none` posé explicitement dans StepNavigation), les surfaces
-   * reçoivent un rayon léger — assez pour adoucir, trop peu pour trahir le
-   * langage anguleux de la marque.
-   *
-   * Un seul endroit à toucher pour revenir à 0 si Knewledge tranche autrement.
+   * Les utilitaires `rounded-*` restent donc sans effet. Seul `rounded-full`
+   * n'est pas piloté par une variable dans Tailwind v4 : il ne doit plus être
+   * employé dans les composants.
    */
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 4px;
-  --radius-xl: 6px;
-  --radius-2xl: 8px;
-  --radius-3xl: 8px;
-  --radius-full: 9999px;
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
 }

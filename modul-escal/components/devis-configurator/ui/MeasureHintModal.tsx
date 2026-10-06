@@ -1,10 +1,11 @@
 "use client";
 
-import { X } from "lucide-react";
+import { RulerIcon, XIcon } from "@phosphor-icons/react";
 
 import { useT } from "@/lib/i18n/useT";
 import type { DimensionField } from "@/lib/step-config";
 
+import { buttonClass } from "./Button";
 import { KreDialog } from "./KreDialog";
 
 /**
@@ -29,28 +30,23 @@ export function MeasureHintModal({
       labelledBy="kre-measure-hint-title"
     >
       <div className="mb-3 flex items-center gap-3">
-        <span
-          aria-hidden
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-2xl"
-        >
-          📏
-        </span>
+        <RulerIcon aria-hidden className="size-6 shrink-0 text-primary" />
         <h3
           id="kre-measure-hint-title"
-          className="text-base font-semibold text-brand"
+          className="text-base font-bold text-heading"
         >
           {m.measureHintModal.title}
         </h3>
         <button
           type="button"
           onClick={onClose}
-          className="ml-auto rounded-lg p-1 text-muted hover:bg-muted-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          className="ml-auto p-1 text-muted transition-colors hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           aria-label={m.common.close}
         >
-          <X className="size-4" aria-hidden />
+          <XIcon className="size-4" aria-hidden />
         </button>
       </div>
-      <p className="mb-1 text-sm text-foreground">
+      <p className="mb-1 text-sm text-heading">
         {field === "depthBand"
           ? m.measureHintModal.depthBody
           : m.measureHintModal.widthBody}
@@ -59,7 +55,7 @@ export function MeasureHintModal({
       <button
         type="button"
         onClick={onClose}
-        className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className={`${buttonClass("primary", "sm")} w-full`}
       >
         {m.common.understood}
       </button>

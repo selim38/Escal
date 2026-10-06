@@ -32,7 +32,7 @@ Contrôle après le premier passage du workflow — les quatre doivent répondre
 
 ```bash
 curl -sI https://escal.point-soft.fr/wc/staging/kre-configurateur.js | head -1
-curl -sI https://escal.point-soft.fr/wc/staging/fonts/archivo-variable.woff2 | head -1
+curl -sI https://escal.point-soft.fr/wc/staging/fonts/hanken-grotesk-variable.woff2 | head -1
 curl -sI https://escal.point-soft.fr/wc/staging/decor/chene-naturel.webp | head -1
 curl -sI https://escal.point-soft.fr/wc/v1.5.0/kre-configurateur.js | head -1
 ```

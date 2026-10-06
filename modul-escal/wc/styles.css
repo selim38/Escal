@@ -17,8 +17,9 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
-/* Tokens de la charte, partagés avec le build Next. */
+/* Tokens de la charte et composants à état, partagés avec le build Next. */
 @import "../lib/theme.css";
+@import "../lib/components.css";
 
 /* Les classes utilitaires sont scannées dans les sources TSX. */
 @source "../components";
@@ -36,7 +37,9 @@
   :host {
     display: block;
     box-sizing: border-box;
-    background: var(--kre-background);
+    /* Transparent : la page hôte fournit le fond (blanc sur le site, selon le
+       design system). La carte du configurateur porte son propre fond blanc. */
+    background: transparent;
     color: var(--kre-foreground);
     font-family: var(--kre-font-sans);
     font-size: 16px;

@@ -182,7 +182,7 @@ jobs:
             "staging/kre-configurateur.js" \
             "staging/decor/chene-naturel.webp" \
             "staging/brand/logo-kre.webp" \
-            "staging/fonts/archivo-variable.woff2" \
+            "staging/fonts/hanken-grotesk-variable.woff2" \
             "$WC_VERSION/kre-configurateur.js" \
             "$WC_VERSION/brand/logo-kre.webp"
           do

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Check, ChevronLeft } from "lucide-react";
+import { Fragment, useEffect, useState } from "react";
+import { ArrowLeftIcon, CheckCircleIcon, XIcon } from "@phosphor-icons/react";
 import { useFormContext } from "react-hook-form";
 
 import { useAsset } from "@/lib/asset";
@@ -11,31 +11,44 @@ import type {
   StepEndCapConfig,
   EndSide,
 } from "@/lib/quote-schema";
-import { StepTitle } from "../ui/Typography";
+import { OptionCard } from "../ui/OptionCard";
+import { StepHeader } from "../ui/Typography";
 
 type SubStep = "between2Walls" | "capType" | "side";
 
-function btn() {
-  return "flex-1 rounded-xl border-2 border-border bg-surface px-4 py-4 text-sm font-semibold text-brand transition hover:border-brand-medium/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
-}
+/** Repli stable pour `watch` : un `?? []` littéral changerait à chaque rendu. */
+const NO_CONFIGS: StepEndCapConfig[] = [];
+
+/** Grille commune aux lignes « Marche n — valeur — action ». */
+const ROW_CLASS =
+  "grid grid-cols-[minmax(0,90px)_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-sm sm:grid-cols-[110px_minmax(0,1fr)_auto]";
+
+/** Petit lien d'action dans le panneau (« Retour », « Annuler »). */
+const PANEL_LINK_CLASS =
+  "inline-flex items-center gap-1.5 text-[13px] font-semibold text-subtle transition-colors hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 /** Option d'embout illustrée : la photo porte l'explication, le texte la nomme. */
 function PhotoChoice({
   src,
   alt,
   label,
+  selected,
   onClick,
 }: {
   src: string;
   alt: string;
   label: string;
+  selected: boolean;
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <OptionCard
+      selected={selected}
       onClick={onClick}
-      className="flex items-center gap-3 rounded-xl border-2 border-border bg-surface p-2.5 text-left text-sm font-semibold text-brand transition hover:border-brand-medium/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      // Mobile : vignette à gauche, libellé à droite. À partir de 640 px :
+      // trois colonnes, photo pleine largeur au-dessus du libellé — assez
+      // grande pour distinguer les différences techniques.
+      className="flex items-center gap-4 overflow-hidden text-left sm:flex-col sm:items-stretch sm:gap-0"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -45,33 +58,60 @@ function PhotoChoice({
         decoding="async"
         width={640}
         height={853}
-        className="aspect-[3/4] w-24 shrink-0 rounded-lg object-cover"
+        className="block aspect-[3/4] w-[84px] shrink-0 object-cover sm:w-full"
       />
-      <span>{label}</span>
-    </button>
+      <span className="py-3 pr-3 text-[15px] font-bold leading-snug text-heading sm:px-2 sm:text-center sm:text-sm">
+        {label}
+      </span>
+    </OptionCard>
   );
 }
 
 export function StepEndCap() {
   const { watch, setValue } = useFormContext<QuoteFormDraft>();
   const stepCount = watch("stepCount") ?? 0;
-  const configs: StepEndCapConfig[] = watch("stepEndCapConfigs") ?? [];
+  const rawConfigs = watch("stepEndCapConfigs") ?? NO_CONFIGS;
   const { m, t } = useT();
   const asset = useAsset();
 
-  // Sous-étape en cours pour la marche actuellement configurée
+  // Sous-étape en cours pour la marche active
   const [subStep, setSubStep] = useState<SubStep>("between2Walls");
+  // Marche rouverte via « Modifier » ; `null` = on configure la suivante.
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  const currentIndex = configs.length; // index de la prochaine marche à configurer
-  const allDone = currentIndex >= stepCount;
+  // Si le nombre de marches a baissé depuis l'étape 4, les réglages en trop
+  // sont retirés : la validation exige un réglage par marche, ni plus ni moins.
+  useEffect(() => {
+    if (rawConfigs.length > stepCount) {
+      setValue("stepEndCapConfigs", rawConfigs.slice(0, stepCount), {
+        shouldValidate: true,
+      });
+    }
+  }, [rawConfigs, stepCount, setValue]);
+
+  const configs = rawConfigs.slice(0, stepCount);
+  const editIndex =
+    editingIndex !== null && editingIndex < configs.length ? editingIndex : null;
+  const isEditing = editIndex !== null;
+  const activeIndex =
+    editIndex ?? (configs.length < stepCount ? configs.length : null);
+  const activeConfig = editIndex !== null ? configs[editIndex] : undefined;
+  const doneCount = configs.length;
+  const pct = stepCount > 0 ? Math.round((doneCount / stepCount) * 100) : 0;
 
   function saveConfig(config: StepEndCapConfig) {
-    const next = [...configs, config];
+    const next = [...configs];
+    if (editIndex !== null) {
+      // Modification en place : les marches suivantes restent configurées.
+      next[editIndex] = config;
+    } else {
+      next.push(config);
+    }
     setValue("stepEndCapConfigs", next, {
       shouldValidate: true,
       shouldDirty: true,
     });
-    // Réinitialise l'état local pour la prochaine marche
+    setEditingIndex(null);
     setSubStep("between2Walls");
   }
 
@@ -107,12 +147,13 @@ export function StepEndCap() {
     }
   }
 
-  function handleEditMarche(index: number) {
-    const next = configs.slice(0, index);
-    setValue("stepEndCapConfigs", next, {
-      shouldValidate: false,
-      shouldDirty: true,
-    });
+  function startEdit(index: number) {
+    setEditingIndex(index);
+    setSubStep("between2Walls");
+  }
+
+  function cancelEdit() {
+    setEditingIndex(null);
     setSubStep("between2Walls");
   }
 
@@ -128,175 +169,189 @@ export function StepEndCap() {
     return m.steps.endCap.summaryNone;
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <StepTitle align="left">{m.steps.endCap.title}</StepTitle>
-        <p className="text-sm text-muted">{m.steps.endCap.subtitle}</p>
-      </div>
+  const panel =
+    activeIndex === null ? null : (
+      <div
+        className={`border-[1.5px] bg-surface p-5 sm:p-6 ${
+          isEditing ? "border-primary" : "mt-2 border-border-option"
+        }`}
+      >
+        {/* Progression dans la liste des marches */}
+        <div className="flex justify-between text-[13px] font-semibold text-subtle">
+          <span>
+            {t(m.steps.endCap.progress, {
+              index: activeIndex + 1,
+              total: stepCount,
+            })}
+          </span>
+          <span aria-hidden>{pct} %</span>
+        </div>
+        <div className="mt-2 h-[3px] bg-track">
+          <div
+            className="h-full bg-primary transition-[width] duration-[360ms] ease-out motion-reduce:transition-none"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
 
-      {/* Récap des marches déjà configurées */}
-      {configs.length > 0 && (
-        <ul className="mx-auto w-full max-w-sm space-y-1.5">
-          {configs.map((c, i) => (
-            <li
-              key={i}
-              className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-            >
-              <span className="font-medium text-brand">
-                {t(m.steps.endCap.stepLabel, { index: i + 1 })}
-              </span>
-              <span className="text-muted">{capLabel(c)}</span>
-              <button
-                type="button"
-                onClick={() => handleEditMarche(i)}
-                className="ml-3 rounded text-xs text-primary underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              >
-                {m.common.edit}
+        {/* Sous-étape : entre 2 murs ? */}
+        {subStep === "between2Walls" && (
+          <>
+            {isEditing ? (
+              <button type="button" onClick={cancelEdit} className={`${PANEL_LINK_CLASS} mt-4`}>
+                <XIcon aria-hidden className="size-3.5" />
+                {m.steps.endCap.cancelEdit}
               </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* Wizard pour la marche en cours */}
-      {!allDone && (
-        <div className="mx-auto w-full max-w-sm space-y-5 rounded-2xl border border-border bg-surface p-5 shadow-sm">
-          {/* En-tête de progression */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs text-muted">
-              <span>
-                {t(m.steps.endCap.progress, {
-                  index: currentIndex + 1,
-                  total: stepCount,
-                })}
-              </span>
-              <span>{Math.round((currentIndex / stepCount) * 100)} %</span>
+            ) : null}
+            <p className={`${isEditing ? "mt-3.5" : "mt-6"} mb-[18px] text-center text-[19px] font-semibold text-heading`}>
+              {t(m.steps.endCap.askBetween2Walls, { index: activeIndex + 1 })}
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <OptionCard
+                selected={activeConfig?.between2Walls === true}
+                mark={false}
+                onClick={() => handleBetween2Walls(true)}
+                className="h-[54px] text-center text-[15px] font-bold text-heading"
+              >
+                {m.common.yes}
+              </OptionCard>
+              <OptionCard
+                selected={activeConfig !== undefined && !activeConfig.between2Walls}
+                mark={false}
+                onClick={() => handleBetween2Walls(false)}
+                className="h-[54px] text-center text-[15px] font-bold text-heading"
+              >
+                {m.common.no}
+              </OptionCard>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted-bg">
-              <div
-                className="h-full rounded-full bg-primary transition-all motion-reduce:transition-none"
-                style={{ width: `${(currentIndex / stepCount) * 100}%` }}
+          </>
+        )}
+
+        {/* Sous-étape : type d'embout */}
+        {subStep === "capType" && (
+          <>
+            <button type="button" onClick={handleGoBack} className={`${PANEL_LINK_CLASS} mt-4`}>
+              <ArrowLeftIcon aria-hidden className="size-3.5" />
+              {m.common.back}
+            </button>
+            <p className="mb-[18px] mt-3.5 text-center text-[19px] font-semibold text-heading">
+              {m.steps.endCap.askCapType}
+            </p>
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
+              <PhotoChoice
+                src={asset("/embout/limons.webp")}
+                alt={m.steps.endCap.photoAltBetween2Stringers}
+                label={m.steps.endCap.capBetween2Stringers}
+                selected={activeConfig?.between2Stringers === true}
+                onClick={handleBetween2Stringers}
+              />
+              <PhotoChoice
+                src={asset("/embout/debordante.webp")}
+                alt={m.steps.endCap.photoAltOverhanging}
+                label={m.steps.endCap.capOverhanging}
+                selected={activeConfig?.cap === "OVERHANGING"}
+                onClick={() => handleCapType("OVERHANGING")}
+              />
+              <PhotoChoice
+                src={asset("/embout/ouvert-cote.webp")}
+                alt={m.steps.endCap.photoAltOpenStep}
+                label={m.steps.endCap.capOpenStep}
+                selected={activeConfig?.cap === "OPEN_STEP"}
+                onClick={() => handleCapType("OPEN_STEP")}
               />
             </div>
-          </div>
+          </>
+        )}
 
-          {/* Sous-étape : entre 2 murs ? */}
-          {subStep === "between2Walls" && (
-            <div className="space-y-4">
-              <p className="text-center text-sm font-semibold text-brand">
-                {t(m.steps.endCap.askBetween2Walls, {
-                  index: currentIndex + 1,
-                })}
-              </p>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleBetween2Walls(true)}
-                  className={btn()}
+        {/* Sous-étape : côté */}
+        {subStep === "side" && (
+          <>
+            <button type="button" onClick={handleGoBack} className={`${PANEL_LINK_CLASS} mt-4`}>
+              <ArrowLeftIcon aria-hidden className="size-3.5" />
+              {m.common.back}
+            </button>
+            <p className="mb-[18px] mt-3.5 text-center text-[19px] text-heading">
+              <span className="font-semibold">{m.steps.endCap.askSide}</span>{" "}
+              <span className="text-[15px] text-muted">
+                {m.steps.endCap.askSideHint}
+              </span>
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {(["LEFT", "RIGHT"] as const).map((side) => (
+                <OptionCard
+                  key={side}
+                  selected={activeConfig?.cap === "OPEN_STEP" && activeConfig.side === side}
+                  mark={false}
+                  onClick={() => handleSide(side)}
+                  className="h-[54px] text-center text-[15px] font-bold text-heading"
                 >
-                  {m.common.yes}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleBetween2Walls(false)}
-                  className={btn()}
-                >
-                  {m.common.no}
-                </button>
-              </div>
+                  {m.catalog.endSide[side]}
+                </OptionCard>
+              ))}
             </div>
-          )}
+          </>
+        )}
+      </div>
+    );
 
-          {/* Sous-étape : type d'embout */}
-          {subStep === "capType" && (
-            <div className="space-y-4">
-              <button
-                type="button"
-                onClick={handleGoBack}
-                className="flex items-center gap-1 rounded text-xs text-muted hover:text-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              >
-                <ChevronLeft className="size-3.5" aria-hidden />
-                {m.common.back}
-              </button>
-              <p className="text-center text-sm font-semibold text-brand">
-                {m.steps.endCap.askCapType}
-              </p>
-              <div className="flex flex-col gap-3">
-                <PhotoChoice
-                  src={asset("/embout/limons.webp")}
-                  alt={m.steps.endCap.photoAltBetween2Stringers}
-                  label={m.steps.endCap.capBetween2Stringers}
-                  onClick={handleBetween2Stringers}
-                />
-                <PhotoChoice
-                  src={asset("/embout/debordante.webp")}
-                  alt={m.steps.endCap.photoAltOverhanging}
-                  label={m.steps.endCap.capOverhanging}
-                  onClick={() => handleCapType("OVERHANGING")}
-                />
-                <PhotoChoice
-                  src={asset("/embout/ouvert-cote.webp")}
-                  alt={m.steps.endCap.photoAltOpenStep}
-                  label={m.steps.endCap.capOpenStep}
-                  onClick={() => handleCapType("OPEN_STEP")}
-                />
-              </div>
-            </div>
-          )}
+  return (
+    <div className="space-y-7">
+      <StepHeader
+        title={m.steps.endCap.title}
+        subtitle={m.steps.endCap.subtitle}
+      />
 
-          {/* Sous-étape : côté */}
-          {subStep === "side" && (
-            <div className="space-y-4">
-              <button
-                type="button"
-                onClick={handleGoBack}
-                className="flex items-center gap-1 rounded text-xs text-muted hover:text-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              >
-                <ChevronLeft className="size-3.5" aria-hidden />
-                {m.common.back}
-              </button>
-              <p className="text-center text-sm font-semibold text-brand">
-                {m.steps.endCap.askSide}{" "}
-                <span className="font-normal text-muted">
-                  {m.steps.endCap.askSideHint}
+      {/*
+        Liste des marches dans l'ordre. Une marche modifiée reste à sa place :
+        sa ligne passe en orange (« En cours de modification ») et le panneau de
+        choix s'ouvre juste en dessous, sans effacer les marches suivantes.
+      */}
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-2">
+        {configs.map((c, i) => (
+          <Fragment key={i}>
+            {i === activeIndex ? (
+              <div className={`${ROW_CLASS} bg-primary text-white`}>
+                <span className="font-bold">
+                  {t(m.steps.endCap.stepLabel, { index: i + 1 })}
                 </span>
-              </p>
-              <div className="flex gap-3">
+                <span className="truncate">{capLabel(c)}</span>
+                <span className="text-[13px] font-semibold">
+                  {m.steps.endCap.editing}
+                </span>
+              </div>
+            ) : (
+              <div className={`${ROW_CLASS} bg-tint`}>
+                <span className="font-bold text-heading">
+                  {t(m.steps.endCap.stepLabel, { index: i + 1 })}
+                </span>
+                <span className="truncate text-muted">{capLabel(c)}</span>
                 <button
                   type="button"
-                  onClick={() => handleSide("LEFT")}
-                  className={btn()}
+                  onClick={() => startEdit(i)}
+                  aria-label={`${m.common.edit} — ${t(m.steps.endCap.stepLabel, { index: i + 1 })}`}
+                  className="text-[13px] font-semibold text-primary underline underline-offset-[3px] transition-colors hover:text-primary-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
-                  {m.catalog.endSide.LEFT}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSide("RIGHT")}
-                  className={btn()}
-                >
-                  {m.catalog.endSide.RIGHT}
+                  {m.common.edit}
                 </button>
               </div>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+            {i === activeIndex ? panel : null}
+          </Fragment>
+        ))}
 
-      {/* Tout configuré */}
-      {allDone && (
-        <div
-          className="mx-auto flex w-full max-w-sm items-center gap-3 rounded-xl border border-success/30 bg-success-tint px-4 py-3"
-          role="status"
-        >
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
-            <Check className="size-3.5 stroke-[3]" aria-hidden />
-          </span>
-          <p className="text-sm font-medium text-success">
+        {/* Prochaine marche à configurer : le panneau suit la liste. */}
+        {!isEditing ? panel : null}
+
+        {/* Tout configuré */}
+        {activeIndex === null && stepCount > 0 && (
+          <div
+            className="mt-2 flex items-center gap-2.5 border-[1.5px] border-primary/40 px-4 py-3.5 text-sm font-semibold text-heading"
+            role="status"
+          >
+            <CheckCircleIcon aria-hidden className="size-[22px] shrink-0 text-primary" />
             {m.steps.endCap.allDone}
-          </p>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

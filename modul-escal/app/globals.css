@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../lib/theme.css";
+@import "../lib/components.css";
 
 /*
  * @font-face — build Next uniquement.
@@ -8,8 +9,8 @@
  * Le chemin diffère uniquement par la base (`/calcul` ici, URL du script là-bas).
  */
 @font-face {
-  font-family: "Archivo";
-  src: url("/calcul/fonts/archivo-variable.woff2") format("woff2");
+  font-family: "Hanken Grotesk";
+  src: url("/calcul/fonts/hanken-grotesk-variable.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -21,7 +22,7 @@
  * shadow root) : les mêmes règles y sont portées par `:host`, voir wc/styles.css.
  */
 body {
-  background: var(--kre-background);
+  background: var(--kre-surface);
   color: var(--kre-foreground);
   font-family: var(--kre-font-sans);
 }

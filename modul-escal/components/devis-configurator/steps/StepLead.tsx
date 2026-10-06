@@ -1,41 +1,81 @@
 "use client";
 
-import { Camera, ImageUp, Mail, MessageCircle, Trash2, User } from "lucide-react";
+import {
+  CameraIcon,
+  CameraPlusIcon,
+  ChatCircleIcon,
+  EnvelopeSimpleIcon,
+  ImageSquareIcon,
+  TrashIcon,
+  UserIcon,
+  WhatsappLogoIcon,
+} from "@phosphor-icons/react";
 import { useRef, useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { usePendingPhotos } from "@/lib/config";
 import { useT } from "@/lib/i18n/useT";
 import { useFieldError } from "@/lib/useFieldError";
-import { type QuoteFormDraft } from "@/lib/quote-schema";
+import { useLiveValidation } from "@/lib/useLiveValidation";
+import { type LeadField, type QuoteFormDraft } from "@/lib/quote-schema";
 
+import { buttonClass } from "../ui/Button";
+import {
+  describedBy,
+  FieldError,
+  FieldLabel,
+  fieldClass,
+  SelectShell,
+  selectClass,
+} from "../ui/Field";
+import { OptionCard } from "../ui/OptionCard";
 import { SampleCta } from "../ui/SampleCta";
-import { StepTitle } from "../ui/Typography";
+import { SectionTitle, StepHeader } from "../ui/Typography";
 
 const PHOTO_SLOT_KEYS = ["bas", "milieu", "haut"] as const;
 type PhotoSlotKey = (typeof PHOTO_SLOT_KEYS)[number];
 
 type SlotPhoto = { file: File; preview: string } | null;
 
+const SECTION_ICON_CLASS = "size-[21px] shrink-0 text-primary";
+
 export function StepLead({
   requiredPhotoCount,
-  onPhotoCountChange,
+  showMissingAsError,
 }: {
   requiredPhotoCount: number;
-  /** Remonte le nombre de photos jointes : l'envoi en dépend. */
-  onPhotoCountChange: (count: number) => void;
+  /** Après un envoi refusé, les photos manquantes sont signalées en erreur. */
+  showMissingAsError: boolean;
 }) {
   const { register, watch, setValue } = useFormContext<QuoteFormDraft>();
   const contactPreference = watch("contactPreference");
   const decor = watch("decor");
   const pendingPhotos = usePendingPhotos();
+  const live = useLiveValidation();
   const { m, t } = useT();
 
-  const lastNameError = useFieldError("lastName");
-  const firstNameError = useFieldError("firstName");
-  const emailError = useFieldError("email");
-  const phoneError = useFieldError("phone");
-  const countryError = useFieldError("country");
+  const errors: Record<LeadField, string | undefined> = {
+    lastName: useFieldError("lastName"),
+    firstName: useFieldError("firstName"),
+    email: useFieldError("email"),
+    phone: useFieldError("phone"),
+    country: useFieldError("country"),
+  };
+
+  /**
+   * Props communes d'un champ : identifiant, état d'erreur relié au message
+   * (aria-describedby), et validation à la sortie du champ — une saisie
+   * incorrecte est signalée sans attendre l'envoi.
+   */
+  const fieldProps = (name: LeadField) => ({
+    id: `kre-${name}`,
+    "aria-invalid": errors[name] ? true : undefined,
+    "aria-describedby": describedBy(errors[name] && `kre-${name}-error`),
+    ...register(name, {
+      onBlur: () => live.touch(name),
+      onChange: () => live.recheck(name),
+    }),
+  });
 
   const [slotPhotos, setSlotPhotos] = useState<Record<string, SlotPhoto>>({
     bas: null,
@@ -61,17 +101,11 @@ export function StepLead({
     );
   }, [slotPhotos, pendingPhotos]);
 
+  // L'étape est démontée dès qu'on revient en arrière : les aperçus sont
+  // perdus, le magasin doit l'être aussi pour ne pas envoyer de photos fantômes.
   useEffect(() => {
-    onPhotoCountChange(
-      Object.values(slotPhotos).filter((s) => s !== null).length,
-    );
-  }, [slotPhotos, onPhotoCountChange]);
-
-  // L'étape est démontée dès qu'on revient en arrière : sans cela, le compte
-  // resterait acquis alors que les aperçus, eux, sont perdus.
-  useEffect(() => {
-    return () => onPhotoCountChange(0);
-  }, [onPhotoCountChange]);
+    return () => pendingPhotos.clear();
+  }, [pendingPhotos]);
 
   // Libère les URLs d'aperçu au démontage (le composant peut être retiré de la
   // page hôte à tout moment).
@@ -95,221 +129,132 @@ export function StepLead({
     });
   };
 
+  const missingMessage = t(m.steps.lead.photosMissing, {
+    count: missingPhotos,
+    plural: missingPhotos > 1 ? "s" : "",
+    total: requiredPhotoCount,
+  });
+
   return (
-    <div className="space-y-6 sm:space-y-8">
-      <div className="space-y-2">
-        <StepTitle align="left">{m.steps.lead.title}</StepTitle>
-        <p className="text-sm text-muted">{m.steps.lead.subtitle}</p>
-      </div>
+    <div className="space-y-8">
+      <StepHeader title={m.steps.lead.title} subtitle={m.steps.lead.subtitle} />
 
       {/* ── Formulaire contact ───────────────────────────────── */}
       <fieldset className="space-y-4">
-        <legend className="flex items-center gap-2 text-brand">
-          <User className="size-5 text-primary" aria-hidden />
-          <span className="text-base font-semibold">
-            {m.steps.lead.personalInfo}
-          </span>
-        </legend>
+        <SectionTitle as="legend" icon={<UserIcon aria-hidden className={SECTION_ICON_CLASS} />}>
+          {m.steps.lead.personalInfo}
+        </SectionTitle>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <label
-              htmlFor="kre-lastName"
-              className="text-[13px] font-bold tracking-[0.01em] text-heading"
-            >
-              {m.steps.lead.lastName}
-            </label>
-            <input
-              id="kre-lastName"
-              autoComplete="family-name"
-              aria-invalid={lastNameError ? true : undefined}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/25"
-              {...register("lastName")}
-            />
-            {lastNameError && (
-              <p className="text-sm text-error" role="alert">
-                {lastNameError}
-              </p>
-            )}
+        <div className="grid grid-cols-1 gap-x-3.5 gap-y-4 sm:grid-cols-2">
+          <div>
+            <FieldLabel htmlFor="kre-lastName">{m.steps.lead.lastName}</FieldLabel>
+            <input autoComplete="family-name" className={fieldClass} {...fieldProps("lastName")} />
+            <FieldError id="kre-lastName-error">{errors.lastName}</FieldError>
           </div>
 
-          <div className="space-y-1.5">
-            <label
-              htmlFor="kre-firstName"
-              className="text-[13px] font-bold tracking-[0.01em] text-heading"
-            >
-              {m.steps.lead.firstName}
-            </label>
-            <input
-              id="kre-firstName"
-              autoComplete="given-name"
-              aria-invalid={firstNameError ? true : undefined}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/25"
-              {...register("firstName")}
-            />
-            {firstNameError && (
-              <p className="text-sm text-error" role="alert">
-                {firstNameError}
-              </p>
-            )}
+          <div>
+            <FieldLabel htmlFor="kre-firstName">{m.steps.lead.firstName}</FieldLabel>
+            <input autoComplete="given-name" className={fieldClass} {...fieldProps("firstName")} />
+            <FieldError id="kre-firstName-error">{errors.firstName}</FieldError>
           </div>
-        </div>
 
-        <div className="space-y-1.5">
-          <label htmlFor="kre-email" className="text-[13px] font-bold tracking-[0.01em] text-heading">
-            {m.steps.lead.email}
-          </label>
-          <div className="relative">
-            <Mail
-              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted"
-              aria-hidden
-            />
+          <div>
+            <FieldLabel htmlFor="kre-email">{m.steps.lead.email}</FieldLabel>
             <input
-              id="kre-email"
               type="email"
               autoComplete="email"
-              aria-invalid={emailError ? true : undefined}
-              className="w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-3 text-foreground shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/25"
-              {...register("email")}
+              inputMode="email"
+              className={fieldClass}
+              {...fieldProps("email")}
             />
+            <FieldError id="kre-email-error">{errors.email}</FieldError>
           </div>
-          {emailError && (
-            <p className="text-sm text-error" role="alert">
-              {emailError}
-            </p>
-          )}
-        </div>
 
-        <div className="space-y-1.5">
-          <label htmlFor="kre-phone" className="text-[13px] font-bold tracking-[0.01em] text-heading">
-            {m.steps.lead.phone}
-          </label>
-          <input
-            id="kre-phone"
-            type="tel"
-            autoComplete="tel"
-            aria-invalid={phoneError ? true : undefined}
-            className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/25"
-            {...register("phone")}
-          />
-          {phoneError && (
-            <p className="text-sm text-error" role="alert">
-              {phoneError}
-            </p>
-          )}
-        </div>
+          <div>
+            <FieldLabel htmlFor="kre-phone">{m.steps.lead.phone}</FieldLabel>
+            <input type="tel" autoComplete="tel" className={fieldClass} {...fieldProps("phone")} />
+            <FieldError id="kre-phone-error">{errors.phone}</FieldError>
+          </div>
 
-        <div className="space-y-1.5">
-          <label
-            htmlFor="kre-country"
-            className="text-[13px] font-bold tracking-[0.01em] text-heading"
-          >
-            {m.steps.lead.country}
-          </label>
-          <select
-            id="kre-country"
-            autoComplete="country-name"
-            aria-invalid={countryError ? true : undefined}
-            className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-foreground shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/25"
-            {...register("country")}
-          >
-            <option value="">{m.steps.lead.countryPlaceholder}</option>
-            <optgroup label={m.steps.lead.countryMain}>
-              {m.steps.lead.countries.main.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label={m.steps.lead.countryOther}>
-              {m.steps.lead.countries.other.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </optgroup>
-          </select>
-          {countryError && (
-            <p className="text-sm text-error" role="alert">
-              {countryError}
-            </p>
-          )}
+          <div>
+            <FieldLabel htmlFor="kre-country">{m.steps.lead.country}</FieldLabel>
+            <SelectShell>
+              <select autoComplete="country-name" className={selectClass} {...fieldProps("country")}>
+                <option value="">{m.steps.lead.countryPlaceholder}</option>
+                <optgroup label={m.steps.lead.countryMain}>
+                  {m.steps.lead.countries.main.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label={m.steps.lead.countryOther}>
+                  {m.steps.lead.countries.other.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+            </SelectShell>
+            <FieldError id="kre-country-error">{errors.country}</FieldError>
+          </div>
         </div>
       </fieldset>
 
       {/* ── Préférence de contact ────────────────────────────── */}
-      <fieldset className="space-y-3">
-        <legend className="flex items-center gap-2 text-brand">
-          <MessageCircle className="size-5 text-primary" aria-hidden />
-          <span className="text-base font-semibold">
-            {m.steps.lead.contactPreferenceTitle}
-          </span>
-        </legend>
-        <div className="flex flex-col gap-2 sm:flex-row">
+      <fieldset className="space-y-3.5">
+        <SectionTitle as="legend" icon={<ChatCircleIcon aria-hidden className={SECTION_ICON_CLASS} />}>
+          {m.steps.lead.contactPreferenceTitle}
+        </SectionTitle>
+        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
           {(
             [
-              {
-                value: "WHATSAPP",
-                label: m.steps.lead.contactWhatsapp,
-                icon: "💬",
-              },
-              { value: "EMAIL", label: m.steps.lead.contactEmail, icon: "✉️" },
+              { value: "WHATSAPP", label: m.steps.lead.contactWhatsapp, Icon: WhatsappLogoIcon },
+              { value: "EMAIL", label: m.steps.lead.contactEmail, Icon: EnvelopeSimpleIcon },
             ] as const
-          ).map((opt) => {
-            const active = contactPreference === opt.value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() =>
-                  setValue("contactPreference", opt.value, {
-                    shouldDirty: true,
-                  })
-                }
-                aria-pressed={active}
-                className={`flex flex-1 items-center gap-3 rounded-xl border-2 px-4 py-3 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                  active
-                    ? "border-primary bg-primary/5 text-brand ring-2 ring-primary/25"
-                    : "border-border bg-surface text-muted hover:border-brand-medium/35"
-                }`}
-              >
-                <span className="text-lg" aria-hidden>
-                  {opt.icon}
-                </span>
-                {opt.label}
-              </button>
-            );
-          })}
+          ).map(({ value, label, Icon }) => (
+            <OptionCard
+              key={value}
+              selected={contactPreference === value}
+              onClick={() =>
+                setValue("contactPreference", value, { shouldDirty: true })
+              }
+              markClassName="top-[13.5px]"
+              className="flex h-14 items-center gap-3 px-[18px] text-left text-[15px] font-semibold text-heading"
+            >
+              {/* Même famille d'icônes que le reste du tunnel (Phosphor Regular). */}
+              <Icon aria-hidden className="size-[22px] shrink-0 text-primary" />
+              {label}
+            </OptionCard>
+          ))}
         </div>
-        <p className="text-xs text-muted">{m.steps.lead.contactHint}</p>
+        <p className="text-[13px] text-subtle">{m.steps.lead.contactHint}</p>
       </fieldset>
 
-      {/* ── 3 photos labelisées ──────────────────────────────── */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 text-brand">
-          <Camera className="size-5 text-primary" aria-hidden />
-          <h3 className="text-base font-semibold">
-            {m.steps.lead.photosTitle}
-          </h3>
-        </div>
+      {/* ── 3 photos labellisées ─────────────────────────────── */}
+      <div className="space-y-3.5">
+        <SectionTitle icon={<CameraIcon aria-hidden className={SECTION_ICON_CLASS} />}>
+          {m.steps.lead.photosTitle}
+        </SectionTitle>
         <p className="text-sm text-muted">{m.steps.lead.photosIntro}</p>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
           {PHOTO_SLOT_KEYS.map((key: PhotoSlotKey) => {
             const photo = slotPhotos[key];
             const slot = m.steps.lead.photoSlots[key];
             const inputId = `kre-photo-${key}`;
             return (
               <div key={key} className="flex flex-col">
-                <div className="mb-2 min-h-[44px]">
-                  <p className="text-xs font-semibold text-brand">
-                    {slot.label}
+                <div className="mb-2.5 sm:min-h-[54px]">
+                  <p className="text-[13px] font-bold text-heading">{slot.label}</p>
+                  <p className="mt-0.5 text-[12.5px] leading-snug text-muted">
+                    {slot.hint}
                   </p>
-                  <p className="text-xs text-muted">{slot.hint}</p>
                 </div>
 
                 {photo ? (
-                  <div className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-border bg-muted-bg">
+                  <div className="relative aspect-[4/3] overflow-hidden border-[1.5px] border-primary bg-muted-bg">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={photo.preview}
@@ -319,12 +264,12 @@ export function StepLead({
                     <button
                       type="button"
                       onClick={() => setSlotFile(key, null)}
-                      className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-black/50 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                      className="absolute right-2 top-2 grid size-8 place-items-center bg-heading/80 text-white transition-colors hover:bg-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                       aria-label={t(m.steps.lead.removePhoto, {
                         label: slot.label,
                       })}
                     >
-                      <Trash2 className="size-3.5" aria-hidden />
+                      <TrashIcon aria-hidden className="size-4" />
                     </button>
                   </div>
                 ) : (
@@ -338,6 +283,7 @@ export function StepLead({
                       accept="image/*"
                       capture="environment"
                       className="sr-only"
+                      tabIndex={-1}
                       onChange={(e) =>
                         setSlotFile(key, e.target.files?.[0] ?? null)
                       }
@@ -350,12 +296,17 @@ export function StepLead({
                       type="file"
                       accept="image/*"
                       className="sr-only"
+                      tabIndex={-1}
                       onChange={(e) =>
                         setSlotFile(key, e.target.files?.[0] ?? null)
                       }
                     />
-                    <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface p-2 text-muted">
-                      <Camera className="size-6" aria-hidden />
+                    <div
+                      className={`flex aspect-[4/3] w-full flex-col items-center justify-center gap-2.5 border-[1.5px] border-dashed bg-muted-bg p-3 transition-colors duration-200 hover:border-primary ${
+                        showMissingAsError ? "border-error" : "border-border-strong"
+                      }`}
+                    >
+                      <CameraPlusIcon aria-hidden className="size-7 text-primary" />
                       {/* Bouton appareil photo réservé au tactile : sur un
                           ordinateur, `capture` est ignoré et les deux boutons
                           ouvriraient le même sélecteur de fichiers. */}
@@ -363,18 +314,19 @@ export function StepLead({
                         type="button"
                         onClick={() => cameraRefs.current[key]?.click()}
                         aria-label={`${slot.label} — ${m.steps.lead.takePhoto}`}
-                        className="hidden w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-2 py-2 text-xs font-semibold text-on-primary transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary pointer-coarse:flex"
+                        className={`${buttonClass("primary", "sm")} hidden w-full pointer-coarse:flex`}
                       >
-                        <Camera className="size-3.5" aria-hidden />
+                        <CameraIcon aria-hidden className="size-4 shrink-0" />
                         {m.steps.lead.takePhoto}
                       </button>
                       <button
                         type="button"
+                        data-photo-pick
                         onClick={() => libraryRefs.current[key]?.click()}
                         aria-label={`${slot.label} — ${m.steps.lead.addPhoto}`}
-                        className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-border px-2 py-2 text-xs font-medium text-brand transition hover:border-primary/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        className={`${buttonClass("secondary", "sm")} w-full bg-surface`}
                       >
-                        <ImageUp className="size-3.5" aria-hidden />
+                        <ImageSquareIcon aria-hidden className="size-4 shrink-0" />
                         {/* « Galerie » n'a de sens que sur mobile. */}
                         <span className="pointer-coarse:hidden">
                           {m.steps.lead.chooseFile}
@@ -390,15 +342,15 @@ export function StepLead({
             );
           })}
         </div>
-        <p className="text-xs text-muted">{m.steps.lead.photosNote}</p>
+        <p className="text-[13px] text-subtle">{m.steps.lead.photosNote}</p>
         {missingPhotos > 0 ? (
-          <p className="text-xs font-medium text-error" role="status">
-            {t(m.steps.lead.photosMissing, {
-              count: missingPhotos,
-              plural: missingPhotos > 1 ? "s" : "",
-              total: requiredPhotoCount,
-            })}
-          </p>
+          showMissingAsError ? (
+            <FieldError>{missingMessage}</FieldError>
+          ) : (
+            <p className="text-[13px] font-semibold text-heading" role="status">
+              {missingMessage}
+            </p>
+          )
         ) : null}
       </div>
 

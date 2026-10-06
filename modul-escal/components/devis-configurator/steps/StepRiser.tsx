@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Check } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
 import { RISER_OPTIONS } from "@/lib/riser-options";
@@ -9,27 +8,28 @@ import { getCMImagePath } from "@/lib/decor-catalog";
 import { useAsset } from "@/lib/asset";
 import { useT } from "@/lib/i18n/useT";
 import { useFieldError } from "@/lib/useFieldError";
+import { useLiveValidation } from "@/lib/useLiveValidation";
 import type { QuoteFormDraft, RiserOption } from "@/lib/quote-schema";
-import { StepTitle } from "../ui/Typography";
+import { describedBy, FieldError, FieldHelp, FieldLabel, fieldClass } from "../ui/Field";
+import { OptionCard } from "../ui/OptionCard";
+import { StepHeader, Tag } from "../ui/Typography";
 
 const WITH_RISER_OPTIONS = RISER_OPTIONS.filter((o) => o.id !== "NONE");
 
-function CMPhoto({ src, label }: { src: string; label: string }) {
+function CMPhoto({ src }: { src: string }) {
   const [failed, setFailed] = useState(false);
   const asset = useAsset();
   if (failed) return null;
   return (
-    <div className="mb-3 overflow-hidden rounded-lg">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={asset(src)}
-        alt={label}
-        loading="lazy"
-        decoding="async"
-        onError={() => setFailed(true)}
-        className="h-28 w-full object-cover"
-      />
-    </div>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={asset(src)}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+      className="block aspect-[3/1] w-full object-cover"
+    />
   );
 }
 
@@ -39,6 +39,7 @@ export function StepRiser() {
   const decor = watch("decor");
   const error = useFieldError("riserOption");
   const heightError = useFieldError("riserHeightMm");
+  const live = useLiveValidation();
   const { m, t } = useT();
 
   const formatPricePerStep = (price: number) =>
@@ -49,69 +50,42 @@ export function StepRiser() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-2">
-        <StepTitle align="left">{m.steps.riser.title}</StepTitle>
-        <p className="text-sm font-medium text-heading">
-          {m.steps.riser.subtitle}
-        </p>
-      </div>
+    <div className="space-y-7">
+      <StepHeader title={m.steps.riser.title} subtitle={m.steps.riser.subtitle} />
 
-      <fieldset className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
+      <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <legend className="sr-only">{m.steps.riser.subtitle}</legend>
         {WITH_RISER_OPTIONS.map((option) => {
-          const selected = value === option.id;
           const photo = decor ? getCMImagePath(decor, option.id) : null;
-          const label = m.catalog.riser[option.id].label;
           return (
-            <button
+            <OptionCard
               key={option.id}
-              type="button"
+              selected={value === option.id}
               onClick={() => selectOption(option.id)}
-              aria-pressed={selected}
-              className={`relative rounded-xl border-2 p-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:p-4 ${
-                selected
-                  ? "border-primary bg-primary/5 ring-2 ring-primary/25"
-                  : "border-border bg-surface shadow-sm transition-shadow hover:-translate-y-[3px] hover:border-brand-medium/35 hover:shadow-lg"
-              }`}
+              className="flex flex-col overflow-hidden text-left"
             >
-              {selected && (
-                <span className="absolute right-3 top-3 z-10 flex size-6 items-center justify-center rounded-full bg-success text-white">
-                  <Check className="size-3.5 stroke-[3]" aria-hidden />
+              {photo && <CMPhoto src={photo} />}
+              <span className="flex flex-col items-start gap-1.5 px-4 pb-[18px] pt-4">
+                <span className="text-[15.5px] font-bold text-heading">
+                  {m.catalog.riser[option.id].label}
                 </span>
-              )}
-              {photo && <CMPhoto src={photo} label={label} />}
-              <span className="block pr-8 text-base font-semibold text-brand">
-                {label}
+                <span className="text-[13.5px] leading-normal text-muted">
+                  {m.catalog.riser[option.id].description}
+                </span>
+                <Tag className="mt-1">{formatPricePerStep(option.pricePerStep)}</Tag>
               </span>
-              <span className="mt-1 block text-sm text-muted">
-                {m.catalog.riser[option.id].description}
-              </span>
-              <span className="mt-3 inline-block rounded-full bg-muted-bg px-2.5 py-1 text-xs font-medium text-brand">
-                {formatPricePerStep(option.pricePerStep)}
-              </span>
-            </button>
+            </OptionCard>
           );
         })}
       </fieldset>
 
-      {error && (
-        <p className="text-center text-sm text-error" role="alert">
-          {error}
-        </p>
-      )}
+      <FieldError>{error}</FieldError>
 
-      <div className="mx-auto w-full max-w-xs space-y-2 text-center">
-        <label
-          htmlFor="kre-riserHeightMm"
-          className="block text-[13px] font-bold tracking-[0.01em] text-heading"
-        >
-          {m.steps.riser.heightLabel}{" "}
-          <span className="font-normal text-muted">
-            {m.steps.riser.heightOptional}
-          </span>
-        </label>
-        <div className="flex items-center justify-center gap-2">
+      <div className="max-w-md">
+        <FieldLabel htmlFor="kre-riserHeightMm" optional={m.common.optional}>
+          {m.steps.riser.heightLabel}
+        </FieldLabel>
+        <div className="flex items-center gap-2.5">
           <input
             id="kre-riserHeightMm"
             type="number"
@@ -120,27 +94,26 @@ export function StepRiser() {
             max={300}
             placeholder={m.steps.riser.heightPlaceholder}
             aria-invalid={heightError ? true : undefined}
-            aria-describedby={heightError ? "kre-riserHeightMm-error" : undefined}
-            className="w-32 rounded-lg border border-border bg-surface px-4 py-3 text-center text-lg text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+            aria-describedby={describedBy(
+              "kre-riserHeightMm-help",
+              heightError && "kre-riserHeightMm-error",
+            )}
+            className={`${fieldClass} max-w-[180px]`}
             {...register("riserHeightMm", {
               setValueAs: (v) => {
                 if (v === "" || v === null || v === undefined) return undefined;
                 const n = Number(v);
                 return Number.isFinite(n) ? n : undefined;
               },
+              onBlur: () => live.check("riserHeightMm"),
+              onChange: () => live.recheck("riserHeightMm"),
             })}
           />
           <span className="text-sm text-muted">{m.common.mm}</span>
         </div>
-        {heightError && (
-          <p
-            id="kre-riserHeightMm-error"
-            className="text-sm text-error"
-            role="alert"
-          >
-            {heightError}
-          </p>
-        )}
+        <FieldError id="kre-riserHeightMm-error">{heightError}</FieldError>
+        {/* Recommandation Knewledge : dire quand et pourquoi renseigner ce champ. */}
+        <FieldHelp id="kre-riserHeightMm-help">{m.steps.riser.heightHelp}</FieldHelp>
       </div>
     </div>
   );

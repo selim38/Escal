@@ -1,6 +1,5 @@
 "use client";
 
-import { Check } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
 import { useT } from "@/lib/i18n/useT";
@@ -11,7 +10,9 @@ import { ensureStepConfigs } from "@/lib/step-config";
 
 import { DimensionsBandsFields } from "./DimensionsBandsFields";
 import { PerStepConfigurator } from "./PerStepConfigurator";
-import { StepTitle } from "../ui/Typography";
+import { FieldError } from "../ui/Field";
+import { OptionCard } from "../ui/OptionCard";
+import { StepHeader } from "../ui/Typography";
 
 export function StepUniformDimensions() {
   const { watch, setValue } = useFormContext<QuoteFormDraft>();
@@ -42,49 +43,32 @@ export function StepUniformDimensions() {
   };
 
   return (
-    <div className="space-y-8">
-      <StepTitle align="left">{m.steps.dimensions.title}</StepTitle>
-      <p className="text-sm text-muted">
-        {m.steps.dimensions.question}
-      </p>
+    <div className="space-y-7">
+      <StepHeader
+        title={m.steps.dimensions.title}
+        subtitle={m.steps.dimensions.question}
+      />
 
-      <fieldset className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
+      <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <legend className="sr-only">{m.steps.dimensions.question}</legend>
-        {choices.map((choice) => {
-          const selected = uniform === choice.value;
-          return (
-            <button
-              key={String(choice.value)}
-              type="button"
-              onClick={() => select(choice.value)}
-              aria-pressed={selected}
-              className={`relative rounded-xl border-2 p-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:p-4 ${
-                selected
-                  ? "border-primary bg-primary/5 ring-2 ring-primary/25"
-                  : "border-border bg-surface shadow-sm transition-shadow hover:-translate-y-[3px] hover:border-brand-medium/35 hover:shadow-lg"
-              }`}
-            >
-              {selected ? (
-                <span className="absolute right-3 top-3 flex size-6 items-center justify-center rounded-full bg-success text-white">
-                  <Check className="size-3.5 stroke-[3]" aria-hidden />
-                </span>
-              ) : null}
-              <span className="block pr-8 text-base font-semibold text-brand">
-                {choice.label}
-              </span>
-              <span className="mt-1 block text-sm text-muted">
-                {choice.description}
-              </span>
-            </button>
-          );
-        })}
+        {choices.map((choice) => (
+          <OptionCard
+            key={String(choice.value)}
+            selected={uniform === choice.value}
+            onClick={() => select(choice.value)}
+            className="flex flex-col gap-1 py-[18px] pl-[18px] pr-14 text-left"
+          >
+            <span className="text-base font-bold text-heading">
+              {choice.label}
+            </span>
+            <span className="text-sm leading-normal text-muted">
+              {choice.description}
+            </span>
+          </OptionCard>
+        ))}
       </fieldset>
 
-      {error ? (
-        <p className="text-center text-sm text-error" role="alert">
-          {error}
-        </p>
-      ) : null}
+      <FieldError>{error}</FieldError>
 
       {uniform === true ? <DimensionsBandsFields /> : null}
       {uniform === false ? <PerStepConfigurator /> : null}

@@ -12,29 +12,20 @@ export const fr = {
   app: {
     /** Texte alternatif du logo — porte le nom de marque pour les lecteurs d'écran. */
     logoAlt: "Kit Rénovation Escalier",
-    /** Accroche en capitales au-dessus du titre — composant Eyebrow.
-     *  Reprend le vocabulaire du site (« Devis gratuit », « Mon devis gratuit »). */
-    eyebrow: "Devis gratuit",
-    title: "Configurateur de devis",
-    intro:
-      "Estimation matériaux pour la rénovation de votre escalier. Aucun paiement en ligne — votre demande est transmise à un commercial.",
+    // Titre, accroche et réassurance ne sont plus portés par le composant :
+    // recommandation Knewledge, ils vivent dans la page WordPress qui l'accueille.
     supportEmail: "contact@escal-concept.fr",
-    /**
-     * Bandeau de réassurance sous l'accroche, calqué sur la rangée
-     * « Simplicité · Sur mesure · Outils inclus » du site.
-     */
-    reassurance: [
-      "Estimation immédiate",
-      "Sans engagement",
-      "Réponse sous 24 h",
-    ],
   },
 
   nav: {
     previous: "Précédent",
     next: "Suivant",
     submit: "Envoyer ma demande au commercial",
+    /** Libellé court du même bouton sur mobile, où il partage la ligne avec « Précédent ». */
+    submitShort: "Envoyer",
     submitting: "Envoi en cours…",
+    /** Escalier ouvert : le bouton « Suivant » mène au formulaire de contact. */
+    openStaircase: "Être recontacté",
   },
 
   progress: {
@@ -63,7 +54,7 @@ export const fr = {
     back: "Retour",
     edit: "Modifier",
     choose: "Choisir…",
-    optionalMm: "(optionnel, mm)",
+    optional: "(optionnel)",
     mm: "mm",
     contactSupport: "Contacter le support",
     unknownError: "Erreur inconnue",
@@ -82,7 +73,9 @@ export const fr = {
   },
 
   success: {
-    title: "Demande envoyée !",
+    /** Titre en deux graisses (design system) : le dernier mot est mis en avant. */
+    titleStart: "Votre demande a bien été",
+    titleEmphasis: "envoyée",
     reference: "Votre référence :",
     estimate: "Estimation matériaux :",
     followUp:
@@ -223,11 +216,17 @@ export const fr = {
       },
       openWarningTitle: "Cas spécifique — escalier ouvert",
       openWarningBody:
-        "Les escaliers ouverts entre chaque marche nécessitent une étude sur mesure. Notre équipe vous contactera pour affiner la configuration.",
+        "Les escaliers ouverts entre chaque marche nécessitent une étude sur mesure. Laissez-nous vos coordonnées avec le bouton « Être recontacté » : notre équipe vous contactera pour affiner la configuration.",
+      /** Repli `mailto:` quand aucun formulaire n'est configuré (attribut `open-staircase-url`). */
+      openContactSubject: "Escalier ouvert — demande d'étude sur mesure",
+      openContactBody:
+        "Bonjour,\n\nMon escalier est ouvert entre chaque marche et je souhaite une étude sur mesure.\n\nMes coordonnées :\nNom :\nTéléphone :\nVille :\n\nMerci.",
     },
 
     decor: {
       title: "Choisir le décor",
+      subtitle:
+        "Le décor s'applique aux marches et, si vous le souhaitez, aux contremarches.",
     },
 
     riser: {
@@ -236,8 +235,10 @@ export const fr = {
       included: "Inclus",
       pricePerStep: "+{price} € / marche",
       heightLabel: "Hauteur des contremarches",
-      heightOptional: "(optionnel, mm)",
       heightPlaceholder: "Ex. 175",
+      /** Recommandation Knewledge : dire pourquoi et quand renseigner ce champ. */
+      heightHelp:
+        "Facultatif. Si vous la connaissez, elle aide notre technicien à préparer vos contremarches : mesurez du dessus d'une marche au dessus de la suivante (entre 100 et 300 mm). Sinon, laissez vide, il la vérifiera sur les photos demandées à la dernière étape.",
     },
 
     stepCount: {
@@ -250,6 +251,9 @@ export const fr = {
       exampleCaption: "Exemple — ici 7 marches (marche de palier incluse).",
       inputLabel: "Nombre de marches",
       inputPlaceholder: "Ex. 12",
+      rangeHint: "Entre {min} et {max} marches.",
+      decrease: "Retirer une marche",
+      increase: "Ajouter une marche",
     },
 
     dimensions: {
@@ -272,7 +276,10 @@ export const fr = {
       lengthLabel: "Longueur",
       depthLabel: "Profondeur",
       exactDepthLabel: "Profondeur exacte",
-      exactDepthPlaceholder: "ex. 280",
+      exactDepthPlaceholder: "Ex. 280",
+      /** Le champ ne sert qu'à détecter une profondeur hors catalogue (voir DepthBlockedModal). */
+      exactDepthHelp:
+        "À renseigner seulement si vos marches font plus de 320 mm de profondeur. Au-delà de {max} mm, elles sortent de notre catalogue et demandent une étude sur mesure. Les fourchettes ci-dessus suffisent pour l'estimation.",
       photoAlt: "{field} — marche {layout}",
       layoutSlug: {
         STRAIGHT: "droite",
@@ -285,8 +292,9 @@ export const fr = {
       intro: "Configurez chaque marche individuellement",
       hint: "Type, longueur et profondeur — les photos indiquent les mesures demandées.",
       stepAria: "Marche {index}",
-      previous: "Précédente",
-      next: "Suivante",
+      // « Marche » précisé pour ne pas confondre avec la navigation entre étapes.
+      previous: "Marche précédente",
+      next: "Marche suivante",
       counter: "Marche {index} / {total}",
       layoutLabel: "Type de marche",
       lengthBalanced: "Longueur (la + longue)",
@@ -318,14 +326,19 @@ export const fr = {
       summaryOpenRight: "Ouverte — droite",
       summaryNone: "—",
       allDone: "Toutes les marches sont configurées.",
+      editing: "En cours de modification",
+      cancelEdit: "Annuler la modification",
     },
 
     landing: {
       title: "Marche palière",
-      subtitle: "Choisissez le type de finition pour votre marche palière.",
+      subtitle:
+        "Votre marche palière est finie par un nez de marche et un seuil décoratif, qui assurent la jonction propre avec le sol du palier.",
       nezSeuil: {
         label: "Nez + seuil",
-        description: "Nez de marche avec seuil décoratif pour finir le palier.",
+        // Seule finition au catalogue : elle est présélectionnée (recommandation Knewledge).
+        description:
+          "Seule finition proposée, elle est sélectionnée pour vous. Il vous reste à choisir la couleur du seuil.",
       },
       seuilColorLabel: "Couleur du seuil",
       seuilPhotoAlt: "Seuil {color} posé sur une marche palière",
@@ -337,10 +350,20 @@ export const fr = {
       title: "Récapitulatif de votre offre",
       subtitle: "Vérifiez votre configuration avant de passer à l'étape finale.",
       configTitle: "Votre configuration",
-      rowSteps: "Marches",
-      valueSteps: "{count} marche{plural}",
+      // Une ligne par étape, dans l'ordre du tunnel.
+      rowStaircaseType: "Type d'escalier",
       rowDecor: "Décor",
       rowRiser: "Contremarches",
+      rowSteps: "Nombre de marches",
+      valueSteps: "{count} marche{plural}",
+      rowDimensions: "Dimensions",
+      valueDimensionsUniform: "Longueur {width} · profondeur {depth}",
+      valueDimensionsPerStep: "Marche par marche : {detail}",
+      layoutCount: {
+        STRAIGHT: "{count} droite{plural}",
+        BALANCED: "{count} tournante{plural}",
+        FIVE_SIDED: "{count} à 5 côtés",
+      },
       rowEndCaps: "Embouts de marche",
       rowLandingFinish: "Finition marche palière",
       rowConsumables: "Consommables",
@@ -378,6 +401,8 @@ export const fr = {
       tutorialsTitle: "Tutoriels de montage en vidéo",
       tutorialsBody:
         "L'ensemble des tutoriels de montage sous forme de vidéo est inclus dans votre commande — prise de mesures, découpe, pose, finitions.",
+      tutorialsDevices:
+        "Les vidéos sont consultables depuis n'importe quel appareil : smartphone, tablette ou ordinateur.",
       priceLabel: "Prix estimé des matériaux",
       priceUnavailable:
         "Complétez les étapes précédentes pour afficher l'estimation.",
@@ -385,7 +410,6 @@ export const fr = {
       nextCtaStrong: "Pour finaliser votre devis,",
       nextCtaBody:
         "renseignez vos coordonnées et ajoutez 3 photos de votre escalier à l'étape suivante. Un technicien vous recontactera rapidement.",
-      nextCtaLink: "Étape suivante : coordonnées & photos",
     },
 
     lead: {
@@ -411,6 +435,9 @@ export const fr = {
       photosNote: "Les photos sont obligatoires pour une validation de dossier.",
       photosMissing:
         "Il manque {count} photo{plural} sur {total} pour envoyer votre demande.",
+      /** Annoncé après un envoi refusé ; le focus est placé sur le premier champ en cause. */
+      errorSummary:
+        "Votre demande n'est pas encore complète : corrigez les points signalés en rouge.",
       addPhoto: "Ajouter une photo",
       takePhoto: "Prendre une photo",
       choosePhoto: "Depuis la galerie",
@@ -478,6 +505,8 @@ export const fr = {
     lastNameRequired: "Le nom est obligatoire.",
     emailInvalid: "E-mail invalide.",
     phoneRequired: "Le téléphone est obligatoire.",
+    phoneInvalid:
+      "Numéro de téléphone invalide : chiffres, espaces et « + » uniquement.",
     countryRequired: "Le pays est obligatoire.",
     answerRequired: "Réponse requise.",
   },

@@ -82,7 +82,7 @@ export function KreDialog({
     <dialog
       ref={ref}
       aria-labelledby={labelledBy}
-      className={`kre-dialog m-auto w-[calc(100%-32px)] rounded-2xl bg-surface p-6 text-foreground shadow-xl ${className}`}
+      className={`kre-dialog m-auto w-[calc(100%-32px)] bg-surface p-6 text-heading ${className}`}
       onClick={(e) => {
         // Clic sur le backdrop (la cible est le <dialog> lui-même, pas son contenu).
         if (e.target === ref.current) onClose();
@@ -165,7 +165,7 @@ function FallbackOverlay({
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}
-        className={`mx-4 rounded-2xl bg-surface p-6 text-foreground shadow-xl ${className}`}
+        className={`mx-4 bg-surface p-6 text-heading ${className}`}
       >
         {children}
       </div>

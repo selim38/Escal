@@ -1,8 +1,8 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
-
 import { useT } from "@/lib/i18n/useT";
+
+import { ButtonArrow, buttonClass } from "./ui/Button";
 
 type StepNavigationProps = {
   isFirstStep: boolean;
@@ -11,6 +11,11 @@ type StepNavigationProps = {
   onPrev: () => void;
   onNext: () => void;
   isSubmitting?: boolean;
+  /**
+   * Escalier ouvert : le tunnel s'arrête, « Suivant » devient un lien vers le
+   * formulaire de contact adapté.
+   */
+  exitHref?: string;
 };
 
 export function StepNavigation({
@@ -20,48 +25,63 @@ export function StepNavigation({
   onPrev,
   onNext,
   isSubmitting,
+  exitHref,
 }: StepNavigationProps) {
   const { m } = useT();
 
   /*
-   * Navigation collante en pied de panneau : sur les étapes riches en images
-   * (décor, contremarches), le bouton de validation tombait sous la ligne de
-   * flottaison et obligeait à faire défiler la page pour valider.
+   * Recommandations Knewledge :
+   * - boutons côte à côte à toutes les tailles, y compris tablette et mobile ;
+   * - barre NON collante sur desktop : collée en pied d'écran, elle laissait
+   *   croire l'étape terminée alors que des champs restaient plus bas. Elle le
+   *   reste sous 1024 px, où les étapes illustrées dépassent l'écran et où le
+   *   bouton de validation tomberait loin sous la ligne de flottaison.
    *
-   * `sticky` et non `fixed` : le bouton reste dans le flux du panneau, donc il
-   * ne recouvre jamais le contenu de la page hôte au-dessus ou en dessous du
-   * composant. Le fond opaque et le filet supérieur évitent que le contenu
-   * défile visiblement derrière.
+   * `sticky` et non `fixed` : la barre reste dans le flux de la carte, donc
+   * elle ne recouvre jamais le contenu de la page hôte autour du composant.
    */
   return (
-    <div className="sticky bottom-0 -mx-6 mt-8 flex flex-col gap-3 border-t border-border bg-surface px-6 pb-1 pt-6 sm:-mx-9 sm:flex-row sm:items-center sm:justify-between sm:px-9">
+    <div className="z-20 flex items-center justify-between gap-3 border-t border-border-subtle bg-surface px-5 py-5 max-lg:sticky max-lg:bottom-0 sm:px-9 lg:px-11">
       <button
         type="button"
         onClick={onPrev}
         disabled={isFirstStep}
-        className="inline-flex h-[46px] flex-1 items-center justify-center gap-[9px] rounded-none border-[1.5px] border-border bg-surface px-5 text-[15px] font-semibold text-brand shadow-xs transition hover:bg-muted-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-40 sm:flex-none"
+        className={`${buttonClass("secondary")} flex-1 max-sm:px-3.5 sm:flex-none`}
       >
-        <ChevronLeft className="size-4 shrink-0" aria-hidden />
+        <ButtonArrow dir="prev" />
         {m.nav.previous}
       </button>
 
-      {!isLastStep ? (
+      {exitHref ? (
+        <a href={exitHref} className={`${buttonClass("primary")} flex-1 max-sm:px-3.5 sm:flex-none`}>
+          {m.nav.openStaircase}
+          <ButtonArrow dir="next" />
+        </a>
+      ) : !isLastStep ? (
         <button
           type="button"
           onClick={onNext}
           disabled={!canGoNext}
-          className="inline-flex h-[46px] flex-1 items-center justify-center gap-[9px] rounded-none bg-primary px-5 text-[15px] font-semibold text-on-primary shadow-accent transition hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-40 sm:flex-none"
+          className={`${buttonClass("primary")} flex-1 max-sm:px-3.5 sm:flex-none`}
         >
           {m.nav.next}
-          <ChevronRight className="size-4 shrink-0" aria-hidden />
+          <ButtonArrow dir="next" />
         </button>
       ) : (
         <button
           type="submit"
           disabled={!canGoNext || isSubmitting}
-          className="inline-flex h-[46px] flex-1 items-center justify-center gap-[9px] rounded-none bg-primary px-5 text-[15px] font-semibold text-on-primary shadow-accent transition hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-40 sm:flex-none"
+          className={`${buttonClass("primary")} flex-1 max-sm:px-3.5 sm:flex-none`}
         >
-          {isSubmitting ? m.nav.submitting : m.nav.submit}
+          {isSubmitting ? (
+            m.nav.submitting
+          ) : (
+            <>
+              <span className="sm:hidden">{m.nav.submitShort}</span>
+              <span className="max-sm:hidden">{m.nav.submit}</span>
+            </>
+          )}
+          {!isSubmitting ? <ButtonArrow dir="next" /> : null}
         </button>
       )}
     </div>

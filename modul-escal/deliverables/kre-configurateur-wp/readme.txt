@@ -34,10 +34,12 @@ Par défaut le plugin pointe vers la production. Pour le staging, ajouter dans
 * `recipient_email`  — adresse destinataire des demandes. Doit figurer dans
                        l'allowlist du serveur, sinon elle est ignorée côté API.
 * `confirmation_url` — redirection après envoi. Vide = écran de succès interne.
+* `open_staircase_url` — formulaire de contact ouvert par « Être recontacté »
+                       quand l'escalier est ouvert. Vide = e-mail pré-rempli.
 * `sample_cta`       — `true` pour afficher le CTA « Demander un échantillon ».
                        Nécessite `recipient_email`.
-* `header`           — `false` pour masquer le titre interne du composant quand
-                       la page WordPress porte déjà son propre titre.
+* `header`           — `false` pour masquer le logo affiché au-dessus du
+                       composant quand l'en-tête de la page le porte déjà.
 
 Exemples :
 

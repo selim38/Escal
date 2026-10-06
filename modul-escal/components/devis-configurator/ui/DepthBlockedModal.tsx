@@ -1,8 +1,11 @@
 "use client";
 
+import { WarningIcon } from "@phosphor-icons/react";
+
 import { useKreConfig } from "@/lib/config";
 import { useT } from "@/lib/i18n/useT";
 
+import { buttonClass } from "./Button";
 import { KreDialog } from "./KreDialog";
 
 /** Profondeur maximale au catalogue (mm). Au-delà : configuration sur-mesure. */
@@ -27,15 +30,10 @@ export function DepthBlockedModal({
   return (
     <KreDialog open={open} onClose={onClose} labelledBy="kre-depth-modal-title">
       <div className="mb-3 flex items-center gap-3">
-        <span
-          aria-hidden
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-warning-tint text-2xl"
-        >
-          ⚠️
-        </span>
+        <WarningIcon aria-hidden className="size-6 shrink-0 text-primary" />
         <h2
           id="kre-depth-modal-title"
-          className="text-base font-semibold text-foreground"
+          className="text-base font-bold text-heading"
         >
           {m.depthModal.title}
         </h2>
@@ -47,14 +45,14 @@ export function DepthBlockedModal({
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
         <a
           href={`mailto:${supportEmail}`}
-          className="inline-flex w-full items-center justify-center rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:w-auto"
+          className={`${buttonClass("primary", "sm")} w-full sm:w-auto`}
         >
           {m.common.contactSupport}
         </a>
         <button
           type="button"
           onClick={onClose}
-          className="w-full rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-muted hover:bg-muted-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-auto"
+          className={`${buttonClass("secondary", "sm")} w-full sm:w-auto`}
         >
           {m.depthModal.fix}
         </button>

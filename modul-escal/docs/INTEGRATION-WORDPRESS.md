@@ -27,6 +27,34 @@ est publiée sous un nouveau chemin (`/wc/v1.5.0/`…), jamais en écrasant la
 précédente. Vous maîtrisez donc la date de bascule. `staging` est republié à
 chaque itération de recette.
 
+**Prochaine version (en recette sur `staging`)** — application de vos
+recommandations « Module de commande » et de votre design system :
+
+- *Charte* : police Hanken Grotesk, angles droits partout (plus aucun arrondi,
+  cercle ni courbe), aucune ombre, icônes Phosphor (style Regular) y compris pour
+  WhatsApp et E-mail. Survol et sélection unifiés sur toutes les cartes : contour
+  orange léger au survol ; contour orange, fond orange léger et coche blanche dans
+  un carré orange une fois sélectionnée.
+- *Structure* : le titre, l'accroche et la réassurance sortent du composant —
+  ils sont à porter par votre page (« Configurez votre escalier en 5 minutes »).
+  La barre de progression s'aligne sur les marges de la carte. « Précédent » et
+  « Suivant » restent côte à côte sur mobile, avec flèches fines et remplissage
+  animé au survol ; la barre n'est plus collante sur desktop (≥ 1024 px).
+- *Étape 1* : un escalier ouvert affiche un encadré avec icône Info, et le bouton
+  « Suivant » devient « Être recontacté », vers le formulaire désigné par le
+  nouvel attribut `open-staircase-url` (§3).
+- *Étapes 3 et 5* : phrases d'aide sous « Hauteur des contremarches » et
+  « Profondeur exacte ». *Étape 4* : sélecteur +/−, plage valide affichée,
+  validation en temps réel. *Étape 5* : « Marche précédente / suivante ».
+- *Étape 6* : marches configurées sur fond beige, « Modifier » souligné ; une
+  marche modifiée reste à sa place (« En cours de modification ») sans effacer les
+  suivantes ; vignettes alignées horizontalement en desktop.
+- *Étape 7* : « Nez + seuil », seule finition, est présélectionnée.
+- *Étape 8* : toutes les étapes au récapitulatif, matériel sur 6 colonnes,
+  « Compris dans le prix » accolé aux titres, prix dans un encadré à halo.
+- *Étape 9* : chaque champ mal rempli est signalé à la sortie du champ ; l'envoi
+  annonce les manques et place le focus sur le premier champ en cause.
+
 **v1.5.0** — le choix de la couleur du seuil (étape 7) montre désormais le
 seuil photographié sur la marche du décor retenu à l'étape 2 : or, noir et
 aluminium sont illustrés pour chacun des onze décors.
@@ -43,7 +71,7 @@ peuvent être prises à l'appareil photo ou choisies dans la galerie.
 **v1.3.0** — ergonomie du tunnel : l'en-tête devient un bandeau horizontal
 compact de 72 px (logo + avancement + jauge), et le bloc de présentation ne
 s'affiche plus qu'à la première étape. Le contenu remonte de 236 px sur les
-étapes 2 à 10. La navigation « Précédent / Suivant » colle en pied de panneau,
+étapes 2 à 9. La navigation « Précédent / Suivant » colle en pied de panneau,
 pour que le bouton de validation reste atteignable sans faire défiler la page.
 
 **v1.2.0** — habillage aligné sur les composants de votre design system :
@@ -157,9 +185,10 @@ joint à tous ses événements ainsi qu'au lead enregistré (§5).
 | `endpoint` | URL | `https://escal.point-soft.fr/api` | Base de l'API Point Soft. Permet de pointer une API de recette. |
 | `recipient-email` | email | *(vide)* | Destinataire des demandes. Voir §3.2. |
 | `confirmation-url` | URL | *(vide)* | Redirection après envoi. Vide = écran de succès interne au composant. |
+| `open-staircase-url` | URL | *(vide)* | Formulaire de contact ouvert par « Être recontacté » quand l'escalier est ouvert (hors tunnel). Vide = e-mail pré-rempli vers `recipient-email`, à défaut `contact@escal-concept.fr`. |
 | `show-sample-cta` | booléen | absent | Affiche le CTA « Demander un échantillon ». Voir §3.3. |
 | `assets-base` | URL | *(déduite)* | Base des images. **À ne pas renseigner** en usage normal : elle est déduite de l'URL du script. |
-| `show-header` | booléen | `true` | Titre et accroche internes au composant. `false` si votre page porte déjà son propre titre. |
+| `show-header` | booléen | `true` | Logo au-dessus du configurateur. `false` si l'en-tête de votre page l'affiche déjà. Le titre et l'accroche ne sont plus portés par le composant. |
 | `demo` | booléen | absent | Simule la soumission sans appeler l'API. Réservé à la recette. |
 
 Les attributs booléens suivent la convention HTML : **la présence de l'attribut
@@ -272,16 +301,18 @@ La palette est définie par des variables CSS préfixées `--kre-` :
 
 | Variable | Valeur actuelle | Usage |
 |---|---|---|
-| `--kre-primary` | `#ff6d1b` | CTA, liens d'action, barre de progression |
-| `--kre-brand` | `#6b3010` | Titres, accents forts |
-| `--kre-brand-medium` | `#7a3b10` | Accents secondaires |
-| `--kre-heading` | `#1e2a4a` | Titres d'étape |
-| `--kre-background` | `#f5f0eb` | Fond |
-| `--kre-surface` | `#ffffff` | Surfaces de cartes |
-| `--kre-foreground` | `#1a1a1a` | Texte principal |
-| `--kre-muted` | `#5c4a3a` | Texte secondaire |
-| `--kre-border` | `#d4c5b5` | Bordures |
-| `--kre-muted-bg` | `#ebe4dc` | Zones et survols |
+| `--kre-primary` | `#ff6d1b` | CTA, sélection, icônes, barre de progression |
+| `--kre-heading` | `#4a1f08` | Titres, libellés, valeurs saisies |
+| `--kre-muted` | `#5c4733` | Paragraphes |
+| `--kre-subtle` | `#87725e` | Légendes et aides |
+| `--kre-surface` | `#ffffff` | Carte du configurateur |
+| `--kre-tint` | `#fdf3ea` | Marches configurées, étiquettes, encadrés |
+| `--kre-tint-strong` | `#fdeadb` | Encadré à halo (prix estimé) |
+| `--kre-selected` | `#fff6ef` | Fond d'une option sélectionnée |
+| `--kre-border` | `rgb(122 59 16 / 0.2)` | Contour des champs |
+| `--kre-border-subtle` | `rgb(122 59 16 / 0.12)` | Contour de la carte, filets |
+
+Le fond autour de la carte est transparent : c'est celui de votre page.
 
 **Transmettez-nous les maquettes et les valeurs exactes de la charte**
 KitRenovationEscalier.fr : nous publions un thème correspondant, sélectionnable
@@ -308,8 +339,8 @@ sur l'intégration iframe.
 
 | Événement | Déclenchement | Données |
 |---|---|---|
-| `devis_start` | Ouverture du configurateur (une fois par instance) | `utm_*`, `gclid`, `fbclid` |
-| `devis_step_view` | Affichage d'une étape | `step_index` (1-10), `step_name` |
+| `devis_start` | Ouverture du configurateur (une fois par instance) | `utm_*`, `gclid`, `fbclid`, `msclkid` |
+| `devis_step_view` | Affichage d'une étape | `step_index` (1-9), `step_name` |
 | `devis_step_complete` | Étape validée, passage à la suivante | `step_index`, `step_name` |
 | `devis_abandon` | Sortie avant soumission | `last_step_index`, `last_step_name`, `time_spent_sec` |
 | `devis_submit` | Lead envoyé avec succès | `estimated_price`, `step_count`, `lead_id` |
@@ -324,7 +355,7 @@ dans GTM.
 
 ```
 staircase_type · decor · riser · step_count · dimensions
-end_cap · landing · parquet · included · contact
+end_cap · landing · included · contact
 ```
 
 Exemple de payload :
@@ -363,9 +394,9 @@ nous absorberons votre convention finale sans refonte.
 
 | Poste | Mesure |
 |---|---|
-| Bundle JS | 400 Ko brut, **113 Ko gzip** |
+| Bundle JS | 449 Ko brut, **130 Ko gzip** (dont 13 Ko gzip d'icônes Phosphor) |
 | Images | 12,2 Mo → **1,2 Mo** en WebP (−90 %) |
-| Police | 1 fichier variable, 68 Ko (graisses 100→900) |
+| Police | Hanken Grotesk, 1 fichier variable, 35 Ko (graisses 100→900) |
 | Chargement | module ES + `defer` — non bloquant |
 | `eval` | absent (vérifié à chaque publication : compatible CSP sans `unsafe-eval`) |
 
@@ -507,8 +538,8 @@ directement à notre API et au CRM Escal.
 }
 ```
 
-Les photos de l'escalier (3 vues, facultatives) sont envoyées séparément en
-`multipart/form-data` après la création du lead.
+Les photos de l'escalier (3 vues, **obligatoires** depuis la v1.4.0) sont
+envoyées séparément en `multipart/form-data` après la création du lead.
 
 Le prix est calculé côté navigateur puis transmis au serveur : c'est une
 **estimation matériaux indicative**, confirmée par un commercial. Elle ne doit

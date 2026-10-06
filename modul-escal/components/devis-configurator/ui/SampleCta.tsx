@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail } from "lucide-react";
+import { EnvelopeSimpleIcon } from "@phosphor-icons/react";
 
 import { KRE_EVENTS, pushEvent } from "@/lib/analytics";
 import { useKreConfig } from "@/lib/config";
@@ -54,9 +54,9 @@ export function SampleCta({
           });
           onRequest?.();
         }}
-        className="inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-surface px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="inline-flex items-center gap-2 border-[1.5px] border-primary/60 bg-surface px-4 py-2.5 text-sm font-semibold text-heading transition-colors duration-200 hover:border-primary hover:bg-selected focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
-        <Mail className="size-4 shrink-0" aria-hidden />
+        <EnvelopeSimpleIcon className="size-[18px] shrink-0 text-primary" aria-hidden />
         {m.sample.cta}
       </a>
     </div>

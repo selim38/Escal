@@ -86,6 +86,7 @@ function kre_attribute_map(): array
         'endpoint'         => 'endpoint',
         'recipient_email'  => 'recipient-email',
         'confirmation_url' => 'confirmation-url',
+        'open_staircase_url' => 'open-staircase-url',
         'sample_cta'       => 'show-sample-cta',
         'header'           => 'show-header',
     ];
@@ -108,6 +109,7 @@ function kre_render_shortcode($atts): string
             'endpoint'         => KRE_API_ENDPOINT,
             'recipient_email'  => '',
             'confirmation_url' => '',
+            'open_staircase_url' => '',
             'sample_cta'       => '',
             'header'           => '',
         ],
@@ -126,7 +128,7 @@ function kre_render_shortcode($atts): string
         }
 
         // Les URLs passent par esc_url pour rejeter javascript: et data:.
-        if (in_array($attribute, ['endpoint', 'confirmation-url'], true)) {
+        if (in_array($attribute, ['endpoint', 'confirmation-url', 'open-staircase-url'], true)) {
             $value = esc_url_raw($value);
             if ($value === '') {
                 continue;

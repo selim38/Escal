@@ -33,6 +33,7 @@ const V = {
   lastNameRequired: vKey("lastNameRequired"),
   emailInvalid: vKey("emailInvalid"),
   phoneRequired: vKey("phoneRequired"),
+  phoneInvalid: vKey("phoneInvalid"),
   countryRequired: vKey("countryRequired"),
   answerRequired: vKey("answerRequired"),
 };
@@ -100,6 +101,10 @@ export type SeuilColor = (typeof SEUIL_COLOR_VALUES)[number];
 export const STAIR_LAYOUT_VALUES = ["STRAIGHT", "BALANCED", "FIVE_SIDED"] as const;
 export type StairLayout = (typeof STAIR_LAYOUT_VALUES)[number];
 
+/** Plage du nombre de marches — partagée par le schéma et le sélecteur +/−. */
+export const STEP_COUNT_MIN = 1;
+export const STEP_COUNT_MAX = 30;
+
 export const STAIRCASE_TYPE_VALUES = ["OPEN", "CLOSED"] as const;
 export type StaircaseType = (typeof STAIRCASE_TYPE_VALUES)[number];
 
@@ -161,8 +166,8 @@ export const quoteFormBaseSchema = z.object({
       error: () => ({ message: V.stepCountRequired }),
     })
     .int(V.integerRequired)
-    .min(1, V.stepCountMin)
-    .max(30, V.stepCountMax),
+    .min(STEP_COUNT_MIN, V.stepCountMin)
+    .max(STEP_COUNT_MAX, V.stepCountMax),
   uniformStepDimensions: z.boolean({
     error: () => ({
       message: V.uniformRequired,
@@ -184,12 +189,29 @@ export const quoteFormBaseSchema = z.object({
   stepEndCapConfigs: z.array(stepEndCapConfigSchema).optional(),
   seuilColor: z.enum(SEUIL_COLOR_VALUES).optional(),
   contactPreference: z.enum(["WHATSAPP", "EMAIL"]).optional(),
-  firstName: z.string().min(1, V.firstNameRequired),
-  lastName: z.string().min(1, V.lastNameRequired),
+  firstName: z.string().trim().min(1, V.firstNameRequired),
+  lastName: z.string().trim().min(1, V.lastNameRequired),
   email: z.email({ error: () => ({ message: V.emailInvalid }) }),
-  phone: z.string().min(1, V.phoneRequired),
+  phone: z
+    .string()
+    .trim()
+    .min(1, V.phoneRequired)
+    .refine(isPlausiblePhone, V.phoneInvalid),
   country: z.string().min(1, V.countryRequired),
 });
+
+/**
+ * Numéro plausible, sans présumer du pays (France, Belgique, Suisse, Canada…) :
+ * chiffres, espaces, points, tirets, parenthèses et « + » initial, de 6 à 15
+ * chiffres (plafond E.164). Attrape les fautes de frappe, pas les numéros rares.
+ */
+function isPlausiblePhone(value: string): boolean {
+  // Champ vide : signalé par `.min(1)` (« obligatoire »), pas comme invalide.
+  if (value === "") return true;
+  if (!/^\+?[\d\s().-]+$/.test(value)) return false;
+  const digits = value.replace(/\D/g, "").length;
+  return digits >= 6 && digits <= 15;
+}
 
 function refineDimensionsBranch(
   data: z.infer<typeof quoteFormBaseSchema>,
@@ -397,6 +419,30 @@ export function validateWizardStep(step: number, values: QuoteFormDraft): boolea
   const schema = quoteStepSchemas[step];
   if (!schema) return false;
   return schema.safeParse(pickQuoteStepValues(step, values)).success;
+}
+
+/** Champs de l'étape Coordonnées, dans l'ordre d'affichage (ordre du focus en erreur). */
+export const LEAD_FIELDS = [
+  "lastName",
+  "firstName",
+  "email",
+  "phone",
+  "country",
+] as const;
+export type LeadField = (typeof LEAD_FIELDS)[number];
+
+/**
+ * Valide un seul champ saisi au clavier — utilisé pendant la saisie ou à la
+ * sortie du champ, pour signaler une valeur incorrecte sans attendre le clic
+ * sur « Suivant » ou l'envoi.
+ * Renvoie la clé du message d'erreur, ou `undefined` si la valeur est valide.
+ */
+export function validateFormField(
+  name: LeadField | "riserHeightMm" | "stepCount",
+  value: unknown,
+): string | undefined {
+  const res = quoteFormBaseSchema.shape[name].safeParse(value);
+  return res.success ? undefined : res.error.issues[0]?.message;
 }
 
 export function getWizardStepFieldErrors(

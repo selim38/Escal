@@ -15,21 +15,25 @@ type Props = {
   activeField: DimensionField | null;
 };
 
+/**
+ * Photos de mesure à côté des champs. La photo du champ en cours de saisie
+ * passe en surbrillance : contour et légende orange.
+ */
 export function StepTreadPhotos({ layout, activeField }: Props) {
   const asset = useAsset();
   const { m, t } = useT();
   const slug = m.steps.dimensions.layoutSlug[layout];
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-2 content-start gap-3">
       {PHOTO_FIELDS.map(({ field, suffix }) => {
         const active = activeField === field;
         const label = m.catalog.dimensionField[field];
         return (
-          <div
+          <figure
             key={field}
-            className={`overflow-hidden rounded-xl border-2 transition ${
-              active ? "border-primary ring-2 ring-primary/25" : "border-border"
+            className={`border transition-colors duration-200 ${
+              active ? "border-primary" : "border-border-subtle"
             }`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -40,16 +44,16 @@ export function StepTreadPhotos({ layout, activeField }: Props) {
               decoding="async"
               width={800}
               height={1067}
-              className="block w-full object-contain"
+              className="block aspect-[3/4] w-full object-cover"
             />
-            <p
-              className={`py-1.5 text-center text-xs font-medium ${
-                active ? "bg-primary text-on-primary" : "bg-muted-bg text-muted"
+            <figcaption
+              className={`py-2 text-center text-[13px] font-semibold transition-colors duration-200 ${
+                active ? "bg-primary text-on-primary" : "bg-tint text-heading"
               }`}
             >
               {label}
-            </p>
-          </div>
+            </figcaption>
+          </figure>
         );
       })}
     </div>

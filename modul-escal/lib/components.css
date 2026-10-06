@@ -1,0 +1,99 @@
+/**
+ * Boutons du configurateur — animation du design system.
+ *
+ * Importé par `app/globals.css` (Next) et `wc/styles.css` (Web Component), juste
+ * après les tokens. Écrit en CSS plutôt qu'en utilitaires : l'effet tient en
+ * six propriétés coordonnées (dégradé, position, taille, transitions), que la
+ * classe `kre-btn` documente en un seul endroit.
+ *
+ * Design system, « Boutons » : hauteur fixe, angles droits, bordure 1,5 px.
+ * « Au survol le fond glisse latéralement en 480 ms et la flèche se décale de
+ * 7 px. » Le fond est un dégradé uni dont on anime `background-size` :
+ *   - principal : plein au repos, il se retire vers la droite au survol ;
+ *   - secondaire : vide au repos, il se remplit de brun depuis la gauche.
+ *
+ * Les survols sont limités aux appareils à pointeur (`hover: hover`) : sur
+ * écran tactile, l'état survolé resterait figé après le toucher.
+ */
+@layer components {
+  .kre-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 52px;
+    padding: 0 22px;
+    border: 1.5px solid;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    transition:
+      color 480ms var(--kre-ease-fill),
+      border-color 480ms var(--kre-ease-fill),
+      background-size 480ms var(--kre-ease-fill),
+      opacity 200ms ease;
+  }
+
+  .kre-btn:focus-visible {
+    outline: 2px solid var(--kre-primary);
+    outline-offset: 2px;
+  }
+
+  .kre-btn:disabled {
+    opacity: 0.38;
+    pointer-events: none;
+  }
+
+  /* Variante compacte : navigation marche par marche, actions de modale. */
+  .kre-btn-sm {
+    height: 40px;
+    padding: 0 14px;
+    gap: 6px;
+    font-size: 13.5px;
+  }
+
+  .kre-btn-primary {
+    color: var(--kre-on-primary);
+    border-color: var(--kre-primary);
+    background-image: linear-gradient(var(--kre-primary), var(--kre-primary));
+    background-position: right center;
+    background-size: 100% 100%;
+  }
+
+  .kre-btn-secondary {
+    color: var(--kre-heading);
+    border-color: var(--kre-border-strong);
+    background-image: linear-gradient(var(--kre-heading), var(--kre-heading));
+    background-position: left center;
+    background-size: 0% 100%;
+  }
+
+  .kre-btn-arrow {
+    flex-shrink: 0;
+    transition: transform 300ms var(--kre-ease-bounce);
+  }
+
+  @media (hover: hover) {
+    .kre-btn-primary:hover {
+      color: var(--kre-primary);
+      background-size: 0% 100%;
+    }
+
+    .kre-btn-secondary:hover {
+      color: #ffffff;
+      border-color: var(--kre-heading);
+      background-size: 100% 100%;
+    }
+
+    .kre-btn:hover .kre-btn-arrow[data-dir="next"] {
+      transform: translateX(7px);
+    }
+
+    .kre-btn:hover .kre-btn-arrow[data-dir="prev"] {
+      transform: translateX(-7px);
+    }
+  }
+}

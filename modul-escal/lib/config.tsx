@@ -35,11 +35,20 @@ export type KreConfig = {
   recipientEmail: string;
   /** URL de redirection après soumission réussie. Vide = écran de succès interne. */
   confirmationUrl: string;
+  /**
+   * Formulaire de contact vers lequel renvoie le bouton « Être recontacté » quand
+   * l'escalier est ouvert (cas hors tunnel). Vide = `mailto:` pré-rempli vers
+   * `recipientEmail`, à défaut l'adresse du support.
+   */
+  openStaircaseUrl: string;
   /** Afficher le CTA « Demander un échantillon ». */
   showSampleCta: boolean;
   /** Mode démo : la soumission est simulée, aucun appel réseau. */
   demo: boolean;
-  /** Afficher l'en-tête (titre + accroche) à l'intérieur du composant. */
+  /**
+   * Afficher le logo au-dessus du configurateur. Le titre et l'accroche ne sont
+   * plus portés par le composant : la page hôte les affiche.
+   */
   showHeader: boolean;
 };
 
@@ -50,6 +59,7 @@ export const DEFAULT_CONFIG: KreConfig = {
   assetsBase: DEFAULT_ASSETS_BASE,
   recipientEmail: "",
   confirmationUrl: "",
+  openStaircaseUrl: "",
   showSampleCta: false,
   demo: false,
   showHeader: true,
@@ -139,6 +149,7 @@ export const KRE_ATTRIBUTES = [
   "endpoint",
   "recipient-email",
   "confirmation-url",
+  "open-staircase-url",
   "show-sample-cta",
   "assets-base",
   "demo",
@@ -215,6 +226,7 @@ export function configFromAttributes(el: Element): Partial<KreConfig> {
     assetsBase: parseUrlAttr(get("assets-base"), "assets-base"),
     recipientEmail: parseEmailAttr(get("recipient-email")),
     confirmationUrl: parseUrlAttr(get("confirmation-url"), "confirmation-url"),
+    openStaircaseUrl: parseUrlAttr(get("open-staircase-url"), "open-staircase-url"),
     showSampleCta: parseBoolAttr(get("show-sample-cta")),
     demo: parseBoolAttr(get("demo")),
     showHeader: parseBoolAttr(get("show-header")),

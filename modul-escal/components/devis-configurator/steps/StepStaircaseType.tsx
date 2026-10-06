@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { InfoIcon } from "@phosphor-icons/react";
 import { useFormContext } from "react-hook-form";
 
 import { useAsset } from "@/lib/asset";
 import { useT } from "@/lib/i18n/useT";
 import { useFieldError } from "@/lib/useFieldError";
 import type { QuoteFormDraft, StaircaseType } from "@/lib/quote-schema";
-import { StepTitle } from "../ui/Typography";
+import { FieldError } from "../ui/Field";
+import { OptionCard } from "../ui/OptionCard";
+import { StepHeader } from "../ui/Typography";
 
 const PHOTOS: Record<StaircaseType, string> = {
   CLOSED: "/escalier/ferme.webp",
@@ -19,7 +21,7 @@ function CasePhoto({ src, label }: { src: string; label: string }) {
   const [failed, setFailed] = useState(false);
   const asset = useAsset();
   return (
-    <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-background to-muted-bg">
+    <div className="relative aspect-video w-full overflow-hidden bg-muted-bg">
       {!failed && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -30,11 +32,6 @@ function CasePhoto({ src, label }: { src: string; label: string }) {
           onError={() => setFailed(true)}
           className="absolute inset-0 h-full w-full object-cover"
         />
-      )}
-      {failed && (
-        <span className="text-4xl" aria-hidden>
-          🪜
-        </span>
       )}
     </div>
   );
@@ -68,65 +65,57 @@ export function StepStaircaseType() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <StepTitle align="left">{m.steps.staircaseType.title}</StepTitle>
-        <p className="text-sm text-muted">{m.steps.staircaseType.subtitle}</p>
-      </div>
+    <div className="space-y-7">
+      <StepHeader
+        title={m.steps.staircaseType.title}
+        subtitle={m.steps.staircaseType.subtitle}
+      />
 
-      <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+      <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <legend className="sr-only">{m.steps.staircaseType.subtitle}</legend>
-        {choices.map((choice) => {
-          const selected = value === choice.value;
-          return (
-            <button
-              key={choice.value}
-              type="button"
-              onClick={() => select(choice.value)}
-              aria-pressed={selected}
-              className={`relative overflow-hidden rounded-xl border-2 p-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:p-4 ${
-                selected
-                  ? "border-primary bg-primary/5 ring-2 ring-primary/25"
-                  : "border-border bg-surface shadow-sm transition-shadow hover:-translate-y-[3px] hover:border-brand-medium/35 hover:shadow-lg"
-              }`}
-            >
-              {selected && (
-                <span className="absolute right-3 top-3 z-10 flex size-6 items-center justify-center rounded-full bg-success text-white shadow-sm">
-                  <Check className="size-3.5 stroke-[3]" aria-hidden />
-                </span>
-              )}
-              <CasePhoto src={PHOTOS[choice.value]} label={choice.label} />
-              <span className="mt-3 block text-base font-semibold text-brand">
+        {choices.map((choice) => (
+          <OptionCard
+            key={choice.value}
+            selected={value === choice.value}
+            onClick={() => select(choice.value)}
+            className="flex flex-col overflow-hidden text-left"
+          >
+            <CasePhoto src={PHOTOS[choice.value]} label={choice.label} />
+            <span className="flex flex-col gap-1 px-[18px] pb-[18px] pt-4">
+              <span className="text-base font-bold text-heading">
                 {choice.label}
               </span>
-              <span className="mt-1 block text-sm text-muted">
+              <span className="text-sm leading-normal text-muted">
                 {choice.description}
               </span>
-            </button>
-          );
-        })}
+            </span>
+          </OptionCard>
+        ))}
       </fieldset>
 
-      {/* Cas spécifique : escalier ouvert → information uniquement */}
+      {/*
+        Cas spécifique : escalier ouvert. Le tunnel s'arrête ici — l'icône Info
+        affirme visuellement l'impasse, et le bouton « Suivant » devient
+        « Être recontacté » (voir StepNavigation).
+      */}
       {value === "OPEN" && (
         <div
-          className="rounded-lg border border-warning bg-warning-tint p-4"
+          className="flex items-start gap-3.5 border border-primary/35 bg-tint px-5 py-[18px]"
           role="status"
         >
-          <p className="text-sm font-semibold text-brand">
-            {m.steps.staircaseType.openWarningTitle}
-          </p>
-          <p className="mt-1 text-sm text-brand">
-            {m.steps.staircaseType.openWarningBody}
-          </p>
+          <InfoIcon aria-hidden className="size-[22px] shrink-0 text-primary" />
+          <div>
+            <p className="text-[14.5px] font-bold text-heading">
+              {m.steps.staircaseType.openWarningTitle}
+            </p>
+            <p className="mt-1 text-sm leading-normal text-muted">
+              {m.steps.staircaseType.openWarningBody}
+            </p>
+          </div>
         </div>
       )}
 
-      {error && value !== "OPEN" && (
-        <p className="text-center text-sm text-error" role="alert">
-          {error}
-        </p>
-      )}
+      {value !== "OPEN" ? <FieldError>{error}</FieldError> : null}
     </div>
   );
 }

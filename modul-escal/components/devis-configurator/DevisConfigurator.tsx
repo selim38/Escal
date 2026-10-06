@@ -1,13 +1,15 @@
 "use client";
 
-import { Clock, ShieldCheck, Zap } from "lucide-react";
+import { CheckCircleIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { BaseSyntheticEvent } from "react";
 import type { FieldPath, UseFormSetError } from "react-hook-form";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import type { z } from "zod";
 
 import {
   getWizardStepFieldErrors,
+  LEAD_FIELDS,
   pickQuoteStepValues,
   quoteFormSchema,
   quoteStepSchemas,
@@ -18,11 +20,11 @@ import {
 
 import { calculatePrice } from "@/lib/calculatePrice";
 import { KreConfigProvider, usePendingPhotos, useKreConfig, type KreConfig } from "@/lib/config";
+import type { Messages } from "@/lib/i18n";
 import { useT } from "@/lib/i18n/useT";
 import { useWizardTracking } from "@/lib/useWizardTracking";
 
-import { Eyebrow } from "./ui/Typography";
-import { ConfiguratorBar } from "./ConfiguratorBar";
+import { ConfiguratorLogo, ConfiguratorProgress } from "./ConfiguratorProgress";
 import { StepNavigation } from "./StepNavigation";
 import { StepStaircaseType } from "./steps/StepStaircaseType";
 import { StepDecor } from "./steps/StepDecor";
@@ -50,9 +52,13 @@ function applyZodIssues(
   setError: UseFormSetError<QuoteFormDraft>,
   issues: z.ZodIssue[],
 ) {
+  const seen = new Set<string>();
   for (const issue of issues) {
     const path = issue.path[0];
-    if (typeof path === "string") {
+    // zod v4 poursuit les contrôles après un échec : seul le premier message
+    // d'un champ est pertinent (« obligatoire » avant « invalide »).
+    if (typeof path === "string" && !seen.has(path)) {
+      seen.add(path);
       setError(path as FieldPath<QuoteFormDraft>, {
         type: "manual",
         message: String(issue.message),
@@ -82,11 +88,11 @@ const REQUIRED_PHOTO_COUNT = 3;
 
 function WizardBody() {
   const [currentStep, setCurrentStep] = useState(0);
-  // Les photos vivent hors du formulaire (des `File`, pas des valeurs de
-  // champ) : leur compte remonte ici pour conditionner le bouton d'envoi.
-  const [photoCount, setPhotoCount] = useState(0);
   const [submitState, setSubmitState] = useState<SubmitState>({ status: "idle" });
-  const { watch, getValues, setError, clearErrors, handleSubmit } =
+  // Passe à `true` au premier envoi refusé : les manques (photos comprises)
+  // sont alors signalés comme des erreurs, et plus seulement comme des consignes.
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const { watch, getValues, setError, clearErrors, handleSubmit, setFocus } =
     useFormContext<QuoteFormDraft>();
   const values = watch();
   const config = useKreConfig();
@@ -97,16 +103,18 @@ function WizardBody() {
   const isFinished = submitState.status === "success";
   const tracking = useWizardTracking(currentStep, isFinished);
 
-  const canGoNext = useMemo(() => {
-    if (!validateWizardStep(currentStep, values)) return false;
-    if (currentStep === QUOTE_STEP_COUNT - 1) {
-      return photoCount >= REQUIRED_PHOTO_COUNT;
-    }
-    return true;
-  }, [currentStep, photoCount, values]);
-
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === QUOTE_STEP_COUNT - 1;
+  // Escalier ouvert : hors tunnel, l'internaute est orienté vers un contact.
+  const isOpenStaircase = isFirstStep && values.staircaseType === "OPEN";
+
+  const canGoNext = useMemo(() => {
+    // Dernière étape : le bouton d'envoi reste actif. Un bouton grisé ne dit
+    // pas ce qui manque ; l'envoi, lui, signale chaque champ en cause et y
+    // place le focus (recommandation Knewledge : annoncer les erreurs).
+    if (isLastStep) return true;
+    return validateWizardStep(currentStep, values);
+  }, [currentStep, isLastStep, values]);
 
   // Déplace le focus en tête d'étape à chaque transition (navigation clavier
   // et annonce lecteur d'écran) — sauf au premier rendu, pour ne pas voler le
@@ -122,6 +130,8 @@ function WizardBody() {
 
   const goPrev = () => {
     if (currentStep === 0) return;
+    // Le message d'échec d'envoi ne concerne que la dernière étape.
+    if (submitState.status === "error") setSubmitState({ status: "idle" });
     setCurrentStep((s) => s - 1);
   };
 
@@ -153,24 +163,28 @@ function WizardBody() {
     setCurrentStep((s) => Math.min(s + 1, QUOTE_STEP_COUNT - 1));
   };
 
-  const onFinal = async (data: QuoteFormDraft) => {
+  const onFinal = async (data: QuoteFormDraft, event?: BaseSyntheticEvent) => {
+    setSubmitAttempted(true);
     const res = quoteFormSchema.safeParse(data);
     if (!res.success) {
       applyZodIssues(setError, res.error.issues);
+      setSubmitState({ status: "error", message: m.steps.lead.errorSummary });
+      // Focus sur le premier champ en cause, dans l'ordre d'affichage : son
+      // message d'erreur est lu par les lecteurs d'écran (aria-describedby).
+      const invalid = new Set(res.error.issues.map((i) => i.path[0]));
+      const first = LEAD_FIELDS.find((name) => invalid.has(name));
+      if (first) setFocus(first);
       return;
     }
-    // Garde-fou : le bouton d'envoi est désactivé sans les photos, mais un
-    // « Entrée » dans un champ texte soumettrait le formulaire malgré tout.
+    // Sans les 3 photos, le dossier n'est pas envoyé. Le détail (« il manque
+    // n photos ») s'affiche sous les emplacements ; le résumé reste générique
+    // pour ne pas annoncer deux fois le même message.
     if (pendingPhotos.get().length < REQUIRED_PHOTO_COUNT) {
-      setSubmitState({
-        status: "error",
-        message: t(m.steps.lead.photosMissing, {
-          count: REQUIRED_PHOTO_COUNT - pendingPhotos.get().length,
-          plural:
-            REQUIRED_PHOTO_COUNT - pendingPhotos.get().length > 1 ? "s" : "",
-          total: REQUIRED_PHOTO_COUNT,
-        }),
-      });
+      setSubmitState({ status: "error", message: m.steps.lead.errorSummary });
+      // La cible de l'événement d'envoi est le formulaire lui-même.
+      (event?.target as HTMLFormElement | undefined)
+        ?.querySelector<HTMLElement>("[data-photo-pick]")
+        ?.focus();
       return;
     }
     setSubmitState({ status: "loading" });
@@ -237,38 +251,36 @@ function WizardBody() {
   if (submitState.status === "success") {
     return (
       <>
-        <ConfiguratorBar
-          currentStep={QUOTE_STEP_COUNT - 1}
-          totalSteps={QUOTE_STEP_COUNT}
-          showLogo={showHeader}
-        />
+        {showHeader ? <ConfiguratorLogo /> : null}
         <div
-          className="rounded-lg border border-border-subtle bg-surface p-6 py-10 text-center shadow-md space-y-4 sm:p-9"
+          className="flex flex-col items-center gap-4 border border-border-subtle bg-surface px-6 py-14 text-center sm:px-11 sm:py-20"
           role="status"
           aria-live="polite"
         >
-        <div className="flex justify-center">
-          <span
-            aria-hidden
-            className="flex size-16 items-center justify-center rounded-full bg-success-tint text-4xl"
-          >
-            ✅
-          </span>
-        </div>
-        <h2 className="text-xl font-semibold text-brand">{m.success.title}</h2>
-        <p className="text-sm text-muted">
-          {m.success.reference}{" "}
-          <span className="font-mono font-semibold text-foreground">
-            {submitState.leadId}
-          </span>
-        </p>
-        <p className="text-sm text-muted">
-          {m.success.estimate}{" "}
-          <strong className="text-foreground">
-            {submitState.estimatedMaterialsEuro} €
-          </strong>
-        </p>
-          <p className="text-sm text-muted">{m.success.followUp}</p>
+          <CheckCircleIcon aria-hidden className="size-14 text-primary" />
+          <h2 className="text-[28px] font-light leading-tight tracking-tighter text-heading sm:text-[38px]">
+            {m.success.titleStart}{" "}
+            <span className="font-semibold text-primary">
+              {m.success.titleEmphasis}
+            </span>
+          </h2>
+          <p className="max-w-[52ch] text-[15.5px] leading-relaxed text-muted">
+            {m.success.followUp}
+          </p>
+          <dl className="mt-2 space-y-1 text-sm text-muted">
+            <div>
+              <dt className="inline">{m.success.reference}</dt>{" "}
+              <dd className="inline font-mono font-semibold text-heading">
+                {submitState.leadId}
+              </dd>
+            </div>
+            <div>
+              <dt className="inline">{m.success.estimate}</dt>{" "}
+              <dd className="inline font-bold text-heading">
+                {submitState.estimatedMaterialsEuro} €
+              </dd>
+            </div>
+          </dl>
         </div>
       </>
     );
@@ -276,70 +288,82 @@ function WizardBody() {
 
   return (
     <>
-      <ConfiguratorBar
-        currentStep={currentStep}
-        totalSteps={QUOTE_STEP_COUNT}
-        showLogo={showHeader}
-      />
+      {showHeader ? <ConfiguratorLogo /> : null}
 
-      <form
-        onSubmit={handleSubmit(onFinal)}
-        className="rounded-lg border border-border-subtle bg-surface p-6 shadow-md sm:p-9"
-        noValidate
-      >
-        {showHeader && currentStep === 0 ? <ConfiguratorIntro /> : null}
-
-      {/* Annonce le changement d'étape et reçoit le focus à chaque transition. */}
-      <div
-        ref={stepHeadingRef}
-        tabIndex={-1}
-        aria-live="polite"
-        className="sr-only"
-      >
-        {t(m.progress.announce, {
-          current: currentStep + 1,
-          total: QUOTE_STEP_COUNT,
-          name: m.progress.stepLabels[currentStep] ?? "",
-        })}
-      </div>
-
-      <div className="min-h-[280px]">
-        {currentStep === 0 ? <StepStaircaseType /> : null}
-        {currentStep === 1 ? <StepDecor /> : null}
-        {currentStep === 2 ? <StepRiser /> : null}
-        {currentStep === 3 ? <StepStepCount /> : null}
-        {currentStep === 4 ? <StepUniformDimensions /> : null}
-        {currentStep === 5 ? <StepEndCap /> : null}
-        {currentStep === 6 ? <StepLanding /> : null}
-        {currentStep === 7 ? <StepInclus /> : null}
-        {currentStep === 8 ? (
-          <StepLead
-            requiredPhotoCount={REQUIRED_PHOTO_COUNT}
-            onPhotoCountChange={setPhotoCount}
-          />
-        ) : null}
-      </div>
-
-      {submitState.status === "error" && (
-        <p
-          className="mt-4 rounded-lg bg-error-tint px-4 py-2.5 text-sm text-error"
-          role="alert"
-        >
-          {submitState.message}
-        </p>
-      )}
-
-        <StepNavigation
-          isFirstStep={isFirstStep}
-          isLastStep={isLastStep}
-          canGoNext={canGoNext && submitState.status !== "loading"}
-          onPrev={goPrev}
-          onNext={goNext}
-          isSubmitting={submitState.status === "loading"}
+      <div className="border border-border-subtle bg-surface">
+        <ConfiguratorProgress
+          currentStep={currentStep}
+          totalSteps={QUOTE_STEP_COUNT}
         />
-      </form>
+
+        <form onSubmit={handleSubmit(onFinal)} noValidate>
+          {/* Annonce le changement d'étape et reçoit le focus à chaque transition. */}
+          <div
+            ref={stepHeadingRef}
+            tabIndex={-1}
+            aria-live="polite"
+            className="sr-only"
+          >
+            {t(m.progress.announce, {
+              current: currentStep + 1,
+              total: QUOTE_STEP_COUNT,
+              name: m.progress.stepLabels[currentStep] ?? "",
+            })}
+          </div>
+
+          <div className="min-h-[280px] px-5 pb-9 pt-8 sm:px-9 lg:px-11">
+            {currentStep === 0 ? <StepStaircaseType /> : null}
+            {currentStep === 1 ? <StepDecor /> : null}
+            {currentStep === 2 ? <StepRiser /> : null}
+            {currentStep === 3 ? <StepStepCount /> : null}
+            {currentStep === 4 ? <StepUniformDimensions /> : null}
+            {currentStep === 5 ? <StepEndCap /> : null}
+            {currentStep === 6 ? <StepLanding /> : null}
+            {currentStep === 7 ? <StepInclus /> : null}
+            {currentStep === 8 ? (
+              <StepLead
+                requiredPhotoCount={REQUIRED_PHOTO_COUNT}
+                showMissingAsError={submitAttempted}
+              />
+            ) : null}
+
+            {submitState.status === "error" && (
+              <p
+                className="mt-7 flex items-start gap-2.5 border border-error/30 bg-error-tint px-4 py-3 text-sm font-semibold text-error"
+                role="alert"
+              >
+                <WarningCircleIcon aria-hidden className="mt-px size-5 shrink-0" />
+                <span>{submitState.message}</span>
+              </p>
+            )}
+          </div>
+
+          <StepNavigation
+            isFirstStep={isFirstStep}
+            isLastStep={isLastStep}
+            canGoNext={canGoNext && submitState.status !== "loading"}
+            onPrev={goPrev}
+            onNext={goNext}
+            isSubmitting={submitState.status === "loading"}
+            exitHref={isOpenStaircase ? openStaircaseHref(config, m) : undefined}
+          />
+        </form>
+      </div>
     </>
   );
+}
+
+/**
+ * Destination du bouton « Être recontacté » (escalier ouvert) : le formulaire
+ * désigné par l'attribut `open-staircase-url`, sinon un e-mail pré-rempli.
+ */
+function openStaircaseHref(config: KreConfig, m: Messages): string {
+  if (config.openStaircaseUrl) return config.openStaircaseUrl;
+  const to = config.recipientEmail || m.app.supportEmail;
+  const { openContactSubject, openContactBody } = m.steps.staircaseType;
+  return `mailto:${to}?subject=${encodeURIComponent(
+    openContactSubject,
+  )}&body=${encodeURIComponent(openContactBody)}`;
 }
 
 /**
@@ -360,54 +384,6 @@ function redirectToConfirmation(
   } catch {
     console.warn("[kre-configurateur] confirmation-url invalide, redirection annulée.");
   }
-}
-
-/**
- * En-tête interne, rendu quand le composant n'est pas encadré par la page hôte.
- *
- * Le logo remplace l'ancienne accroche textuelle « Kit Rénovation Escalier » :
- * il porte déjà ce nom, le répéter serait une redondance à l'écran comme au
- * lecteur d'écran. Le nom de marque vit donc dans l'`alt`.
- */
-/**
- * Bloc de présentation — affiché uniquement à la première étape.
- *
- * Titre, accroche et réassurance informent une fois, au moment où l'internaute
- * décide de se lancer. Les répéter aux neuf étapes suivantes n'apportait rien et
- * repoussait le bouton de validation sous la ligne de flottaison.
- */
-function ConfiguratorIntro() {
-  const { m } = useT();
-  const icons = [Zap, ShieldCheck, Clock];
-
-  return (
-    <div className="mb-8 border-b border-border-subtle pb-8">
-      <Eyebrow>{m.app.eyebrow}</Eyebrow>
-      <h2 className="text-2xl font-black leading-tight tracking-tight text-heading sm:text-3xl">
-        {m.app.title}
-      </h2>
-      <p className="mt-3 max-w-[54ch] text-base text-muted">{m.app.intro}</p>
-
-      {/*
-        Rangée de réassurance, reprise de la bande « Simplicité · Sur mesure ·
-        Outils inclus » du site : icônes orange fines et libellés courts.
-      */}
-      <ul className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2">
-        {m.app.reassurance.map((label, i) => {
-          const Icon = icons[i] ?? Zap;
-          return (
-            <li
-              key={label}
-              className="flex items-center gap-2 text-[13px] font-semibold text-brand"
-            >
-              <Icon className="size-4 shrink-0 text-primary" aria-hidden />
-              {label}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
 }
 
 function ConfiguratorShell() {

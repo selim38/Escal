@@ -3,63 +3,74 @@
 import type { ReactNode } from "react";
 
 /**
- * Accroche en capitales — composant `Eyebrow` du design system Knewledge.
+ * En-tête d'étape — titre et phrase d'introduction, alignés à gauche.
  *
- * Specs reprises telles quelles : graisse 800, 12 px, interlettrage 0,14em,
- * capitales, couleur `--text-accent`. C'est ce contraste entre des capitales
- * très espacées et des titres à interlettrage négatif qui donne au site son
- * caractère — sans lui, la typographie paraît plate.
+ * Titre calé sur la maquette Knewledge : Hanken Grotesk 600, 30 px,
+ * interlettrage −0,01em, brun 900. Le texte d'introduction est en « brun
+ * texte » du design system.
  */
-export function Eyebrow({ children }: { children: ReactNode }) {
+export function StepHeader({
+  title,
+  subtitle,
+}: {
+  title: ReactNode;
+  subtitle?: ReactNode;
+}) {
   return (
-    <p className="mb-3.5 text-xs font-extrabold uppercase tracking-wider text-accent">
-      {children}
-    </p>
+    <div>
+      <StepTitle>{title}</StepTitle>
+      {subtitle ? (
+        <p className="mt-2 text-[15px] leading-relaxed text-muted">{subtitle}</p>
+      ) : null}
+    </div>
   );
 }
 
-/**
- * Titre d'étape — calé sur le `h1` du design system : graisse 900,
- * interlettrage −0,02em, couleur `--text-strong`.
- *
- * L'échelle est un cran en dessous du héros du site (qui monte à 56 px) : le
- * composant s'insère dans une page qui a déjà son propre titre principal.
- */
-export function StepTitle({
-  children,
-  align = "left",
-}: {
-  children: ReactNode;
-  /**
-   * Aligné à gauche par défaut, sur le même axe que l'en-tête. Le mélange
-   * centré/gauche était une des sources d'incohérence visuelle relevées.
-   */
-  align?: "center" | "left";
-}) {
+export function StepTitle({ children }: { children: ReactNode }) {
   return (
-    <h2
-      className={`text-2xl font-black leading-tight tracking-tight text-heading sm:text-3xl ${
-        align === "center" ? "text-center" : ""
-      }`}
-    >
+    <h2 className="text-[26px] font-semibold leading-tight tracking-tight text-heading sm:text-3xl">
       {children}
     </h2>
   );
 }
 
-/** Sous-titre d'étape. */
-export function StepSubtitle({
+/** Intitulé d'un bloc à l'intérieur d'une étape, avec icône orange facultative. */
+export function SectionTitle({
+  icon,
   children,
-  align = "center",
+  as: Tag = "h3",
 }: {
+  icon?: ReactNode;
   children: ReactNode;
-  align?: "center" | "left";
+  as?: "h3" | "legend" | "p";
 }) {
   return (
-    <p
-      className={`text-base text-muted ${align === "center" ? "text-center" : ""}`}
-    >
+    <Tag className="flex items-center gap-2.5 text-base font-bold text-heading">
+      {icon}
       {children}
-    </p>
+    </Tag>
+  );
+}
+
+/**
+ * Étiquette accolée à un titre (« Compris dans le prix », « + 19 € / marche »).
+ * Toujours au même endroit, juste après l'intitulé qu'elle qualifie.
+ */
+export function Tag({
+  icon,
+  children,
+  className = "",
+}: {
+  icon?: ReactNode;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap bg-tint px-2.5 py-1 text-xs font-bold text-brand-medium ${className}`}
+    >
+      {icon}
+      {children}
+    </span>
   );
 }
