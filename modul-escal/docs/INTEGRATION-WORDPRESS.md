@@ -15,7 +15,7 @@
 
 | Livrable | Emplacement |
 |---|---|
-| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.5.0/kre-configurateur.js` |
+| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.6.0/kre-configurateur.js` |
 | Bundle JS — staging | `https://escal.point-soft.fr/wc/staging/kre-configurateur.js` |
 | Balise d'intégration | §2 |
 | Liste des attributs | §3 |
@@ -23,11 +23,11 @@
 | Plugin WordPress (optionnel) | `deliverables/kre-configurateur-wp/` |
 
 Les URLs de production sont **versionnées et immuables** : une nouvelle version
-est publiée sous un nouveau chemin (`/wc/v1.5.0/`…), jamais en écrasant la
+est publiée sous un nouveau chemin (`/wc/v1.6.0/`…), jamais en écrasant la
 précédente. Vous maîtrisez donc la date de bascule. `staging` est republié à
 chaque itération de recette.
 
-**Prochaine version (en recette sur `staging`)** — application de vos
+**v1.6.0** — application de vos
 recommandations « Module de commande » et de votre design system :
 
 - *Charte* : police Hanken Grotesk, angles droits partout (plus aucun arrondi,
@@ -88,7 +88,7 @@ officielles. Voir §4.3 pour les trois écarts de contraste assumés.
 ## 2. Intégration
 
 ```html
-<script src="https://escal.point-soft.fr/wc/v1.5.0/kre-configurateur.js"
+<script src="https://escal.point-soft.fr/wc/v1.6.0/kre-configurateur.js"
         type="module" defer></script>
 
 <kre-configurateur lang="fr" theme="kre"></kre-configurateur>
@@ -394,7 +394,7 @@ nous absorberons votre convention finale sans refonte.
 
 | Poste | Mesure |
 |---|---|
-| Bundle JS | 449 Ko brut, **130 Ko gzip** (dont 13 Ko gzip d'icônes Phosphor) |
+| Bundle JS | 438 Ko brut, **125 Ko gzip** (dont 12 Ko gzip d'icônes Phosphor) |
 | Images | 12,2 Mo → **1,2 Mo** en WebP (−90 %) |
 | Police | Hanken Grotesk, 1 fichier variable, 35 Ko (graisses 100→900) |
 | Chargement | module ES + `defer` — non bloquant |
