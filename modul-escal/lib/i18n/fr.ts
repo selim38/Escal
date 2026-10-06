@@ -236,9 +236,6 @@ export const fr = {
       pricePerStep: "+{price} € / marche",
       heightLabel: "Hauteur des contremarches",
       heightPlaceholder: "Ex. 175",
-      /** Recommandation Knewledge : dire pourquoi et quand renseigner ce champ. */
-      heightHelp:
-        "Facultatif. Si vous la connaissez, elle aide notre technicien à préparer vos contremarches : mesurez du dessus d'une marche au dessus de la suivante (entre 100 et 300 mm). Sinon, laissez vide, il la vérifiera sur les photos demandées à la dernière étape.",
     },
 
     stepCount: {

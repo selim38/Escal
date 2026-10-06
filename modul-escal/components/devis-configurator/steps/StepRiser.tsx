@@ -10,7 +10,7 @@ import { useT } from "@/lib/i18n/useT";
 import { useFieldError } from "@/lib/useFieldError";
 import { useLiveValidation } from "@/lib/useLiveValidation";
 import type { QuoteFormDraft, RiserOption } from "@/lib/quote-schema";
-import { describedBy, FieldError, FieldHelp, FieldLabel, fieldClass } from "../ui/Field";
+import { FieldError, FieldLabel, fieldClass } from "../ui/Field";
 import { OptionCard } from "../ui/OptionCard";
 import { StepHeader, Tag } from "../ui/Typography";
 
@@ -94,10 +94,7 @@ export function StepRiser() {
             max={300}
             placeholder={m.steps.riser.heightPlaceholder}
             aria-invalid={heightError ? true : undefined}
-            aria-describedby={describedBy(
-              "kre-riserHeightMm-help",
-              heightError && "kre-riserHeightMm-error",
-            )}
+            aria-describedby={heightError ? "kre-riserHeightMm-error" : undefined}
             className={`${fieldClass} max-w-[180px]`}
             {...register("riserHeightMm", {
               setValueAs: (v) => {
@@ -112,8 +109,6 @@ export function StepRiser() {
           <span className="text-sm text-muted">{m.common.mm}</span>
         </div>
         <FieldError id="kre-riserHeightMm-error">{heightError}</FieldError>
-        {/* Recommandation Knewledge : dire quand et pourquoi renseigner ce champ. */}
-        <FieldHelp id="kre-riserHeightMm-help">{m.steps.riser.heightHelp}</FieldHelp>
       </div>
     </div>
   );
