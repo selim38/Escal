@@ -15,7 +15,7 @@
 
 | Livrable | Emplacement |
 |---|---|
-| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.6.1/kre-configurateur.js` |
+| Bundle JS — production | `https://escal.point-soft.fr/wc/v1.6.2/kre-configurateur.js` |
 | Bundle JS — staging | `https://escal.point-soft.fr/wc/staging/kre-configurateur.js` |
 | Balise d'intégration | §2 |
 | Liste des attributs | §3 |
@@ -23,9 +23,20 @@
 | Plugin WordPress (optionnel) | `deliverables/kre-configurateur-wp/` |
 
 Les URLs de production sont **versionnées et immuables** : une nouvelle version
-est publiée sous un nouveau chemin (`/wc/v1.6.1/`…), jamais en écrasant la
+est publiée sous un nouveau chemin (`/wc/v1.6.2/`…), jamais en écrasant la
 précédente. Vous maîtrisez donc la date de bascule. `staging` est republié à
 chaque itération de recette.
+
+**v1.6.2** — suite de vos recommandations du 14 octobre :
+
+- *Étape 5* : « Profondeur exacte » n'apparaît que pour la fourchette
+  « > 320 mm », et y devient obligatoire (de 320 à 630 mm). Exemple à 350 mm,
+  message d'erreur sous 320 mm, valeur conservée en revenant sur l'étape.
+- *Étapes 8 et confirmation* : « Prix pour les marches, contremarches, outils
+  et consommables », hors livraison.
+- *Étape 9* : les erreurs ne s'affichent plus dès l'arrivée sur l'étape ; le
+  message « Votre demande n'est pas encore complète… » disparaît dès que tout
+  est rempli. « Technicien » devient « expert » dans tout le parcours.
 
 **v1.6.1** — retrait de la phrase d'aide sous « Hauteur des contremarches »
 (étape 3). Le champ reste facultatif.
@@ -91,7 +102,7 @@ officielles. Voir §4.3 pour les trois écarts de contraste assumés.
 ## 2. Intégration
 
 ```html
-<script src="https://escal.point-soft.fr/wc/v1.6.1/kre-configurateur.js"
+<script src="https://escal.point-soft.fr/wc/v1.6.2/kre-configurateur.js"
         type="module" defer></script>
 
 <kre-configurateur lang="fr" theme="kre"></kre-configurateur>
@@ -397,7 +408,7 @@ nous absorberons votre convention finale sans refonte.
 
 | Poste | Mesure |
 |---|---|
-| Bundle JS | 438 Ko brut, **125 Ko gzip** (dont 12 Ko gzip d'icônes Phosphor) |
+| Bundle JS | 439 Ko brut, **125 Ko gzip** (dont 12 Ko gzip d'icônes Phosphor) |
 | Images | 12,2 Mo → **1,2 Mo** en WebP (−90 %) |
 | Police | Hanken Grotesk, 1 fichier variable, 35 Ko (graisses 100→900) |
 | Chargement | module ES + `defer` — non bloquant |
