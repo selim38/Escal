@@ -8,6 +8,14 @@
  * Volontairement sans `as const` : les valeurs doivent être typées `string` pour
  * qu'un autre dictionnaire soit assignable à `Messages`.
  */
+
+/**
+ * Ce que couvre le prix affiché — récapitulatif et écran de confirmation.
+ * Formule Knewledge : « estimation matériaux » laissait croire les outils et
+ * consommables en supplément.
+ */
+const priceScope = "Prix pour les marches, contremarches, outils et consommables";
+
 export const fr = {
   app: {
     /** Texte alternatif du logo — porte le nom de marque pour les lecteurs d'écran. */
@@ -77,7 +85,8 @@ export const fr = {
     titleStart: "Votre demande a bien été",
     titleEmphasis: "envoyée",
     reference: "Votre référence :",
-    estimate: "Estimation matériaux :",
+    estimate: `${priceScope} :`,
+    estimateNote: "(hors livraison)",
     followUp:
       "Notre équipe vous contactera sous 24 h pour finaliser votre devis.",
   },
@@ -273,10 +282,13 @@ export const fr = {
       lengthLabel: "Longueur",
       depthLabel: "Profondeur",
       exactDepthLabel: "Profondeur exacte",
-      exactDepthPlaceholder: "Ex. 280",
-      /** Le champ ne sert qu'à détecter une profondeur hors catalogue (voir DepthBlockedModal). */
+      exactDepthPlaceholder: "Ex. 350",
+      /**
+       * Champ affiché pour la seule fourchette « > 320 mm » : il détecte une
+       * profondeur hors catalogue (voir DepthBlockedModal).
+       */
       exactDepthHelp:
-        "À renseigner seulement si vos marches font plus de 320 mm de profondeur. Au-delà de {max} mm, elles sortent de notre catalogue et demandent une étude sur mesure. Les fourchettes ci-dessus suffisent pour l'estimation.",
+        "Entre {min} et {max} mm. Au-delà de {max} mm, vos marches sortent de notre catalogue et demandent une étude sur mesure.",
       photoAlt: "{field} — marche {layout}",
       layoutSlug: {
         STRAIGHT: "droite",
@@ -400,18 +412,18 @@ export const fr = {
         "L'ensemble des tutoriels de montage sous forme de vidéo est inclus dans votre commande — prise de mesures, découpe, pose, finitions.",
       tutorialsDevices:
         "Les vidéos sont consultables depuis n'importe quel appareil : smartphone, tablette ou ordinateur.",
-      priceLabel: "Prix estimé des matériaux",
+      priceLabel: priceScope,
       priceUnavailable:
         "Complétez les étapes précédentes pour afficher l'estimation.",
-      priceNote: "Estimation matériaux uniquement, hors pose et livraison.",
+      priceNote: "(Hors livraison)",
       nextCtaStrong: "Pour finaliser votre devis,",
       nextCtaBody:
-        "renseignez vos coordonnées et ajoutez 3 photos de votre escalier à l'étape suivante. Un technicien vous recontactera rapidement.",
+        "renseignez vos coordonnées et ajoutez 3 photos de votre escalier à l'étape suivante. Un expert vous recontactera rapidement.",
     },
 
     lead: {
       title: "Vos coordonnées",
-      subtitle: "Un technicien vous recontactera pour finaliser votre devis.",
+      subtitle: "Un expert vous recontactera pour finaliser votre devis.",
       personalInfo: "Informations personnelles",
       lastName: "Nom",
       firstName: "Prénom",
@@ -425,10 +437,10 @@ export const fr = {
       contactWhatsapp: "WhatsApp",
       contactEmail: "E-mail",
       contactHint:
-        "Si vous n'avez pas WhatsApp, choisissez E-mail — un technicien vous répondra dans les 24 h.",
+        "Si vous n'avez pas WhatsApp, choisissez E-mail — un expert vous répondra dans les 24 h.",
       photosTitle: "Photos de votre escalier",
       photosIntro:
-        "3 photos sont nécessaires pour que notre technicien puisse affiner votre devis.",
+        "3 photos sont nécessaires pour que notre expert puisse affiner votre devis.",
       photosNote: "Les photos sont obligatoires pour une validation de dossier.",
       photosMissing:
         "Il manque {count} photo{plural} sur {total} pour envoyer votre demande.",
@@ -492,6 +504,10 @@ export const fr = {
     stepCountMax: "Maximum 30 marches.",
     uniformRequired:
       "Indiquez si toutes les marches ont les mêmes dimensions.",
+    exactDepthRequired: "Indiquez la profondeur exacte de vos marches.",
+    exactDepthMin:
+      "Minimum 320 mm. En dessous, choisissez la profondeur « < 320 mm ».",
+    exactDepthMax: "Maximum 630 mm.",
     landingFinishRequired: "Choisissez un type de marche palière.",
     seuilColorRequired: "Choisissez la couleur du seuil.",
     endCapRequired: "Choisissez un type d’embout de marche.",

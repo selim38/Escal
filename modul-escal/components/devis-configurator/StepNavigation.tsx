@@ -58,7 +58,12 @@ export function StepNavigation({
           <ButtonArrow dir="next" />
         </a>
       ) : !isLastStep ? (
+        // Clés distinctes : sans elles, React réutilise ce bouton pour « Envoyer »
+        // et passe son type à `submit` pendant le clic sur « Suivant » — le
+        // navigateur soumettait alors le formulaire dès l'arrivée sur la
+        // dernière étape, et affichait toutes ses erreurs.
         <button
+          key="next"
           type="button"
           onClick={onNext}
           disabled={!canGoNext}
@@ -69,6 +74,7 @@ export function StepNavigation({
         </button>
       ) : (
         <button
+          key="submit"
           type="submit"
           disabled={!canGoNext || isSubmitting}
           className={`${buttonClass("primary")} flex-1 max-sm:px-3.5 sm:flex-none`}

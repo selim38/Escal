@@ -5,11 +5,17 @@ import { useFormContext } from "react-hook-form";
 
 import { useT } from "@/lib/i18n/useT";
 import { useFieldError } from "@/lib/useFieldError";
+import { useLiveValidation } from "@/lib/useLiveValidation";
 import type { QuoteFormDraft } from "@/lib/quote-schema";
-import { DEPTH_BAND_VALUES, WIDTH_BAND_VALUES } from "@/lib/quote-schema";
+import {
+  DEPTH_BAND_VALUES,
+  EXACT_DEPTH_MAX_MM,
+  EXACT_DEPTH_MIN_MM,
+  WIDTH_BAND_VALUES,
+} from "@/lib/quote-schema";
 import type { DimensionField } from "@/lib/step-config";
 
-import { DepthBlockedModal, MAX_DEPTH_MM } from "../ui/DepthBlockedModal";
+import { DepthBlockedModal } from "../ui/DepthBlockedModal";
 import {
   describedBy,
   FieldError,
@@ -22,22 +28,37 @@ import {
 import { StepTreadPhotos } from "./StepTreadPhotos";
 
 export function DimensionsBandsFields() {
-  const { register, setValue } = useFormContext<QuoteFormDraft>();
+  const { register, setValue, getValues, clearErrors, setFocus, watch } =
+    useFormContext<QuoteFormDraft>();
+  const depthBand = watch("depthBand");
   const wErr = useFieldError("widthBand");
   const dErr = useFieldError("depthBand");
+  const exactErr = useFieldError("exactDepthMm");
+  const live = useLiveValidation();
   const { m, t } = useT();
 
-  const [exactDepth, setExactDepth] = useState("");
   const [showDepthModal, setShowDepthModal] = useState(false);
   const [focusedField, setFocusedField] = useState<DimensionField | null>(null);
 
-  function handleDepthBlur() {
-    const val = Number(exactDepth);
-    if (exactDepth && !Number.isNaN(val) && val > MAX_DEPTH_MM) {
+  // La profondeur exacte n'a de sens que pour « > 320 mm » : on l'efface dès
+  // qu'une autre fourchette est choisie.
+  function handleDepthBandChange(value: string) {
+    if (value === "D_GT_320") return;
+    setValue("exactDepthMm", undefined);
+    clearErrors("exactDepthMm");
+  }
+
+  // Hors catalogue : la modale oriente vers le support, puis la saisie est
+  // effacée. La fourchette reste « > 320 mm » : tant que la profondeur exacte
+  // n'est pas corrigée, l'étape ne peut pas être validée.
+  function handleExactDepthBlur() {
+    setFocusedField(null);
+    const value = getValues("exactDepthMm");
+    if (value !== undefined && value > EXACT_DEPTH_MAX_MM) {
       setShowDepthModal(true);
-      // Réinitialise la bande sélectionnée
-      setValue("depthBand", undefined, { shouldValidate: false });
+      return;
     }
+    live.touch("exactDepthMm");
   }
 
   return (
@@ -45,8 +66,10 @@ export function DimensionsBandsFields() {
       <DepthBlockedModal
         open={showDepthModal}
         onClose={() => {
-          setExactDepth("");
+          setValue("exactDepthMm", undefined);
+          clearErrors("exactDepthMm");
           setShowDepthModal(false);
+          setFocus("exactDepthMm");
         }}
       />
 
@@ -99,7 +122,10 @@ export function DimensionsBandsFields() {
                   aria-describedby={dErr ? "kre-depthBand-error" : undefined}
                   className={selectClass}
                   onFocus={() => setFocusedField("depthBand")}
-                  {...register("depthBand", { onBlur: () => setFocusedField(null) })}
+                  {...register("depthBand", {
+                    onBlur: () => setFocusedField(null),
+                    onChange: (e) => handleDepthBandChange(e.target.value),
+                  })}
                 >
                   <option value="">{m.common.choose}</option>
                   {DEPTH_BAND_VALUES.map((d) => (
@@ -113,32 +139,49 @@ export function DimensionsBandsFields() {
             </div>
           </div>
 
-          {/* Profondeur exacte — sert uniquement à repérer une marche hors
-              catalogue ; l'aide dit quand la renseigner. */}
-          <div>
-            <FieldLabel htmlFor="kre-exactDepth" optional={m.common.optional}>
-              {m.steps.dimensions.exactDepthLabel}
-            </FieldLabel>
-            <div className="flex items-center gap-2.5">
-              <input
-                id="kre-exactDepth"
-                type="number"
-                inputMode="numeric"
-                min="1"
-                max="999"
-                placeholder={m.steps.dimensions.exactDepthPlaceholder}
-                value={exactDepth}
-                onChange={(e) => setExactDepth(e.target.value)}
-                onBlur={handleDepthBlur}
-                aria-describedby={describedBy("kre-exactDepth-help")}
-                className={`${fieldClass} max-w-[180px]`}
-              />
-              <span className="text-sm text-muted">{m.common.mm}</span>
+          {/* Profondeur exacte — demandée seulement pour « > 320 mm », pour
+              repérer une marche hors catalogue. */}
+          {depthBand === "D_GT_320" ? (
+            <div>
+              <FieldLabel htmlFor="kre-exactDepthMm">
+                {m.steps.dimensions.exactDepthLabel}
+              </FieldLabel>
+              <div className="flex items-center gap-2.5">
+                <input
+                  id="kre-exactDepthMm"
+                  type="number"
+                  inputMode="numeric"
+                  min={EXACT_DEPTH_MIN_MM}
+                  max={EXACT_DEPTH_MAX_MM}
+                  placeholder={m.steps.dimensions.exactDepthPlaceholder}
+                  aria-invalid={exactErr ? true : undefined}
+                  aria-describedby={describedBy(
+                    exactErr && "kre-exactDepthMm-error",
+                    "kre-exactDepthMm-help",
+                  )}
+                  className={`${fieldClass} max-w-[180px]`}
+                  onFocus={() => setFocusedField("depthBand")}
+                  {...register("exactDepthMm", {
+                    setValueAs: (v) => {
+                      if (v === "" || v === null || v === undefined) return undefined;
+                      const n = Number(v);
+                      return Number.isFinite(n) ? n : undefined;
+                    },
+                    onBlur: handleExactDepthBlur,
+                    onChange: () => live.recheck("exactDepthMm"),
+                  })}
+                />
+                <span className="text-sm text-muted">{m.common.mm}</span>
+              </div>
+              <FieldError id="kre-exactDepthMm-error">{exactErr}</FieldError>
+              <FieldHelp id="kre-exactDepthMm-help">
+                {t(m.steps.dimensions.exactDepthHelp, {
+                  min: EXACT_DEPTH_MIN_MM,
+                  max: EXACT_DEPTH_MAX_MM,
+                })}
+              </FieldHelp>
             </div>
-            <FieldHelp id="kre-exactDepth-help">
-              {t(m.steps.dimensions.exactDepthHelp, { max: MAX_DEPTH_MM })}
-            </FieldHelp>
-          </div>
+          ) : null}
         </div>
 
         {/* Photos guides */}

@@ -4,12 +4,10 @@ import { WarningIcon } from "@phosphor-icons/react";
 
 import { useKreConfig } from "@/lib/config";
 import { useT } from "@/lib/i18n/useT";
+import { EXACT_DEPTH_MAX_MM } from "@/lib/quote-schema";
 
 import { buttonClass } from "./Button";
 import { KreDialog } from "./KreDialog";
-
-/** Profondeur maximale au catalogue (mm). Au-delà : configuration sur-mesure. */
-export const MAX_DEPTH_MM = 630;
 
 /**
  * Affichée quand la profondeur saisie dépasse le catalogue.
@@ -39,7 +37,7 @@ export function DepthBlockedModal({
         </h2>
       </div>
       <p className="mb-1 text-sm text-muted">
-        {t(m.depthModal.body1, { max: MAX_DEPTH_MM })}
+        {t(m.depthModal.body1, { max: EXACT_DEPTH_MAX_MM })}
       </p>
       <p className="mb-5 text-sm text-muted">{m.depthModal.body2}</p>
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">

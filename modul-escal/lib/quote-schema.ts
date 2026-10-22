@@ -24,6 +24,9 @@ const V = {
   stepCountMin: vKey("stepCountMin"),
   stepCountMax: vKey("stepCountMax"),
   uniformRequired: vKey("uniformRequired"),
+  exactDepthRequired: vKey("exactDepthRequired"),
+  exactDepthMin: vKey("exactDepthMin"),
+  exactDepthMax: vKey("exactDepthMax"),
   landingFinishRequired: vKey("landingFinishRequired"),
   seuilColorRequired: vKey("seuilColorRequired"),
   endCapRequired: vKey("endCapRequired"),
@@ -72,6 +75,19 @@ export type WidthBand = (typeof WIDTH_BAND_VALUES)[number];
 
 export const DEPTH_BAND_VALUES = ["D_LT_320", "D_GT_320"] as const;
 export type DepthBand = (typeof DEPTH_BAND_VALUES)[number];
+
+/**
+ * Profondeur exacte, demandée seulement pour la fourchette « > 320 mm » : elle
+ * repère les marches hors catalogue (au-delà du maximum, étude sur mesure).
+ */
+export const EXACT_DEPTH_MIN_MM = 320;
+export const EXACT_DEPTH_MAX_MM = 630;
+
+const exactDepthSchema = z
+  .number({ error: () => ({ message: V.exactDepthRequired }) })
+  .int(V.integerRequired)
+  .min(EXACT_DEPTH_MIN_MM, V.exactDepthMin)
+  .max(EXACT_DEPTH_MAX_MM, V.exactDepthMax);
 
 export const STEP_END_CAP_VALUES = ["NONE", "OPEN_STEP", "OVERHANGING"] as const;
 export type StepEndCap = (typeof STEP_END_CAP_VALUES)[number];
@@ -176,6 +192,7 @@ export const quoteFormBaseSchema = z.object({
   stepConfigs: z.array(stepConfigSchema.partial()).optional(),
   widthBand: z.enum(WIDTH_BAND_VALUES).optional(),
   depthBand: z.enum(DEPTH_BAND_VALUES).optional(),
+  exactDepthMm: exactDepthSchema.optional(),
   openSides: z.boolean(),
   intermediateLanding: z.boolean(),
   landingFinish: z.enum(LANDING_FINISH_VALUES, {
@@ -259,6 +276,7 @@ export type QuoteFormDraft = Partial<
     | "stepConfigs"
     | "widthBand"
     | "depthBand"
+    | "exactDepthMm"
     | "riserHeightMm"
     | "stepEndCap"
     | "openStepEndSide"
@@ -372,15 +390,24 @@ function validateDimensionsStep(values: QuoteFormDraft): boolean {
   if (!uniformOk) return false;
 
   if (values.uniformStepDimensions === true) {
-    return stepDimensionsBandsSchema.safeParse({
-      widthBand: values.widthBand,
-      depthBand: values.depthBand,
-    }).success;
+    return (
+      stepDimensionsBandsSchema.safeParse({
+        widthBand: values.widthBand,
+        depthBand: values.depthBand,
+      }).success && !exactDepthError(values)
+    );
   }
   if (values.uniformStepDimensions === false) {
     return validateStepConfigs(values.stepConfigs, values.stepCount ?? 0);
   }
   return false;
+}
+
+/** Erreur de la profondeur exacte, exigée seulement pour « > 320 mm ». */
+function exactDepthError(values: QuoteFormDraft): string | undefined {
+  if (values.depthBand !== "D_GT_320") return undefined;
+  const res = exactDepthSchema.safeParse(values.exactDepthMm);
+  return res.success ? undefined : res.error.issues[0]?.message;
 }
 
 function validateStepEndCapStep(values: QuoteFormDraft): boolean {
@@ -438,7 +465,7 @@ export type LeadField = (typeof LEAD_FIELDS)[number];
  * Renvoie la clé du message d'erreur, ou `undefined` si la valeur est valide.
  */
 export function validateFormField(
-  name: LeadField | "riserHeightMm" | "stepCount",
+  name: LeadField | "riserHeightMm" | "stepCount" | "exactDepthMm",
   value: unknown,
 ): string | undefined {
   const res = quoteFormBaseSchema.shape[name].safeParse(value);
@@ -466,7 +493,8 @@ export function getWizardStepFieldErrors(
         widthBand: values.widthBand,
         depthBand: values.depthBand,
       });
-      if (res.success) return {};
+      const exactDepthMm = exactDepthError(values);
+      if (res.success) return exactDepthMm ? { exactDepthMm } : {};
       return Object.fromEntries(
         res.error.issues
           .filter((i) => typeof i.path[0] === "string")

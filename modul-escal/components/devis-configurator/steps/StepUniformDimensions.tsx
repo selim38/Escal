@@ -36,6 +36,7 @@ export function StepUniformDimensions() {
     } else {
       setValue("widthBand", undefined);
       setValue("depthBand", undefined);
+      setValue("exactDepthMm", undefined);
       setValue("stepConfigs", ensureStepConfigs(undefined, stepCount), {
         shouldValidate: true,
       });

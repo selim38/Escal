@@ -41,7 +41,7 @@ const STEP_CLEAR_PATHS: (keyof QuoteFormDraft)[][] = [
   ["decor"],
   ["riserOption"],
   ["stepCount"],
-  ["uniformStepDimensions", "widthBand", "depthBand", "stepConfigs"],
+  ["uniformStepDimensions", "widthBand", "depthBand", "exactDepthMm", "stepConfigs"],
   ["openSides", "stepEndCapConfigs"],
   ["intermediateLanding", "landingFinish", "seuilColor"],
   [], // étape inclus — aucun champ à effacer
@@ -92,6 +92,7 @@ function WizardBody() {
   // Passe à `true` au premier envoi refusé : les manques (photos comprises)
   // sont alors signalés comme des erreurs, et plus seulement comme des consignes.
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [photoCount, setPhotoCount] = useState(0);
   const { watch, getValues, setError, clearErrors, handleSubmit, setFocus } =
     useFormContext<QuoteFormDraft>();
   const values = watch();
@@ -105,6 +106,20 @@ function WizardBody() {
 
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === QUOTE_STEP_COUNT - 1;
+  // Résumé « demande incomplète » : affiché après un envoi refusé, et retiré
+  // dès que tous les champs et les photos sont en règle — sans attendre un
+  // nouvel envoi.
+  const showIncompleteSummary =
+    isLastStep &&
+    submitAttempted &&
+    (!quoteFormSchema.safeParse(values).success ||
+      photoCount < REQUIRED_PHOTO_COUNT);
+  const errorMessage =
+    submitState.status === "error"
+      ? submitState.message
+      : showIncompleteSummary
+        ? m.steps.lead.errorSummary
+        : null;
   // Escalier ouvert : hors tunnel, l'internaute est orienté vers un contact.
   const isOpenStaircase = isFirstStep && values.staircaseType === "OPEN";
 
@@ -132,6 +147,9 @@ function WizardBody() {
     if (currentStep === 0) return;
     // Le message d'échec d'envoi ne concerne que la dernière étape.
     if (submitState.status === "error") setSubmitState({ status: "idle" });
+    // Les photos sont perdues en quittant l'étape : au retour, leurs
+    // emplacements redeviennent des consignes, pas des erreurs.
+    setSubmitAttempted(false);
     setCurrentStep((s) => s - 1);
   };
 
@@ -165,10 +183,11 @@ function WizardBody() {
 
   const onFinal = async (data: QuoteFormDraft, event?: BaseSyntheticEvent) => {
     setSubmitAttempted(true);
+    // Un échec d'envoi précédent laisse la place au résumé des manques.
+    setSubmitState({ status: "idle" });
     const res = quoteFormSchema.safeParse(data);
     if (!res.success) {
       applyZodIssues(setError, res.error.issues);
-      setSubmitState({ status: "error", message: m.steps.lead.errorSummary });
       // Focus sur le premier champ en cause, dans l'ordre d'affichage : son
       // message d'erreur est lu par les lecteurs d'écran (aria-describedby).
       const invalid = new Set(res.error.issues.map((i) => i.path[0]));
@@ -180,7 +199,6 @@ function WizardBody() {
     // n photos ») s'affiche sous les emplacements ; le résumé reste générique
     // pour ne pas annoncer deux fois le même message.
     if (pendingPhotos.get().length < REQUIRED_PHOTO_COUNT) {
-      setSubmitState({ status: "error", message: m.steps.lead.errorSummary });
       // La cible de l'événement d'envoi est le formulaire lui-même.
       (event?.target as HTMLFormElement | undefined)
         ?.querySelector<HTMLElement>("[data-photo-pick]")
@@ -276,8 +294,11 @@ function WizardBody() {
             </div>
             <div>
               <dt className="inline">{m.success.estimate}</dt>{" "}
-              <dd className="inline font-bold text-heading">
-                {submitState.estimatedMaterialsEuro} €
+              <dd className="inline">
+                <span className="font-bold text-heading">
+                  {submitState.estimatedMaterialsEuro.toLocaleString(config.locale)} €
+                </span>{" "}
+                {m.success.estimateNote}
               </dd>
             </div>
           </dl>
@@ -324,16 +345,17 @@ function WizardBody() {
               <StepLead
                 requiredPhotoCount={REQUIRED_PHOTO_COUNT}
                 showMissingAsError={submitAttempted}
+                onPhotoCountChange={setPhotoCount}
               />
             ) : null}
 
-            {submitState.status === "error" && (
+            {errorMessage && (
               <p
                 className="mt-7 flex items-start gap-2.5 border border-error/30 bg-error-tint px-4 py-3 text-sm font-semibold text-error"
                 role="alert"
               >
                 <WarningCircleIcon aria-hidden className="mt-px size-5 shrink-0" />
-                <span>{submitState.message}</span>
+                <span>{errorMessage}</span>
               </p>
             )}
           </div>

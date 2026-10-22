@@ -42,10 +42,13 @@ const SECTION_ICON_CLASS = "size-[21px] shrink-0 text-primary";
 export function StepLead({
   requiredPhotoCount,
   showMissingAsError,
+  onPhotoCountChange,
 }: {
   requiredPhotoCount: number;
   /** Après un envoi refusé, les photos manquantes sont signalées en erreur. */
   showMissingAsError: boolean;
+  /** Nombre de photos ajoutées, pour retirer le résumé d'erreur une fois complet. */
+  onPhotoCountChange: (count: number) => void;
 }) {
   const { register, watch, setValue } = useFormContext<QuoteFormDraft>();
   const contactPreference = watch("contactPreference");
@@ -94,12 +97,12 @@ export function StepLead({
 
   // Synchronise le magasin de photos porté par l'instance
   useEffect(() => {
-    pendingPhotos.set(
-      Object.values(slotPhotos)
-        .filter((s): s is NonNullable<SlotPhoto> => s !== null)
-        .map((s) => s.file),
-    );
-  }, [slotPhotos, pendingPhotos]);
+    const photos = Object.values(slotPhotos)
+      .filter((s): s is NonNullable<SlotPhoto> => s !== null)
+      .map((s) => s.file);
+    pendingPhotos.set(photos);
+    onPhotoCountChange(photos.length);
+  }, [slotPhotos, pendingPhotos, onPhotoCountChange]);
 
   // L'étape est démontée dès qu'on revient en arrière : les aperçus sont
   // perdus, le magasin doit l'être aussi pour ne pas envoyer de photos fantômes.
