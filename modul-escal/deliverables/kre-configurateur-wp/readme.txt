@@ -3,7 +3,7 @@ Contributors: pointsoft
 Requires at least: 6.3
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.6.2
+Stable tag: 1.6.3
 License: GPL-2.0-or-later
 
 Intègre le configurateur de devis Kit Rénovation Escalier dans une page
@@ -52,7 +52,7 @@ Exemples :
 
 Le plugin n'est qu'une commodité. Un bloc HTML suffit :
 
-    <script src="https://escal.point-soft.fr/wc/v1.6.2/kre-configurateur.js" type="module" defer></script>
+    <script src="https://escal.point-soft.fr/wc/v1.6.3/kre-configurateur.js" type="module" defer></script>
     <kre-configurateur lang="fr" theme="kre"></kre-configurateur>
 
 `type="module"` est nécessaire : le bundle est un module ES et utilise
