@@ -31,6 +31,7 @@ const V = {
   seuilColorRequired: vKey("seuilColorRequired"),
   endCapRequired: vKey("endCapRequired"),
   endCapConfigsIncomplete: vKey("endCapConfigsIncomplete"),
+  landingStepUnconfirmed: vKey("landingStepUnconfirmed"),
   stepConfigsIncomplete: vKey("stepConfigsIncomplete"),
   firstNameRequired: vKey("firstNameRequired"),
   lastNameRequired: vKey("lastNameRequired"),
@@ -117,9 +118,24 @@ export type SeuilColor = (typeof SEUIL_COLOR_VALUES)[number];
 export const STAIR_LAYOUT_VALUES = ["STRAIGHT", "BALANCED", "FIVE_SIDED"] as const;
 export type StairLayout = (typeof STAIR_LAYOUT_VALUES)[number];
 
-/** Plage du nombre de marches — partagée par le schéma et le sélecteur +/−. */
-export const STEP_COUNT_MIN = 1;
+/**
+ * Plage du nombre de marches — partagée par le schéma et le sélecteur +/−.
+ * Le compte inclut la marche palière : au moins une marche plus le palier.
+ */
+export const STEP_COUNT_MIN = 2;
 export const STEP_COUNT_MAX = 30;
+
+/**
+ * Marches à configurer (dimensions, embouts). La dernière marche comptée à
+ * l'étape 4 est la marche palière : un seuil avec nez de marche d'un seul
+ * morceau, sans dimensions ni embout à renseigner.
+ */
+export function treadCount(stepCount: number | undefined): number {
+  return Math.max((stepCount ?? 0) - 1, 0);
+}
+
+export const CONTACT_PREFERENCE_VALUES = ["WHATSAPP", "EMAIL", "PHONE"] as const;
+export type ContactPreference = (typeof CONTACT_PREFERENCE_VALUES)[number];
 
 export const STAIRCASE_TYPE_VALUES = ["OPEN", "CLOSED"] as const;
 export type StaircaseType = (typeof STAIRCASE_TYPE_VALUES)[number];
@@ -142,11 +158,12 @@ export type StepConfigDraft = Partial<StepConfig>;
 
 export const stepConfigsSchema = z.array(stepConfigSchema);
 
+/** Une configuration par marche, marche palière exclue (voir `treadCount`). */
 export function validateStepConfigs(
   configs: StepConfigDraft[] | undefined,
   stepCount: number,
 ): configs is StepConfig[] {
-  if (!configs || configs.length !== stepCount) return false;
+  if (!configs || configs.length !== treadCount(stepCount)) return false;
   return configs.every((c) => stepConfigSchema.safeParse(c).success);
 }
 
@@ -204,8 +221,10 @@ export const quoteFormBaseSchema = z.object({
   openStepEndSide: z.enum(END_SIDE_VALUES).optional(),
   lateralEndSide: z.enum(END_SIDE_VALUES).optional(),
   stepEndCapConfigs: z.array(stepEndCapConfigSchema).optional(),
+  /** Réponse « oui » à « la marche n est-elle bien la marche palière ? » (étape 6). */
+  landingStepConfirmed: z.boolean().optional(),
   seuilColor: z.enum(SEUIL_COLOR_VALUES).optional(),
-  contactPreference: z.enum(["WHATSAPP", "EMAIL"]).optional(),
+  contactPreference: z.enum(CONTACT_PREFERENCE_VALUES).optional(),
   firstName: z.string().trim().min(1, V.firstNameRequired),
   lastName: z.string().trim().min(1, V.lastNameRequired),
   email: z.email({ error: () => ({ message: V.emailInvalid }) }),
@@ -282,6 +301,7 @@ export type QuoteFormDraft = Partial<
     | "openStepEndSide"
     | "lateralEndSide"
     | "stepEndCapConfigs"
+    | "landingStepConfirmed"
     | "landingFinish"
     | "seuilColor"
     | "contactPreference"
@@ -315,7 +335,9 @@ export const quoteStepSchemas = [
   quoteFormBaseSchema.pick({ riserOption: true, riserHeightMm: true }),
   quoteFormBaseSchema.pick({ stepCount: true }),
   quoteFormBaseSchema.pick({ uniformStepDimensions: true }),
-  quoteFormBaseSchema.pick({ stepEndCapConfigs: true }).partial(),
+  quoteFormBaseSchema
+    .pick({ stepEndCapConfigs: true, landingStepConfirmed: true })
+    .partial(),
   quoteFormBaseSchema.pick({
     intermediateLanding: true,
     landingFinish: true,
@@ -361,7 +383,10 @@ export function pickQuoteStepValues(
     case 4:
       return { uniformStepDimensions: values.uniformStepDimensions };
     case 5:
-      return { stepEndCapConfigs: values.stepEndCapConfigs };
+      return {
+        stepEndCapConfigs: values.stepEndCapConfigs,
+        landingStepConfirmed: values.landingStepConfirmed,
+      };
     case 6:
       return {
         intermediateLanding: values.intermediateLanding,
@@ -411,8 +436,8 @@ function exactDepthError(values: QuoteFormDraft): string | undefined {
 }
 
 function validateStepEndCapStep(values: QuoteFormDraft): boolean {
-  const count = values.stepCount;
-  if (!count) return false;
+  const count = treadCount(values.stepCount);
+  if (!count || values.landingStepConfirmed !== true) return false;
   const configs = values.stepEndCapConfigs;
   if (!configs || configs.length !== count) return false;
   return configs.every((c) => {
@@ -513,7 +538,11 @@ export function getWizardStepFieldErrors(
 
   if (step === 5) {
     if (!validateStepEndCapStep(values)) {
-      return { stepEndCapConfigs: V.endCapConfigsIncomplete };
+      const configured =
+        values.stepEndCapConfigs?.length === treadCount(values.stepCount);
+      return configured
+        ? { landingStepConfirmed: V.landingStepUnconfirmed }
+        : { stepEndCapConfigs: V.endCapConfigsIncomplete };
     }
     return {};
   }

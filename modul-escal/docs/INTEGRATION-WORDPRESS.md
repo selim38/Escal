@@ -199,7 +199,7 @@ joint à tous ses événements ainsi qu'au lead enregistré (§5).
 | `endpoint` | URL | `https://escal.point-soft.fr/api` | Base de l'API Point Soft. Permet de pointer une API de recette. |
 | `recipient-email` | email | *(vide)* | Destinataire des demandes. Voir §3.2. |
 | `confirmation-url` | URL | *(vide)* | Redirection après envoi. Vide = écran de succès interne au composant. |
-| `open-staircase-url` | URL | *(vide)* | Formulaire de contact ouvert par « Être recontacté » quand l'escalier est ouvert (hors tunnel). Vide = e-mail pré-rempli vers `recipient-email`, à défaut `contact@escal-concept.fr`. |
+| `open-staircase-url` | URL | *(vide)* | Formulaire de contact ouvert par « Être recontacté » (étape 1, escalier d'un autre type que fermé). Vide = e-mail pré-rempli vers `recipient-email`, à défaut `contact@kitrenovationescalier.fr`. |
 | `show-sample-cta` | booléen | absent | Affiche le CTA « Demander un échantillon ». Voir §3.3. |
 | `assets-base` | URL | *(déduite)* | Base des images. **À ne pas renseigner** en usage normal : elle est déduite de l'URL du script. |
 | `show-header` | booléen | `true` | Logo au-dessus du configurateur. `false` si l'en-tête de votre page l'affiche déjà. Le titre et l'accroche ne sont plus portés par le composant. |

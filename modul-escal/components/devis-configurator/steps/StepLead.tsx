@@ -6,6 +6,8 @@ import {
   ChatCircleIcon,
   EnvelopeSimpleIcon,
   ImageSquareIcon,
+  PhoneIcon,
+  SealCheckIcon,
   TrashIcon,
   UserIcon,
   WhatsappLogoIcon,
@@ -142,99 +144,8 @@ export function StepLead({
     <div className="space-y-8">
       <StepHeader title={m.steps.lead.title} subtitle={m.steps.lead.subtitle} />
 
-      {/* ── Formulaire contact ───────────────────────────────── */}
-      <fieldset className="space-y-4">
-        <SectionTitle as="legend" icon={<UserIcon aria-hidden className={SECTION_ICON_CLASS} />}>
-          {m.steps.lead.personalInfo}
-        </SectionTitle>
-
-        <div className="grid grid-cols-1 gap-x-3.5 gap-y-4 sm:grid-cols-2">
-          <div>
-            <FieldLabel htmlFor="kre-lastName">{m.steps.lead.lastName}</FieldLabel>
-            <input autoComplete="family-name" className={fieldClass} {...fieldProps("lastName")} />
-            <FieldError id="kre-lastName-error">{errors.lastName}</FieldError>
-          </div>
-
-          <div>
-            <FieldLabel htmlFor="kre-firstName">{m.steps.lead.firstName}</FieldLabel>
-            <input autoComplete="given-name" className={fieldClass} {...fieldProps("firstName")} />
-            <FieldError id="kre-firstName-error">{errors.firstName}</FieldError>
-          </div>
-
-          <div>
-            <FieldLabel htmlFor="kre-email">{m.steps.lead.email}</FieldLabel>
-            <input
-              type="email"
-              autoComplete="email"
-              inputMode="email"
-              className={fieldClass}
-              {...fieldProps("email")}
-            />
-            <FieldError id="kre-email-error">{errors.email}</FieldError>
-          </div>
-
-          <div>
-            <FieldLabel htmlFor="kre-phone">{m.steps.lead.phone}</FieldLabel>
-            <input type="tel" autoComplete="tel" className={fieldClass} {...fieldProps("phone")} />
-            <FieldError id="kre-phone-error">{errors.phone}</FieldError>
-          </div>
-
-          <div>
-            <FieldLabel htmlFor="kre-country">{m.steps.lead.country}</FieldLabel>
-            <SelectShell>
-              <select autoComplete="country-name" className={selectClass} {...fieldProps("country")}>
-                <option value="">{m.steps.lead.countryPlaceholder}</option>
-                <optgroup label={m.steps.lead.countryMain}>
-                  {m.steps.lead.countries.main.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label={m.steps.lead.countryOther}>
-                  {m.steps.lead.countries.other.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </optgroup>
-              </select>
-            </SelectShell>
-            <FieldError id="kre-country-error">{errors.country}</FieldError>
-          </div>
-        </div>
-      </fieldset>
-
-      {/* ── Préférence de contact ────────────────────────────── */}
-      <fieldset className="space-y-3.5">
-        <SectionTitle as="legend" icon={<ChatCircleIcon aria-hidden className={SECTION_ICON_CLASS} />}>
-          {m.steps.lead.contactPreferenceTitle}
-        </SectionTitle>
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-          {(
-            [
-              { value: "WHATSAPP", label: m.steps.lead.contactWhatsapp, Icon: WhatsappLogoIcon },
-              { value: "EMAIL", label: m.steps.lead.contactEmail, Icon: EnvelopeSimpleIcon },
-            ] as const
-          ).map(({ value, label, Icon }) => (
-            <OptionCard
-              key={value}
-              selected={contactPreference === value}
-              onClick={() =>
-                setValue("contactPreference", value, { shouldDirty: true })
-              }
-              markClassName="top-[13.5px]"
-              className="flex h-14 items-center gap-3 px-[18px] text-left text-[15px] font-semibold text-heading"
-            >
-              {/* Même famille d'icônes que le reste du tunnel (Phosphor Regular). */}
-              <Icon aria-hidden className="size-[22px] shrink-0 text-primary" />
-              {label}
-            </OptionCard>
-          ))}
-        </div>
-        <p className="text-[13px] text-subtle">{m.steps.lead.contactHint}</p>
-      </fieldset>
-
+      {/* Ordre fixé par Escal Concept : photos, ce que débloque la
+          validation, coordonnées, puis préférence de contact. */}
       {/* ── 3 photos labellisées ─────────────────────────────── */}
       <div className="space-y-3.5">
         <SectionTitle icon={<CameraIcon aria-hidden className={SECTION_ICON_CLASS} />}>
@@ -356,6 +267,107 @@ export function StepLead({
           )
         ) : null}
       </div>
+
+      {/* ── Après validation du dossier : ce que débloque l'envoi ─── */}
+      <div className="flex items-start gap-3.5 border border-primary/35 bg-tint px-5 py-[18px]">
+        <SealCheckIcon aria-hidden className="size-[22px] shrink-0 text-primary" />
+        <p className="text-sm leading-relaxed text-heading">{m.steps.lead.unlockInfo}</p>
+      </div>
+
+      {/* ── Formulaire contact ───────────────────────────────── */}
+      <fieldset className="space-y-4">
+        <SectionTitle as="legend" icon={<UserIcon aria-hidden className={SECTION_ICON_CLASS} />}>
+          {m.steps.lead.personalInfo}
+        </SectionTitle>
+        <p className="text-sm text-muted">{m.steps.lead.personalInfoIntro}</p>
+
+        <div className="grid grid-cols-1 gap-x-3.5 gap-y-4 sm:grid-cols-2">
+          <div>
+            <FieldLabel htmlFor="kre-lastName">{m.steps.lead.lastName}</FieldLabel>
+            <input autoComplete="family-name" className={fieldClass} {...fieldProps("lastName")} />
+            <FieldError id="kre-lastName-error">{errors.lastName}</FieldError>
+          </div>
+
+          <div>
+            <FieldLabel htmlFor="kre-firstName">{m.steps.lead.firstName}</FieldLabel>
+            <input autoComplete="given-name" className={fieldClass} {...fieldProps("firstName")} />
+            <FieldError id="kre-firstName-error">{errors.firstName}</FieldError>
+          </div>
+
+          <div>
+            <FieldLabel htmlFor="kre-email">{m.steps.lead.email}</FieldLabel>
+            <input
+              type="email"
+              autoComplete="email"
+              inputMode="email"
+              className={fieldClass}
+              {...fieldProps("email")}
+            />
+            <FieldError id="kre-email-error">{errors.email}</FieldError>
+          </div>
+
+          <div>
+            <FieldLabel htmlFor="kre-phone">{m.steps.lead.phone}</FieldLabel>
+            <input type="tel" autoComplete="tel" className={fieldClass} {...fieldProps("phone")} />
+            <FieldError id="kre-phone-error">{errors.phone}</FieldError>
+          </div>
+
+          <div>
+            <FieldLabel htmlFor="kre-country">{m.steps.lead.country}</FieldLabel>
+            <SelectShell>
+              <select autoComplete="country-name" className={selectClass} {...fieldProps("country")}>
+                <option value="">{m.steps.lead.countryPlaceholder}</option>
+                <optgroup label={m.steps.lead.countryMain}>
+                  {m.steps.lead.countries.main.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label={m.steps.lead.countryOther}>
+                  {m.steps.lead.countries.other.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+            </SelectShell>
+            <FieldError id="kre-country-error">{errors.country}</FieldError>
+          </div>
+        </div>
+      </fieldset>
+
+      {/* ── Préférence de contact ────────────────────────────── */}
+      <fieldset className="space-y-3.5">
+        <SectionTitle as="legend" icon={<ChatCircleIcon aria-hidden className={SECTION_ICON_CLASS} />}>
+          {m.steps.lead.contactPreferenceTitle}
+        </SectionTitle>
+        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
+          {(
+            [
+              { value: "WHATSAPP", label: m.steps.lead.contactWhatsapp, Icon: WhatsappLogoIcon },
+              { value: "EMAIL", label: m.steps.lead.contactEmail, Icon: EnvelopeSimpleIcon },
+              { value: "PHONE", label: m.steps.lead.contactPhone, Icon: PhoneIcon },
+            ] as const
+          ).map(({ value, label, Icon }) => (
+            <OptionCard
+              key={value}
+              selected={contactPreference === value}
+              onClick={() =>
+                setValue("contactPreference", value, { shouldDirty: true })
+              }
+              markClassName="top-[13.5px]"
+              className="flex h-14 items-center gap-3 px-[18px] text-left text-[15px] font-semibold text-heading"
+            >
+              {/* Même famille d'icônes que le reste du tunnel (Phosphor Regular). */}
+              <Icon aria-hidden className="size-[22px] shrink-0 text-primary" />
+              {label}
+            </OptionCard>
+          ))}
+        </div>
+        <p className="text-[13px] text-subtle">{m.steps.lead.contactHint}</p>
+      </fieldset>
 
       <SampleCta decorLabel={decor ? m.catalog.decor[decor] : undefined} />
     </div>

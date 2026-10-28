@@ -22,7 +22,7 @@ export const fr = {
     logoAlt: "Kit Rénovation Escalier",
     // Titre, accroche et réassurance ne sont plus portés par le composant :
     // recommandation Knewledge, ils vivent dans la page WordPress qui l'accueille.
-    supportEmail: "contact@escal-concept.fr",
+    supportEmail: "contact@kitrenovationescalier.fr",
   },
 
   nav: {
@@ -32,8 +32,6 @@ export const fr = {
     /** Libellé court du même bouton sur mobile, où il partage la ligne avec « Précédent ». */
     submitShort: "Envoyer",
     submitting: "Envoi en cours…",
-    /** Escalier ouvert : le bouton « Suivant » mène au formulaire de contact. */
-    openStaircase: "Être recontacté",
   },
 
   progress: {
@@ -50,7 +48,7 @@ export const fr = {
       "Embouts de marche",
       "Palier intermédiaire",
       "Éléments inclus",
-      "Coordonnées",
+      "Photos et coordonnées",
     ],
   },
 
@@ -89,6 +87,11 @@ export const fr = {
     estimateNote: "(hors livraison)",
     followUp:
       "Notre équipe vous contactera sous 24 h pour finaliser votre devis.",
+  },
+
+  /** Rappel aux étapes Dimensions et Embouts (voir LandingStepNote). */
+  landingStep: {
+    note: "La marche {index}, votre marche palière, n'est pas à configurer : c'est un seuil avec nez de marche, d'un seul morceau.",
   },
 
   depthModal: {
@@ -214,22 +217,20 @@ export const fr = {
   steps: {
     staircaseType: {
       title: "Type d'escalier",
-      subtitle: "Votre escalier est-il ouvert ou fermé entre chaque marche ?",
+      subtitle:
+        "Le kit s'adresse aux escaliers fermés entre chaque marche.",
       closed: {
         label: "Fermé",
         description: "Mon escalier est fermé entre chaque marche.",
       },
-      open: {
-        label: "Ouvert",
-        description: "Mon escalier est ouvert entre chaque marche.",
-      },
-      openWarningTitle: "Cas spécifique — escalier ouvert",
-      openWarningBody:
-        "Les escaliers ouverts entre chaque marche nécessitent une étude sur mesure. Laissez-nous vos coordonnées avec le bouton « Être recontacté » : notre équipe vous contactera pour affiner la configuration.",
+      otherTitle: "Votre escalier est d'un autre type ?",
+      otherBody:
+        "Laissez-nous vos coordonnées : notre équipe vous contactera pour étudier votre projet.",
+      otherCta: "Être recontacté",
       /** Repli `mailto:` quand aucun formulaire n'est configuré (attribut `open-staircase-url`). */
-      openContactSubject: "Escalier ouvert — demande d'étude sur mesure",
-      openContactBody:
-        "Bonjour,\n\nMon escalier est ouvert entre chaque marche et je souhaite une étude sur mesure.\n\nMes coordonnées :\nNom :\nTéléphone :\nVille :\n\nMerci.",
+      otherContactSubject: "Autre type d'escalier — demande de contact",
+      otherContactBody:
+        "Bonjour,\n\nMon escalier n'est pas fermé entre chaque marche et je souhaite être recontacté.\n\nMes coordonnées :\nNom :\nTéléphone :\nVille :\n\nMerci.",
     },
 
     decor: {
@@ -258,6 +259,9 @@ export const fr = {
       inputLabel: "Nombre de marches",
       inputPlaceholder: "Ex. 12",
       rangeHint: "Entre {min} et {max} marches.",
+      landingTitle: "La dernière marche est la marche palière.",
+      landingBody:
+        "Ce n'est pas une marche complète, mais un seuil avec nez de marche d'un seul morceau : vous n'aurez pas à la configurer.",
       decrease: "Retirer une marche",
       increase: "Ajouter une marche",
     },
@@ -334,6 +338,12 @@ export const fr = {
       summaryOpenLeft: "Ouverte — gauche",
       summaryOpenRight: "Ouverte — droite",
       summaryNone: "—",
+      askLanding: "La marche {index} est-elle bien votre marche palière ?",
+      askLandingHint: "La marche du haut, au niveau du palier : seuil et nez de marche d'un seul morceau.",
+      landingNo:
+        "Le nombre de marches doit inclure la marche palière : la marche {index} doit être celle du palier.",
+      editStepCount: "Modifier le nombre de marches",
+      summaryLanding: "Marche palière — seuil + nez",
       allDone: "Toutes les marches sont configurées.",
       editing: "En cours de modification",
       cancelEdit: "Annuler la modification",
@@ -364,7 +374,7 @@ export const fr = {
       rowDecor: "Décor",
       rowRiser: "Contremarches",
       rowSteps: "Nombre de marches",
-      valueSteps: "{count} marche{plural}",
+      valueSteps: "{count} marche{plural} + marche palière",
       rowDimensions: "Dimensions",
       valueDimensionsUniform: "Longueur {width} · profondeur {depth}",
       valueDimensionsPerStep: "Marche par marche : {detail}",
@@ -416,15 +426,23 @@ export const fr = {
       priceUnavailable:
         "Complétez les étapes précédentes pour afficher l'estimation.",
       priceNote: "(Hors livraison)",
-      nextCtaStrong: "Pour finaliser votre devis,",
-      nextCtaBody:
-        "renseignez vos coordonnées et ajoutez 3 photos de votre escalier à l'étape suivante. Un expert vous recontactera rapidement.",
+      nextStepsTitle: "Pour finaliser votre commande",
+      nextSteps: [
+        "Votre devis est complet : vérifiez-le ci-dessus.",
+        "Pour éviter toute erreur d'incompatibilité ou technique, joignez 3 photos de votre escalier à l'étape suivante.",
+        "Une fois votre dossier validé par nos soins, vous débloquerez les vidéos tutos, le pack installation outillage et le matériel pour le recouvrement de votre escalier, réalisé dans notre usine.",
+        "Renseignez vos coordonnées : un expert vous recontactera.",
+      ],
     },
 
     lead: {
-      title: "Vos coordonnées",
+      title: "Photos et coordonnées",
       subtitle: "Un expert vous recontactera pour finaliser votre devis.",
       personalInfo: "Informations personnelles",
+      personalInfoIntro: "Merci de renseigner vos coordonnées ci-dessous.",
+      /** Affiché entre les photos et les coordonnées (ordre fixé par Escal Concept). */
+      unlockInfo:
+        "Une fois votre dossier validé par nos soins, vous débloquerez les vidéos tutos, le pack installation outillage et le matériel pour le recouvrement de votre escalier, réalisé dans notre usine.",
       lastName: "Nom",
       firstName: "Prénom",
       email: "E-mail",
@@ -436,11 +454,12 @@ export const fr = {
       contactPreferenceTitle: "Comment souhaitez-vous être contacté ?",
       contactWhatsapp: "WhatsApp",
       contactEmail: "E-mail",
+      contactPhone: "Téléphone",
       contactHint:
-        "Si vous n'avez pas WhatsApp, choisissez E-mail — un expert vous répondra dans les 24 h.",
+        "Si vous n'avez pas WhatsApp, choisissez E-mail ou Téléphone — un expert vous répondra dans les 24 h.",
       photosTitle: "Photos de votre escalier",
       photosIntro:
-        "3 photos sont nécessaires pour que notre expert puisse affiner votre devis.",
+        "Pour éviter toute erreur d'incompatibilité ou technique, joignez 3 photos de votre escalier.",
       photosNote: "Les photos sont obligatoires pour une validation de dossier.",
       photosMissing:
         "Il manque {count} photo{plural} sur {total} pour envoyer votre demande.",
@@ -500,7 +519,7 @@ export const fr = {
     riserHeightMin: "Minimum 100 mm.",
     riserHeightMax: "Maximum 300 mm.",
     stepCountRequired: "Indiquez le nombre de marches.",
-    stepCountMin: "Minimum 1 marche.",
+    stepCountMin: "Minimum 2 marches, marche palière comprise.",
     stepCountMax: "Maximum 30 marches.",
     uniformRequired:
       "Indiquez si toutes les marches ont les mêmes dimensions.",
@@ -512,6 +531,8 @@ export const fr = {
     seuilColorRequired: "Choisissez la couleur du seuil.",
     endCapRequired: "Choisissez un type d’embout de marche.",
     endCapConfigsIncomplete: "Configurez toutes les marches.",
+    landingStepUnconfirmed:
+      "Indiquez si la dernière marche est bien votre marche palière.",
     stepConfigsIncomplete:
       "Configurez le type et les dimensions de chaque marche.",
     firstNameRequired: "Le prénom est obligatoire.",

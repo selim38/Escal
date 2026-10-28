@@ -20,7 +20,6 @@ import {
 
 import { calculatePrice } from "@/lib/calculatePrice";
 import { KreConfigProvider, usePendingPhotos, useKreConfig, type KreConfig } from "@/lib/config";
-import type { Messages } from "@/lib/i18n";
 import { useT } from "@/lib/i18n/useT";
 import { useWizardTracking } from "@/lib/useWizardTracking";
 
@@ -42,7 +41,7 @@ const STEP_CLEAR_PATHS: (keyof QuoteFormDraft)[][] = [
   ["riserOption"],
   ["stepCount"],
   ["uniformStepDimensions", "widthBand", "depthBand", "exactDepthMm", "stepConfigs"],
-  ["openSides", "stepEndCapConfigs"],
+  ["openSides", "stepEndCapConfigs", "landingStepConfirmed"],
   ["intermediateLanding", "landingFinish", "seuilColor"],
   [], // étape inclus — aucun champ à effacer
   ["firstName", "lastName", "email", "phone"],
@@ -68,6 +67,8 @@ function applyZodIssues(
 }
 
 const defaultValues: QuoteFormDraft = {
+  // Seul type d'escalier pris en charge pour l'instant (voir StepStaircaseType).
+  staircaseType: "CLOSED",
   openSides: false,
   intermediateLanding: false,
   firstName: "",
@@ -82,6 +83,9 @@ type SubmitState =
   | { status: "loading" }
   | { status: "success"; leadId: string; estimatedMaterialsEuro: number }
   | { status: "error"; message: string };
+
+/** Index de l'étape « Nombre de marches » (retour depuis la question du palier). */
+const STEP_COUNT_STEP_INDEX = 3;
 
 /** Nombre de photos exigées à l'étape Coordonnées avant l'envoi du dossier. */
 const REQUIRED_PHOTO_COUNT = 3;
@@ -120,8 +124,6 @@ function WizardBody() {
       : showIncompleteSummary
         ? m.steps.lead.errorSummary
         : null;
-  // Escalier ouvert : hors tunnel, l'internaute est orienté vers un contact.
-  const isOpenStaircase = isFirstStep && values.staircaseType === "OPEN";
 
   const canGoNext = useMemo(() => {
     // Dernière étape : le bouton d'envoi reste actif. Un bouton grisé ne dit
@@ -186,23 +188,24 @@ function WizardBody() {
     // Un échec d'envoi précédent laisse la place au résumé des manques.
     setSubmitState({ status: "idle" });
     const res = quoteFormSchema.safeParse(data);
-    if (!res.success) {
-      applyZodIssues(setError, res.error.issues);
-      // Focus sur le premier champ en cause, dans l'ordre d'affichage : son
-      // message d'erreur est lu par les lecteurs d'écran (aria-describedby).
-      const invalid = new Set(res.error.issues.map((i) => i.path[0]));
-      const first = LEAD_FIELDS.find((name) => invalid.has(name));
-      if (first) setFocus(first);
-      return;
-    }
     // Sans les 3 photos, le dossier n'est pas envoyé. Le détail (« il manque
     // n photos ») s'affiche sous les emplacements ; le résumé reste générique
     // pour ne pas annoncer deux fois le même message.
-    if (pendingPhotos.get().length < REQUIRED_PHOTO_COUNT) {
-      // La cible de l'événement d'envoi est le formulaire lui-même.
-      (event?.target as HTMLFormElement | undefined)
-        ?.querySelector<HTMLElement>("[data-photo-pick]")
-        ?.focus();
+    const photosMissing = pendingPhotos.get().length < REQUIRED_PHOTO_COUNT;
+    if (!res.success) applyZodIssues(setError, res.error.issues);
+    if (!res.success || photosMissing) {
+      // Focus sur le premier manque dans l'ordre d'affichage — les photos,
+      // puis les coordonnées : son message est lu par les lecteurs d'écran.
+      if (photosMissing) {
+        // La cible de l'événement d'envoi est le formulaire lui-même.
+        (event?.target as HTMLFormElement | undefined)
+          ?.querySelector<HTMLElement>("[data-photo-pick]")
+          ?.focus();
+      } else if (!res.success) {
+        const invalid = new Set(res.error.issues.map((i) => i.path[0]));
+        const first = LEAD_FIELDS.find((name) => invalid.has(name));
+        if (first) setFocus(first);
+      }
       return;
     }
     setSubmitState({ status: "loading" });
@@ -338,7 +341,12 @@ function WizardBody() {
             {currentStep === 2 ? <StepRiser /> : null}
             {currentStep === 3 ? <StepStepCount /> : null}
             {currentStep === 4 ? <StepUniformDimensions /> : null}
-            {currentStep === 5 ? <StepEndCap /> : null}
+            {currentStep === 5 ? (
+              <StepEndCap
+                onLandingConfirmed={goNext}
+                onEditStepCount={() => setCurrentStep(STEP_COUNT_STEP_INDEX)}
+              />
+            ) : null}
             {currentStep === 6 ? <StepLanding /> : null}
             {currentStep === 7 ? <StepInclus /> : null}
             {currentStep === 8 ? (
@@ -367,25 +375,11 @@ function WizardBody() {
             onPrev={goPrev}
             onNext={goNext}
             isSubmitting={submitState.status === "loading"}
-            exitHref={isOpenStaircase ? openStaircaseHref(config, m) : undefined}
           />
         </form>
       </div>
     </>
   );
-}
-
-/**
- * Destination du bouton « Être recontacté » (escalier ouvert) : le formulaire
- * désigné par l'attribut `open-staircase-url`, sinon un e-mail pré-rempli.
- */
-function openStaircaseHref(config: KreConfig, m: Messages): string {
-  if (config.openStaircaseUrl) return config.openStaircaseUrl;
-  const to = config.recipientEmail || m.app.supportEmail;
-  const { openContactSubject, openContactBody } = m.steps.staircaseType;
-  return `mailto:${to}?subject=${encodeURIComponent(
-    openContactSubject,
-  )}&body=${encodeURIComponent(openContactBody)}`;
 }
 
 /**

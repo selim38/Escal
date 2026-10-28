@@ -2,20 +2,14 @@
 
 import { useState } from "react";
 import { InfoIcon } from "@phosphor-icons/react";
-import { useFormContext } from "react-hook-form";
 
 import { useAsset } from "@/lib/asset";
+import { useKreConfig, type KreConfig } from "@/lib/config";
+import type { Messages } from "@/lib/i18n";
 import { useT } from "@/lib/i18n/useT";
-import { useFieldError } from "@/lib/useFieldError";
-import type { QuoteFormDraft, StaircaseType } from "@/lib/quote-schema";
-import { FieldError } from "../ui/Field";
+import { buttonClass } from "../ui/Button";
 import { OptionCard } from "../ui/OptionCard";
 import { StepHeader } from "../ui/Typography";
-
-const PHOTOS: Record<StaircaseType, string> = {
-  CLOSED: "/escalier/ferme.webp",
-  OPEN: "/escalier/ouvert.webp",
-};
 
 function CasePhoto({ src, label }: { src: string; label: string }) {
   const [failed, setFailed] = useState(false);
@@ -37,85 +31,63 @@ function CasePhoto({ src, label }: { src: string; label: string }) {
   );
 }
 
+/**
+ * Étape 1 — le kit ne couvre pour l'instant que les escaliers fermés (demande
+ * Escal Concept). « Fermé », seul choix, est présélectionné (valeur par défaut
+ * du formulaire) ; un autre escalier mène à une demande de recontact.
+ */
 export function StepStaircaseType() {
-  const { watch, setValue } = useFormContext<QuoteFormDraft>();
-  const value = watch("staircaseType");
-  const error = useFieldError("staircaseType");
+  const config = useKreConfig();
   const { m } = useT();
-
-  const choices: Array<{
-    value: StaircaseType;
-    label: string;
-    description: string;
-  }> = [
-    {
-      value: "CLOSED",
-      label: m.steps.staircaseType.closed.label,
-      description: m.steps.staircaseType.closed.description,
-    },
-    {
-      value: "OPEN",
-      label: m.steps.staircaseType.open.label,
-      description: m.steps.staircaseType.open.description,
-    },
-  ];
-
-  const select = (v: StaircaseType) => {
-    setValue("staircaseType", v, { shouldValidate: true, shouldDirty: true });
-  };
+  const s = m.steps.staircaseType;
 
   return (
     <div className="space-y-7">
-      <StepHeader
-        title={m.steps.staircaseType.title}
-        subtitle={m.steps.staircaseType.subtitle}
-      />
+      <StepHeader title={s.title} subtitle={s.subtitle} />
 
-      <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <legend className="sr-only">{m.steps.staircaseType.subtitle}</legend>
-        {choices.map((choice) => (
-          <OptionCard
-            key={choice.value}
-            selected={value === choice.value}
-            onClick={() => select(choice.value)}
-            className="flex flex-col overflow-hidden text-left"
-          >
-            <CasePhoto src={PHOTOS[choice.value]} label={choice.label} />
-            <span className="flex flex-col gap-1 px-[18px] pb-[18px] pt-4">
-              <span className="text-base font-bold text-heading">
-                {choice.label}
-              </span>
-              <span className="text-sm leading-normal text-muted">
-                {choice.description}
-              </span>
-            </span>
-          </OptionCard>
-        ))}
-      </fieldset>
-
-      {/*
-        Cas spécifique : escalier ouvert. Le tunnel s'arrête ici — l'icône Info
-        affirme visuellement l'impasse, et le bouton « Suivant » devient
-        « Être recontacté » (voir StepNavigation).
-      */}
-      {value === "OPEN" && (
-        <div
-          className="flex items-start gap-3.5 border border-primary/35 bg-tint px-5 py-[18px]"
-          role="status"
+      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+        <OptionCard
+          selected
+          // Seul choix possible : la carte reste sélectionnée.
+          aria-disabled
+          className="flex cursor-default flex-col overflow-hidden text-left"
         >
+          <CasePhoto src="/escalier/ferme.webp" label={s.closed.label} />
+          <span className="flex flex-col gap-1 px-[18px] pb-[18px] pt-4">
+            <span className="text-base font-bold text-heading">{s.closed.label}</span>
+            <span className="text-sm leading-normal text-muted">
+              {s.closed.description}
+            </span>
+          </span>
+        </OptionCard>
+
+        <div className="flex items-start gap-3.5 border border-primary/35 bg-tint px-5 py-[18px]">
           <InfoIcon aria-hidden className="size-[22px] shrink-0 text-primary" />
           <div>
-            <p className="text-[14.5px] font-bold text-heading">
-              {m.steps.staircaseType.openWarningTitle}
-            </p>
-            <p className="mt-1 text-sm leading-normal text-muted">
-              {m.steps.staircaseType.openWarningBody}
-            </p>
+            <p className="text-[14.5px] font-bold text-heading">{s.otherTitle}</p>
+            <p className="mt-1 text-sm leading-normal text-muted">{s.otherBody}</p>
+            <a
+              href={otherStaircaseHref(config, m)}
+              className={`${buttonClass("secondary", "sm")} mt-4 bg-surface`}
+            >
+              {s.otherCta}
+            </a>
           </div>
         </div>
-      )}
-
-      {value !== "OPEN" ? <FieldError>{error}</FieldError> : null}
+      </div>
     </div>
   );
+}
+
+/**
+ * Destination de « Être recontacté » : le formulaire désigné par l'attribut
+ * `open-staircase-url`, sinon un e-mail pré-rempli.
+ */
+function otherStaircaseHref(config: KreConfig, m: Messages): string {
+  if (config.openStaircaseUrl) return config.openStaircaseUrl;
+  const to = config.recipientEmail || m.app.supportEmail;
+  const { otherContactSubject, otherContactBody } = m.steps.staircaseType;
+  return `mailto:${to}?subject=${encodeURIComponent(
+    otherContactSubject,
+  )}&body=${encodeURIComponent(otherContactBody)}`;
 }

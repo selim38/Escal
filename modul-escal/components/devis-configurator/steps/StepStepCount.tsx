@@ -37,11 +37,15 @@ export function StepStepCount() {
     setValue("stepCount", Number.isFinite(n) ? n : undefined, {
       shouldDirty: true,
     });
+    // Le compte a changé : la dernière marche n'est peut-être plus la même, la
+    // question « est-ce bien la marche palière ? » (étape 6) sera reposée.
+    setValue("landingStepConfirmed", undefined);
     // Validation en temps réel (recommandation Knewledge) : une valeur hors
-    // plage est signalée dès la frappe. Tout chiffre de 1 à 9 étant valide,
-    // aucun message n'interrompt une saisie en cours. Un champ vidé ne
-    // déclenche pas d'erreur : « Suivant » reste simplement inactif.
-    if (raw.trim() === "") clearErrors("stepCount");
+    // plage est signalée dès la frappe. Un « 1 » isolé est le début de « 12 »
+    // aussi souvent qu'une valeur trop basse : il n'est signalé qu'à la sortie
+    // du champ. Un champ vidé ne déclenche pas d'erreur : « Suivant » reste
+    // simplement inactif.
+    if (raw.trim() === "" || n === 1) clearErrors("stepCount");
     else live.check("stepCount");
   };
 
@@ -106,6 +110,9 @@ export function StepStepCount() {
               placeholder={m.steps.stepCount.inputPlaceholder}
               value={text}
               onChange={(e) => commit(e.target.value)}
+              onBlur={() => {
+                if (text.trim() !== "") live.check("stepCount");
+              }}
               aria-invalid={error ? true : undefined}
               aria-describedby={describedBy(
                 "kre-stepCount-range",
@@ -131,6 +138,10 @@ export function StepStepCount() {
             })}
           </FieldHelp>
           <FieldError id="kre-stepCount-error">{error}</FieldError>
+          <p className="mt-5 max-w-[42ch] text-[13.5px] leading-snug text-heading">
+            <strong className="font-bold">{m.steps.stepCount.landingTitle}</strong>{" "}
+            {m.steps.stepCount.landingBody}
+          </p>
         </div>
       </div>
     </div>

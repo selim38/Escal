@@ -50,9 +50,12 @@ export function calculatePrice(data: QuotePricingInput): CalculatePriceResult {
 
   if (perStepConfigs) {
     const panelPrices = perStepConfigs.map(getStepConfigPanelPrice);
-    baseTotal = panelPrices.reduce((sum, p) => sum + p, 0);
-    adjustedPanel =
-      panelPrices.reduce((sum, p) => sum + p, 0) / perStepConfigs.length;
+    // La marche palière n'est pas configurée (voir `treadCount`). En attendant
+    // le tarif du seuil + nez, elle reste chiffrée comme la marche du dessous,
+    // ce qui garde le total identique à celui d'une marche configurée de plus.
+    const landingPanel = panelPrices[panelPrices.length - 1] ?? basePanel;
+    baseTotal = panelPrices.reduce((sum, p) => sum + p, 0) + landingPanel;
+    adjustedPanel = baseTotal / data.stepCount;
   } else {
     adjustedPanel = getUniformStraightStepPanelPrice(
       data.widthBand,

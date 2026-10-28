@@ -11,7 +11,7 @@ import {
   type StepConfigDraft,
 } from "@/lib/step-config";
 import { STAIR_LAYOUT_OPTIONS } from "@/lib/stair-layout-catalog";
-import type { QuoteFormDraft, StairLayout } from "@/lib/quote-schema";
+import { treadCount, type QuoteFormDraft, type StairLayout } from "@/lib/quote-schema";
 import { DEPTH_BAND_VALUES, WIDTH_BAND_VALUES } from "@/lib/quote-schema";
 import { useT } from "@/lib/i18n/useT";
 import { useFieldError } from "@/lib/useFieldError";
@@ -34,7 +34,8 @@ const NO_STEP_CONFIGS: StepConfigDraft[] = [];
 
 export function PerStepConfigurator() {
   const { watch, setValue } = useFormContext<QuoteFormDraft>();
-  const stepCount = watch("stepCount") ?? 1;
+  // Marche palière exclue : elle n'a ni type ni dimensions à renseigner.
+  const stepCount = Math.max(treadCount(watch("stepCount")), 1);
   const stepConfigs = watch("stepConfigs") ?? NO_STEP_CONFIGS;
   const [requestedIndex, setActiveIndex] = useState(0);
   const [focusedField, setFocusedField] = useState<DimensionField | null>(null);
@@ -165,13 +166,14 @@ export function PerStepConfigurator() {
           type="button"
           disabled={activeIndex === 0}
           onClick={() => setActiveIndex((i) => i - 1)}
-          className={`${buttonClass("secondary", "sm")} h-auto min-h-10 py-1.5 max-sm:px-2.5`}
+          className={`${buttonClass("secondary")} h-auto min-h-[52px] py-2 max-sm:px-3`}
         >
           <ButtonArrow dir="prev" />
           {m.steps.perStep.previous}
         </button>
+        {/* Numéro de la marche en cours mis en avant (retour Escal Concept). */}
         <span
-          className="col-span-2 row-start-1 text-center text-sm font-bold text-heading"
+          className="col-span-2 row-start-1 text-center text-[22px] font-bold leading-tight text-heading sm:text-[26px]"
           aria-live="polite"
         >
           {t(m.steps.perStep.counter, {
@@ -183,7 +185,9 @@ export function PerStepConfigurator() {
           type="button"
           disabled={activeIndex >= stepCount - 1}
           onClick={() => setActiveIndex((i) => i + 1)}
-          className={`${buttonClass("secondary", "sm")} h-auto min-h-10 py-1.5 max-sm:px-2.5`}
+          // Action principale de l'écran : bouton plein, à la taille de
+          // « Suivant ».
+          className={`${buttonClass("primary")} h-auto min-h-[52px] py-2 max-sm:px-3`}
         >
           {m.steps.perStep.next}
           <ButtonArrow dir="next" />

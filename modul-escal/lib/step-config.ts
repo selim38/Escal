@@ -7,11 +7,12 @@ export function createDefaultStepConfig(): StepConfigDraft {
   return { layout: "STRAIGHT" };
 }
 
+/** Une configuration par marche à configurer (`treadCount`, palier exclu). */
 export function ensureStepConfigs(
   current: StepConfigDraft[] | undefined,
-  stepCount: number,
+  count: number,
 ): StepConfigDraft[] {
-  return Array.from({ length: stepCount }, (_, i) => ({
+  return Array.from({ length: count }, (_, i) => ({
     ...createDefaultStepConfig(),
     ...current?.[i],
   }));

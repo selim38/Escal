@@ -11,11 +11,6 @@ type StepNavigationProps = {
   onPrev: () => void;
   onNext: () => void;
   isSubmitting?: boolean;
-  /**
-   * Escalier ouvert : le tunnel s'arrête, « Suivant » devient un lien vers le
-   * formulaire de contact adapté.
-   */
-  exitHref?: string;
 };
 
 export function StepNavigation({
@@ -25,7 +20,6 @@ export function StepNavigation({
   onPrev,
   onNext,
   isSubmitting,
-  exitHref,
 }: StepNavigationProps) {
   const { m } = useT();
 
@@ -52,12 +46,7 @@ export function StepNavigation({
         {m.nav.previous}
       </button>
 
-      {exitHref ? (
-        <a href={exitHref} className={`${buttonClass("primary")} flex-1 max-sm:px-3.5 sm:flex-none`}>
-          {m.nav.openStaircase}
-          <ButtonArrow dir="next" />
-        </a>
-      ) : !isLastStep ? (
+      {!isLastStep ? (
         // Clés distinctes : sans elles, React réutilise ce bouton pour « Envoyer »
         // et passe son type à `submit` pendant le clic sur « Suivant » — le
         // navigateur soumettait alors le formulaire dès l'arrivée sur la

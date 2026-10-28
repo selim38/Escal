@@ -28,7 +28,9 @@ function CMPhoto({ src }: { src: string }) {
       loading="lazy"
       decoding="async"
       onError={() => setFailed(true)}
-      className="block aspect-[3/1] w-full object-cover"
+      // Photo entière (3:4, format des masters) dès 640 px : le bandeau 3:1
+      // n'en montrait qu'une tranche. Carré sur mobile, une carte par ligne.
+      className="block aspect-square w-full object-cover sm:aspect-[3/4]"
     />
   );
 }

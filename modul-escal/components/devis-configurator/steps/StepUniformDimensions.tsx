@@ -4,19 +4,20 @@ import { useFormContext } from "react-hook-form";
 
 import { useT } from "@/lib/i18n/useT";
 import { useFieldError } from "@/lib/useFieldError";
-import type { QuoteFormDraft } from "@/lib/quote-schema";
+import { treadCount, type QuoteFormDraft } from "@/lib/quote-schema";
 
 import { ensureStepConfigs } from "@/lib/step-config";
 
 import { DimensionsBandsFields } from "./DimensionsBandsFields";
 import { PerStepConfigurator } from "./PerStepConfigurator";
 import { FieldError } from "../ui/Field";
+import { LandingStepNote } from "../ui/LandingStepNote";
 import { OptionCard } from "../ui/OptionCard";
 import { StepHeader } from "../ui/Typography";
 
 export function StepUniformDimensions() {
   const { watch, setValue } = useFormContext<QuoteFormDraft>();
-  const stepCount = watch("stepCount") ?? 1;
+  const stepCount = watch("stepCount");
   const uniform = watch("uniformStepDimensions");
   const error = useFieldError("uniformStepDimensions");
   const { m } = useT();
@@ -37,7 +38,7 @@ export function StepUniformDimensions() {
       setValue("widthBand", undefined);
       setValue("depthBand", undefined);
       setValue("exactDepthMm", undefined);
-      setValue("stepConfigs", ensureStepConfigs(undefined, stepCount), {
+      setValue("stepConfigs", ensureStepConfigs(undefined, treadCount(stepCount)), {
         shouldValidate: true,
       });
     }
@@ -49,6 +50,7 @@ export function StepUniformDimensions() {
         title={m.steps.dimensions.title}
         subtitle={m.steps.dimensions.question}
       />
+      <LandingStepNote stepCount={stepCount} />
 
       <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <legend className="sr-only">{m.steps.dimensions.question}</legend>

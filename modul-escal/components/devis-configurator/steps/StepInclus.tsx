@@ -159,11 +159,7 @@ export function StepInclus() {
           {values.staircaseType && (
             <RecapRow
               label={m.steps.included.rowStaircaseType}
-              value={
-                values.staircaseType === "OPEN"
-                  ? m.steps.staircaseType.open.label
-                  : m.steps.staircaseType.closed.label
-              }
+              value={m.steps.staircaseType.closed.label}
             />
           )}
           {values.decor && (
@@ -183,12 +179,12 @@ export function StepInclus() {
                 .join(" ")}
             />
           )}
-          {stepCount > 0 && (
+          {stepCount > 1 && (
             <RecapRow
               label={m.steps.included.rowSteps}
               value={t(m.steps.included.valueSteps, {
-                count: stepCount,
-                plural: plural(stepCount),
+                count: stepCount - 1,
+                plural: plural(stepCount - 1),
               })}
             />
           )}
@@ -309,12 +305,26 @@ export function StepInclus() {
         </div>
       </section>
 
-      {/* ── Suite : texte simple, sans aplat, pour laisser le prix seul
-             au premier plan ──────────────────────────────────────── */}
-      <p className="text-sm leading-relaxed text-heading">
-        <strong className="font-bold">{m.steps.included.nextCtaStrong}</strong>{" "}
-        {m.steps.included.nextCtaBody}
-      </p>
+      {/* ── Suite : liste simple, sans aplat, pour laisser le prix seul
+             au premier plan. Ordre fixé par Escal Concept. ─────────── */}
+      <section>
+        <h3 className="text-[15px] font-bold text-heading">
+          {m.steps.included.nextStepsTitle}
+        </h3>
+        <ol className="mt-3 space-y-2.5">
+          {m.steps.included.nextSteps.map((item, i) => (
+            <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-heading">
+              <span
+                aria-hidden
+                className="grid size-6 shrink-0 place-items-center bg-primary text-[12.5px] font-bold text-on-primary"
+              >
+                {i + 1}
+              </span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
     </div>
   );
 }

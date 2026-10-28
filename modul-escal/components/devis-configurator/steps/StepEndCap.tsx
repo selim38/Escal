@@ -6,11 +6,14 @@ import { useFormContext } from "react-hook-form";
 
 import { useAsset } from "@/lib/asset";
 import { useT } from "@/lib/i18n/useT";
-import type {
-  QuoteFormDraft,
-  StepEndCapConfig,
-  EndSide,
+import {
+  treadCount,
+  type QuoteFormDraft,
+  type StepEndCapConfig,
+  type EndSide,
 } from "@/lib/quote-schema";
+import { buttonClass } from "../ui/Button";
+import { LandingStepNote } from "../ui/LandingStepNote";
 import { OptionCard } from "../ui/OptionCard";
 import { StepHeader } from "../ui/Typography";
 
@@ -57,8 +60,8 @@ function PhotoChoice({
         loading="lazy"
         decoding="async"
         width={640}
-        height={853}
-        className="block aspect-[3/4] w-[84px] shrink-0 object-cover sm:w-full"
+        height={768}
+        className="block aspect-[5/6] w-[84px] shrink-0 object-cover sm:w-full"
       />
       <span className="py-3 pr-3 text-[15px] font-bold leading-snug text-heading sm:px-2 sm:text-center sm:text-sm">
         {label}
@@ -67,9 +70,21 @@ function PhotoChoice({
   );
 }
 
-export function StepEndCap() {
+export function StepEndCap({
+  onLandingConfirmed,
+  onEditStepCount,
+}: {
+  /** « Oui, c'est la marche palière » : passe directement à l'étape suivante. */
+  onLandingConfirmed: () => void;
+  /** « Non » : renvoie à l'étape Nombre de marches pour corriger le compte. */
+  onEditStepCount: () => void;
+}) {
   const { watch, setValue } = useFormContext<QuoteFormDraft>();
   const stepCount = watch("stepCount") ?? 0;
+  // La dernière marche est la marche palière : seules les précédentes ont un
+  // embout à configurer.
+  const treads = treadCount(stepCount);
+  const landingConfirmed = watch("landingStepConfirmed");
   const rawConfigs = watch("stepEndCapConfigs") ?? NO_CONFIGS;
   const { m, t } = useT();
   const asset = useAsset();
@@ -82,22 +97,29 @@ export function StepEndCap() {
   // Si le nombre de marches a baissé depuis l'étape 4, les réglages en trop
   // sont retirés : la validation exige un réglage par marche, ni plus ni moins.
   useEffect(() => {
-    if (rawConfigs.length > stepCount) {
-      setValue("stepEndCapConfigs", rawConfigs.slice(0, stepCount), {
+    if (rawConfigs.length > treads) {
+      setValue("stepEndCapConfigs", rawConfigs.slice(0, treads), {
         shouldValidate: true,
       });
     }
-  }, [rawConfigs, stepCount, setValue]);
+  }, [rawConfigs, treads, setValue]);
 
-  const configs = rawConfigs.slice(0, stepCount);
+  const configs = rawConfigs.slice(0, treads);
   const editIndex =
     editingIndex !== null && editingIndex < configs.length ? editingIndex : null;
   const isEditing = editIndex !== null;
   const activeIndex =
-    editIndex ?? (configs.length < stepCount ? configs.length : null);
+    editIndex ?? (configs.length < treads ? configs.length : null);
   const activeConfig = editIndex !== null ? configs[editIndex] : undefined;
-  const doneCount = configs.length;
+  // Toutes les marches configurées : reste la question de la marche palière.
+  const askLanding = activeIndex === null && treads > 0;
+  const doneCount = configs.length + (landingConfirmed ? 1 : 0);
   const pct = stepCount > 0 ? Math.round((doneCount / stepCount) * 100) : 0;
+
+  function answerLanding(yes: boolean) {
+    setValue("landingStepConfirmed", yes, { shouldValidate: true, shouldDirty: true });
+    if (yes) onLandingConfirmed();
+  }
 
   function saveConfig(config: StepEndCapConfig) {
     const next = [...configs];
@@ -169,6 +191,67 @@ export function StepEndCap() {
     return m.steps.endCap.summaryNone;
   }
 
+  /** Progression dans la liste des marches, en tête du panneau. */
+  const progress = (index: number) => (
+    <>
+      <div className="flex justify-between text-[13px] font-semibold text-subtle">
+        <span>{t(m.steps.endCap.progress, { index: index + 1, total: stepCount })}</span>
+        <span aria-hidden>{pct} %</span>
+      </div>
+      <div className="mt-2 h-[3px] bg-track">
+        <div
+          className="h-full bg-primary transition-[width] duration-[360ms] ease-out motion-reduce:transition-none"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </>
+  );
+
+  // Une fois confirmée, la marche palière rejoint la liste et le panneau se
+  // ferme ; la question revient si le nombre de marches change (étape 4).
+  const landingPanel = askLanding && landingConfirmed !== true ? (
+    <div className="mt-2 border-[1.5px] border-border-option bg-surface p-5 sm:p-6">
+      {progress(stepCount - 1)}
+      <p className="mt-6 text-center text-[19px] font-semibold text-heading">
+        {t(m.steps.endCap.askLanding, { index: stepCount })}
+      </p>
+      <p className="mb-[18px] mt-1.5 text-center text-sm text-muted">
+        {m.steps.endCap.askLandingHint}
+      </p>
+      <div className="grid grid-cols-2 gap-3">
+        <OptionCard
+          selected={false}
+          mark={false}
+          onClick={() => answerLanding(true)}
+          className="h-[54px] text-center text-[15px] font-bold text-heading"
+        >
+          {m.common.yes}
+        </OptionCard>
+        <OptionCard
+          selected={landingConfirmed === false}
+          mark={false}
+          onClick={() => answerLanding(false)}
+          className="h-[54px] text-center text-[15px] font-bold text-heading"
+        >
+          {m.common.no}
+        </OptionCard>
+      </div>
+      {landingConfirmed === false ? (
+        <div className="mt-4 border border-primary/35 bg-tint px-4 py-3.5 text-sm text-heading" role="status">
+          <p>{t(m.steps.endCap.landingNo, { index: stepCount })}</p>
+          <button
+            type="button"
+            onClick={onEditStepCount}
+            className={`${buttonClass("secondary", "sm")} mt-3 bg-surface`}
+          >
+            <ArrowLeftIcon aria-hidden className="size-3.5" />
+            {m.steps.endCap.editStepCount}
+          </button>
+        </div>
+      ) : null}
+    </div>
+  ) : null;
+
   const panel =
     activeIndex === null ? null : (
       <div
@@ -176,22 +259,7 @@ export function StepEndCap() {
           isEditing ? "border-primary" : "mt-2 border-border-option"
         }`}
       >
-        {/* Progression dans la liste des marches */}
-        <div className="flex justify-between text-[13px] font-semibold text-subtle">
-          <span>
-            {t(m.steps.endCap.progress, {
-              index: activeIndex + 1,
-              total: stepCount,
-            })}
-          </span>
-          <span aria-hidden>{pct} %</span>
-        </div>
-        <div className="mt-2 h-[3px] bg-track">
-          <div
-            className="h-full bg-primary transition-[width] duration-[360ms] ease-out motion-reduce:transition-none"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
+        {progress(activeIndex)}
 
         {/* Sous-étape : entre 2 murs ? */}
         {subStep === "between2Walls" && (
@@ -299,6 +367,7 @@ export function StepEndCap() {
         title={m.steps.endCap.title}
         subtitle={m.steps.endCap.subtitle}
       />
+      <LandingStepNote stepCount={stepCount} />
 
       {/*
         Liste des marches dans l'ordre. Une marche modifiée reste à sa place :
@@ -341,8 +410,22 @@ export function StepEndCap() {
         {/* Prochaine marche à configurer : le panneau suit la liste. */}
         {!isEditing ? panel : null}
 
+        {/* Marche palière confirmée : dernière ligne de la liste. */}
+        {askLanding && landingConfirmed ? (
+          <div className={`${ROW_CLASS} bg-tint`}>
+            <span className="font-bold text-heading">
+              {t(m.steps.endCap.stepLabel, { index: stepCount })}
+            </span>
+            <span className="truncate text-muted">{m.steps.endCap.summaryLanding}</span>
+            <span aria-hidden />
+          </div>
+        ) : null}
+
+        {/* Dernière marche : est-ce bien la marche palière ? */}
+        {landingPanel}
+
         {/* Tout configuré */}
-        {activeIndex === null && stepCount > 0 && (
+        {askLanding && landingConfirmed && (
           <div
             className="mt-2 flex items-center gap-2.5 border-[1.5px] border-primary/40 px-4 py-3.5 text-sm font-semibold text-heading"
             role="status"
